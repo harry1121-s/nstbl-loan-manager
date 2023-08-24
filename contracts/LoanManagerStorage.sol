@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "modules/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IPool.sol";
+import "./LMTokenLP.sol";
+
 
 contract loanManagerStorage {
     address public nstblHub;
@@ -10,8 +13,8 @@ contract loanManagerStorage {
     IERC20 public immutable usdc;
     IERC20 public usdtAsset;
 
-    IERC20 public immutable lUSDC;
-    IERC20 public lUSDT;
+    LMTokenLP public lUSDC;
+    LMTokenLP public lUSDT;
 
     uint256 public usdcDeposited;
     uint256 public usdcSharesReceived;

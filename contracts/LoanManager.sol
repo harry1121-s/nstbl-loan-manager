@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./LoanManagerStorage.sol";
-import "./Token.sol";
 import { console } from "forge-std/Test.sol";
 
 contract loanManager is Ownable, loanManagerStorage {
@@ -21,14 +20,15 @@ contract loanManager is Ownable, loanManagerStorage {
         // address _mapleUSDTPool,
         address _usdc,
         // address _USDTAsset
-        address _lUSDC
+        address _admin
     ) Ownable(msg.sender) {
         nstblHub = _nstblHub;
         mapleUSDCPool = IPool(_mapleUSDCPool);
         // mapleUSDTPool = IPool(_mapleUSDTPool);
         usdc = IERC20(_usdc);
         // usdtAsset = IERC20(_USDTAsset);
-        lUSDC = IERC20(_lUSDC);
+        lUSDC = new LMTokenLP("Loan Manager USDC", "lUSDC", _admin);
+        console.log(lUSDC);
     }
 
     function investUSDCMapleCash(uint256 _assets) public authorizedCaller {
@@ -36,10 +36,11 @@ contract loanManager is Ownable, loanManagerStorage {
         usdcDeposited += _assets;
         // uint256 getShares
         usdc.approve(address(mapleUSDCPool), _assets);
+        usdcSharesReceived = mapleUSDCPool.previewDeposit(_assets);
         mapleUSDCPool.deposit(_assets, address(this));
-        // totalUSDCSharesReceived += mapleUSDCPool.deposit(_assets, address(this));
+        totalUSDCSharesReceived += usdcSharesReceived;
 
-        // lUSDC.mint(nstblHub, usdcSharesReceived * (lUSDC.decimals() / mapleUSDCPool.decimals()));
+        lUSDC.mint(nstblHub, usdcSharesReceived * 12);
     }
 
     function requestRedeemUSDCMapleCash(uint256 _shares) public authorizedCaller {

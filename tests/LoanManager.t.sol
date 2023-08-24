@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 import {loanManager} from "../contracts/LoanManager.sol";
-import {Token} from "../contracts/Token.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPoolManager} from "../contracts/interfaces/IPoolManager.sol";
 import {IPool} from "../contracts/interfaces/IPool.sol";
@@ -11,7 +10,7 @@ import {IPool} from "../contracts/interfaces/IPool.sol";
 contract CounterTest is Test {
 
     loanManager public loan;
-    Token public token;
+    // Token public token;
 
     IERC20 public usdc;
     IPool public pool;
@@ -27,11 +26,11 @@ contract CounterTest is Test {
         vm.label(poolDelegate, "poolDelegate");
 
         vm.startPrank(owner);
-        token = new Token(name, symbol);
+        // token = new Token(name, symbol);
         loan = new loanManager(0x749f88e87EaEb030E478164cFd3681E27d0bcB42,
                                 0xfe119e9C24ab79F1bDd5dd884B86Ceea2eE75D92,
                                 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,
-                                address(token));
+                                owner);
         vm.stopPrank();
         vm.label(address(loan), "loanManager");
 

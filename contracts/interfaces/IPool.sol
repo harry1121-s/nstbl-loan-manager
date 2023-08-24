@@ -8,4 +8,6 @@ interface IPool {
     function previewRedeem(uint256 shares_) external returns (uint256 assets_);
     function balanceOf(address account) external view returns (uint256);
     function convertToExitAssets(uint256 shares_) external returns (uint256 assets_);
+    function previewDeposit(uint256 assets_) external returns (uint256 shares_);
+
 }

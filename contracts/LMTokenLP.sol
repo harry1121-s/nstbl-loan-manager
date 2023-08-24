@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract Token is ERC20 {
+contract LMTokenLP is ERC20 {
     address public loanManager;
     address public admin;
 
@@ -17,8 +17,9 @@ contract Token is ERC20 {
         _;
     }
 
-    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
-        admin = msg.sender;
+    constructor(string memory _name, string memory _symbol, address _admin) ERC20(_name, _symbol) {
+        admin = _admin;
+        loanManager = msg.sender;
     }
 
     function mint(address _user, uint256 _amount) public authorizedCaller {
