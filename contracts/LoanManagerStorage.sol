@@ -8,14 +8,20 @@ contract loanManagerStorage{
 
     address public nstblHub;
 
-    IERC20 public usdcAsset;
+    IERC20 public immutable usdcAsset;
     IERC20 public usdtAsset;
 
+    IERC20 public  immutable lUSDC;
+    IERC20 public lUSDT;
+
     uint256 public usdcDeposited;
+    uint256 public usdcSharesReceived;
+    uint256 public totalUSDCSharesReceived;
+    uint256 public escrowedUSDCShares;
+
 
     uint256 public usdcRedeemed;
 
-    uint256 public usdcSharesReceived;
 
     uint256 public usdcSharesRequestedForRedeem;
 
@@ -30,4 +36,5 @@ contract loanManagerStorage{
     IPool public mapleUSDCPool;
 
     IPool public mapleUSDTPool;
+
 }

@@ -15,13 +15,18 @@ contract CounterTest is Test {
     IPool public pool;
     IPoolManager public poolManager;
     address public poolDelegate = 0x8c8C2431658608F5649B8432764a930c952d8A98;
+    address owner = address(123);
+    address user = address(456);
+
 
     function setUp() public {
         vm.label(poolDelegate, "poolDelegate");
 
+        vm.startPrank(owner);
         loan = new loanManager(0x749f88e87EaEb030E478164cFd3681E27d0bcB42, 
                                 0xfe119e9C24ab79F1bDd5dd884B86Ceea2eE75D92, 
                                 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+        vm.stopPrank();
         vm.label(address(loan), "loanManager");
         
         usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
@@ -35,20 +40,47 @@ contract CounterTest is Test {
 
     function testInvest() public {
 
-        address user = 0x675D786f754577825eA39d30708a709205A4ddbd;
+        vm.prank(owner);
+        loan.setAuthorizedCaller(user);
+
         deal(address(usdc), user, 1e7 * 1e6, true);
         assertEq(usdc.balanceOf(user), 1e7 * 1e6);
 
         //first whitelist user
         vm.startPrank(poolDelegate);
-        (bool out2,) = address(poolManager).staticcall(abi.encodeWithSignature("openToPublic()"));
-        console.log("out - ",out2);
-        // assertFalse(out2);
         poolManager.setAllowedLender(address(loan), true);
         (bool out,) = address(poolManager).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
-        // console.log("out - ", out);
         assertTrue(out);
-        vm.store(address(poolManager), bytes32(uint256(0x09)), bytes1(0x00));
+        // vm.store(address(poolManager), bytes32(uint256(0x09)), bytes1(0x00));
+        // (bool out2,) = address(poolManager).staticcall(abi.encodeWithSignature("openToPublic()"));
+        // console.log("out - ",out2);
+        // // assertFalse(out2);
+        vm.stopPrank();
+
+        vm.startPrank(user);
+        usdc.approve(address(loan), 1e7 * 1e6);
+        loan.investUSDCMapleCash(1e7 * 1e6);
+        assertEq(usdc.balanceOf(user),0);
+        console.log("LP balance", pool.balanceOf(address(loan)));
+        uint256 shares = pool.balanceOf(address(loan));
+        vm.stopPrank();
+    
+    }
+
+     function testRedeemRequest() public {
+
+        vm.prank(owner);
+        loan.setAuthorizedCaller(user);
+
+        deal(address(usdc), user, 1e7 * 1e6, true);
+        assertEq(usdc.balanceOf(user), 1e7 * 1e6);
+
+        //first whitelist user
+        vm.startPrank(poolDelegate);
+        poolManager.setAllowedLender(address(loan), true);
+        (bool out,) = address(poolManager).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
+        assertTrue(out);
+        // vm.store(address(poolManager), bytes32(uint256(0x09)), bytes1(0x00));
         // (bool out2,) = address(poolManager).staticcall(abi.encodeWithSignature("openToPublic()"));
         // console.log("out - ",out2);
         // // assertFalse(out2);
@@ -66,17 +98,15 @@ contract CounterTest is Test {
         vm.warp(block.timestamp + 100 days);
 
         console.log("Shares converted to assets after 100 days: ", pool.convertToAssets(shares));
-        //preview redemption
-        uint256 b = pool.previewRedeem(shares);
-        console.log("Resulting assets: ", b);
         //requesting redeem
         uint256 escrowShares = loan.requestRedeemUSDCMapleCash(shares);
+         //preview redemption
+        uint256 b = loan.previewRedeemAsset(shares);
+        console.log("Resulting assets: ", b);
         console.log("Escrow Shares: ", escrowShares);
         console.log("LP balance after redeem requset", pool.balanceOf(address(loan)));
         vm.stopPrank();
-
     
-
     }
 }
 // https://rpc.vnet.tenderly.co/devnet/nstbl/584b585c-6c2d-4103-b82c-b6f18c34c2e7
