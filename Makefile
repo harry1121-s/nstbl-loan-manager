@@ -13,6 +13,9 @@ build:
 test:
 	forge test
 
+testToken:
+	forge test --match-path ./tests/Token.t.sol
+
 debug: 
 	forge test -vvvvv
 

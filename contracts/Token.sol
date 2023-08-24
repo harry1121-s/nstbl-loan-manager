@@ -6,14 +6,21 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract Token is ERC20{
 
     address public loanManager;
+    address public admin;
 
     modifier authorizedCaller{
         require(msg.sender == loanManager, "Loan Manager: unAuth");
         _;
     }
 
+    modifier onlyAdmin {
+        require(msg.sender == admin, "Admin: unAuth");
+        _;
+    }
+
     constructor(string memory _name, string memory _symbol, address _loanManager) ERC20(_name, _symbol){
-       loanManager = msg.sender;
+        admin = msg.sender;
+        loanManager = _loanManager;
     }
 
     function mint(address _user, uint256 _amount)public authorizedCaller {
@@ -23,5 +30,14 @@ contract Token is ERC20{
     function burn(address _user, uint256 _amount) public authorizedCaller {
         _burn(_user, _amount);
     }
+
+    function setLoanManager(address _loanManager) public onlyAdmin {
+        loanManager = _loanManager;
+    }
+
+    function setAdmin(address _admin) public onlyAdmin {
+        admin = _admin;
+    }
+
 
 }
