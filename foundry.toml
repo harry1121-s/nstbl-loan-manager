@@ -14,3 +14,14 @@ optimizer = true
 [fuzz]
 runs = 100
 
+[fmt]
+line_length = 120
+tab_width = 4
+bracket_spacing = true
+int_types = "long"
+multiline_func_header = "attributes_first"
+quote_style = "double"
+number_underscore = "thousands"
+override_spacing = true
+wrap_comments = false
+ignore = []
