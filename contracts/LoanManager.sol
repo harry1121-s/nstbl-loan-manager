@@ -5,59 +5,56 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./LoanManagerStorage.sol";
 import "./Token.sol";
+import { console } from "forge-std/Test.sol";
 
-
-contract loanManager is Ownable, loanManagerStorage{
-
+contract loanManager is Ownable, loanManagerStorage {
     using SafeERC20 for IERC20;
 
-    modifier authorizedCaller{
+    modifier authorizedCaller() {
         require(msg.sender == nstblHub, "Loan Manager: unAuth");
         _;
     }
 
     constructor(
-        address _nstblHub, 
-        address _mapleUSDCPool, 
-        // address _mapleUSDTPool, 
-        address _USDCAsset,
+        address _nstblHub,
+        address _mapleUSDCPool,
+        // address _mapleUSDTPool,
+        address _usdc,
         // address _USDTAsset
         address _lUSDC
-        ) Ownable(msg.sender){
+    ) Ownable(msg.sender) {
         nstblHub = _nstblHub;
         mapleUSDCPool = IPool(_mapleUSDCPool);
         // mapleUSDTPool = IPool(_mapleUSDTPool);
-        usdcAsset = IERC20(_USDCAsset);
+        usdc = IERC20(_usdc);
         // usdtAsset = IERC20(_USDTAsset);
         lUSDC = IERC20(_lUSDC);
-
     }
 
-    function investUSDCMapleCash(uint256 _assets)public authorizedCaller{
-        usdcAsset.safeTransferFrom(msg.sender, address(this), _assets);
+    function investUSDCMapleCash(uint256 _assets) public authorizedCaller {
+        usdc.safeTransferFrom(msg.sender, address(this), _assets);
         usdcDeposited += _assets;
-        usdcAsset.approve(address(mapleUSDCPool), _assets);
-        // (usdcSharesReceived,) = mapleUSDCPool.deposit(_assets, address(this));
-        usdcSharesReceived = mapleUSDCPool.deposit(_assets, address(this));
-        // usdcSharesReceived = mapleUSDCPool(balanceOf(address(this))) - totalUSDCShares;
-        totalUSDCSharesReceived += usdcSharesReceived;
-        
-        lUSDC.mint(nstblHub, usdcSharesReceived * (lUSDC.decimals()/mapleUSDCPool.decimals()));
+        // uint256 getShares
+        usdc.approve(address(mapleUSDCPool), _assets);
+        mapleUSDCPool.deposit(_assets, address(this));
+        // totalUSDCSharesReceived += mapleUSDCPool.deposit(_assets, address(this));
+
+        // lUSDC.mint(nstblHub, usdcSharesReceived * (lUSDC.decimals() / mapleUSDCPool.decimals()));
     }
 
-    function requestRedeemUSDCMapleCash(uint256 _shares)public authorizedCaller{
+    function requestRedeemUSDCMapleCash(uint256 _shares) public authorizedCaller {
         require(mapleUSDCPool.balanceOf(address(this)) >= _shares, "Insufficient amount");
         usdcSharesRequestedForRedeem = _shares;
-        escrowedUSDCShares =  mapleUSDCPool.requestRedeem(_shares, address(this));
+        escrowedUSDCShares = mapleUSDCPool.requestRedeem(_shares, address(this));
     }
+ 
+    // function getAssets(uint256 _shares) public view returns (uint256) {
+    //     return mapleUSDCPool.convertToAssets(_shares);
+    // }
 
-    function getAssets(uint256 _shares)public view returns(uint256 _assets){
-        _assets = mapleUSDCPool.convertToAssets(_shares);
-    }
-
-    function getAssetsWithUnRealisedLosses(uint256 _shares)public view returns(uint256 _assets){
-        _assets = mapleUSDCPool.convertToExitAssets(_shares);
-    }
+    // function getAssetsWithUnRealisedLosses(uint256 _shares) public view returns (uint256) {
+    //     return mapleUSDCPool.convertToExitAssets(_shares);
+    // }
 
     // function redeemUSDCMapleCash()public authorizedCaller{
     //     uint256 _shares = usdcSharesRequestedForRedeem;
@@ -85,12 +82,11 @@ contract loanManager is Ownable, loanManagerStorage{
     //     usdcRedeemed += mapleUSDTPool.redeem(_shares, nstblHub, address(this));
     // }
 
-    function previewRedeemAsset(uint256 _shares)public authorizedCaller returns(uint256){
+    function previewRedeemAsset(uint256 _shares) public authorizedCaller returns (uint256) {
         return mapleUSDCPool.previewRedeem(_shares);
     }
 
-    function setAuthorizedCaller(address _caller)public onlyOwner{
+    function setAuthorizedCaller(address _caller) public onlyOwner {
         nstblHub = _caller;
     }
-
 }

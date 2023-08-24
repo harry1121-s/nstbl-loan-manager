@@ -4,14 +4,13 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IPool.sol";
 
-contract loanManagerStorage{
-
+contract loanManagerStorage {
     address public nstblHub;
 
-    IERC20 public immutable usdcAsset;
+    IERC20 public immutable usdc;
     IERC20 public usdtAsset;
 
-    IERC20 public  immutable lUSDC;
+    IERC20 public immutable lUSDC;
     IERC20 public lUSDT;
 
     uint256 public usdcDeposited;
@@ -19,9 +18,7 @@ contract loanManagerStorage{
     uint256 public totalUSDCSharesReceived;
     uint256 public escrowedUSDCShares;
 
-
     uint256 public usdcRedeemed;
-
 
     uint256 public usdcSharesRequestedForRedeem;
 
@@ -36,5 +33,4 @@ contract loanManagerStorage{
     IPool public mapleUSDCPool;
 
     IPool public mapleUSDTPool;
-
 }

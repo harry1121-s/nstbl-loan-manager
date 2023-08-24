@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.7;
 
-interface IPoolManager{
-
-    /**************************************************************************************************************************************/
-    /*** Ownership Transfer Functions                                                                                                   ***/
-    /**************************************************************************************************************************************/
+interface IPoolManager {
+    /**
+     *
+     */
+    /**
+     * Ownership Transfer Functions                                                                                                   **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev Accepts the role of pool delegate.
@@ -18,9 +23,15 @@ interface IPoolManager{
      */
     function setPendingPoolDelegate(address pendingPoolDelegate_) external;
 
-    /**************************************************************************************************************************************/
-    /*** Administrative Functions                                                                                                       ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * Administrative Functions                                                                                                       **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev    Adds a new loan manager.
@@ -77,9 +88,15 @@ interface IPoolManager{
      */
     function setWithdrawalManager(address withdrawalManager_) external;
 
-    /**************************************************************************************************************************************/
-    /*** Funding Functions                                                                                                              ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * Funding Functions                                                                                                              **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev   LoanManager can request funds from the pool via the poolManager.
@@ -88,9 +105,15 @@ interface IPoolManager{
      */
     function requestFunds(address destination_, uint256 principal_) external;
 
-    /**************************************************************************************************************************************/
-    /*** Liquidation Functions                                                                                                          ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * Liquidation Functions                                                                                                          **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev   Finishes the collateral liquidation
@@ -105,9 +128,15 @@ interface IPoolManager{
      */
     function triggerDefault(address loan_, address liquidatorFactory_) external;
 
-    /**************************************************************************************************************************************/
-    /*** Exit Functions                                                                                                                 ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * Exit Functions                                                                                                                 **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev    Processes a redemptions of shares for assets from the pool.
@@ -156,11 +185,17 @@ interface IPoolManager{
      *  @param owner_  The address of the owner of the shares.
      *  @param sender_ The address of the sender of the shares.
      */
-     function requestWithdraw(uint256 shares_, uint256 assets_, address owner_, address sender_) external;
+    function requestWithdraw(uint256 shares_, uint256 assets_, address owner_, address sender_) external;
 
-    /**************************************************************************************************************************************/
-    /*** Cover Functions                                                                                                                ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * Cover Functions                                                                                                                **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev   Deposits cover into the pool.
@@ -175,9 +210,15 @@ interface IPoolManager{
      */
     function withdrawCover(uint256 amount_, address recipient_) external;
 
-    /**************************************************************************************************************************************/
-    /*** LP Token View Functions                                                                                                        ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * LP Token View Functions                                                                                                        **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev    Returns the amount of exit shares for the input amount.
@@ -193,7 +234,10 @@ interface IPoolManager{
      *  @return escrowShares_ The amount of escrowed shares.
      *  @return destination_  The address of the destination.
      */
-    function getEscrowParams(address owner_, uint256 shares_) external view returns (uint256 escrowShares_, address destination_);
+    function getEscrowParams(address owner_, uint256 shares_)
+        external
+        view
+        returns (uint256 escrowShares_, address destination_);
 
     /**
      *  @dev   Gets the amount of assets that can be deposited.
@@ -239,9 +283,15 @@ interface IPoolManager{
      */
     function previewWithdraw(address owner_, uint256 assets_) external view returns (uint256 shares_);
 
-    /**************************************************************************************************************************************/
-    /*** View Functions                                                                                                                 ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * View Functions                                                                                                                 **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev    Checks if a scheduled call can be executed.
@@ -252,7 +302,8 @@ interface IPoolManager{
      *  @return errorMessage_ The error message if the call cannot be executed.
      */
     function canCall(bytes32 functionId_, address caller_, bytes memory data_)
-        external view
+        external
+        view
         returns (bool canCall_, string memory errorMessage_);
 
     /**
@@ -290,5 +341,4 @@ interface IPoolManager{
      *  @return unrealizedLosses_ Amount of unrealized losses.
      */
     function unrealizedLosses() external view returns (uint256 unrealizedLosses_);
-
 }

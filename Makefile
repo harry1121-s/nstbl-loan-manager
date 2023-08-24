@@ -16,6 +16,9 @@ test:
 testToken:
 	forge test --match-path ./tests/Token.t.sol
 
+testLoanManager:
+	forge test --match-path ./tests/LoanManager.t.sol --fork-url https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW -vvvvv
+
 debug: 
 	forge test -vvvvv
 

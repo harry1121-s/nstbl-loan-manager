@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Test, console} from "forge-std/Test.sol";
-import {Token} from "../contracts/Token.sol";
+import { Test, console } from "forge-std/Test.sol";
+import { Token } from "../contracts/Token.sol";
 
 contract TestToken is Test {
     Token public token;
@@ -13,7 +13,7 @@ contract TestToken is Test {
 
     function setUp() public {
         vm.prank(admin);
-        token = new Token(name, symbol, LoanManager);
+        token = new Token(name, symbol);
         vm.label(address(token), "Token");
         vm.label(LoanManager, "LoanManager");
     }
@@ -55,6 +55,4 @@ contract TestToken is Test {
         token.setAdmin(LoanManager);
         assertEq(token.admin(), LoanManager);
     }
-
 }
-
