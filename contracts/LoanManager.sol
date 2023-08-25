@@ -14,54 +14,50 @@ contract loanManager is Ownable, loanManagerStorage {
         _;
     }
 
-    constructor(
-        address _nstblHub,
-        address _mapleUSDCPool,
-        // address _mapleUSDTPool,
-        address _usdc,
-        // address _USDTAsset
-        address _admin
-    ) Ownable(msg.sender) {
+    constructor(address _nstblHub, address _mapleUSDCPool, address _usdc, address _admin) Ownable(msg.sender) {
         nstblHub = _nstblHub;
         mapleUSDCPool = IPool(_mapleUSDCPool);
         // mapleUSDTPool = IPool(_mapleUSDTPool);
         usdc = IERC20(_usdc);
         // usdtAsset = IERC20(_USDTAsset);
         lUSDC = new LMTokenLP("Loan Manager USDC", "lUSDC", _admin);
-        console.log(lUSDC);
+        lUSDCAdd = address(lUSDC);
+        // console.log(lUSDC);
     }
 
     function investUSDCMapleCash(uint256 _assets) public authorizedCaller {
+
         usdc.safeTransferFrom(msg.sender, address(this), _assets);
         usdcDeposited += _assets;
-        // uint256 getShares
         usdc.approve(address(mapleUSDCPool), _assets);
         usdcSharesReceived = mapleUSDCPool.previewDeposit(_assets);
         mapleUSDCPool.deposit(_assets, address(this));
         totalUSDCSharesReceived += usdcSharesReceived;
+        lUSDC.mint(nstblHub, usdcSharesReceived * 10 ** 12);
 
-        lUSDC.mint(nstblHub, usdcSharesReceived * 12);
     }
 
     function requestRedeemUSDCMapleCash(uint256 _shares) public authorizedCaller {
-        require(mapleUSDCPool.balanceOf(address(this)) >= _shares, "Insufficient amount");
+
+        require(mapleUSDCPool.balanceOf(address(this)) >= _shares/10**12, "Insufficient amount");
         usdcSharesRequestedForRedeem = _shares;
-        escrowedUSDCShares = mapleUSDCPool.requestRedeem(_shares, address(this));
+        escrowedUSDCShares = mapleUSDCPool.requestRedeem(_shares/10**12, address(this));
+
     }
- 
-    // function getAssets(uint256 _shares) public view returns (uint256) {
-    //     return mapleUSDCPool.convertToAssets(_shares);
-    // }
 
-    // function getAssetsWithUnRealisedLosses(uint256 _shares) public view returns (uint256) {
-    //     return mapleUSDCPool.convertToExitAssets(_shares);
-    // }
+    function getAssets(uint256 _shares) public returns (uint256) {
+        return mapleUSDCPool.convertToAssets(_shares/10**12);
+    }
 
-    // function redeemUSDCMapleCash()public authorizedCaller{
-    //     uint256 _shares = usdcSharesRequestedForRedeem;
-    //     usdcRedeemed += mapleUSDCPool.redeem(_shares, nstblHub, address(this));
+    function getAssetsWithUnrealisedLosses(uint256 _shares) public returns (uint256) {
+        return mapleUSDCPool.convertToExitAssets(_shares/10**12);
+    }
 
-    // }
+    function redeemUSDCMapleCash()public authorizedCaller{
+        uint256 _shares = usdcSharesRequestedForRedeem;
+        usdcRedeemed += mapleUSDCPool.redeem(_shares/10**12, nstblHub, address(this));
+        usdcSharesRequestedForRedeem = 0;
+    }
 
     // function investUSDTMapleCash(uint256 _assets)public authorizedCaller{
 
@@ -84,7 +80,7 @@ contract loanManager is Ownable, loanManagerStorage {
     // }
 
     function previewRedeemAsset(uint256 _shares) public authorizedCaller returns (uint256) {
-        return mapleUSDCPool.previewRedeem(_shares);
+        return mapleUSDCPool.previewRedeem(_shares/10**12);
     }
 
     function setAuthorizedCaller(address _caller) public onlyOwner {
