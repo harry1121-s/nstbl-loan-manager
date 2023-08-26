@@ -37,7 +37,7 @@ contract loanManager is Ownable, loanManagerStorage {
         // console.log(lUSDC);
     }
 
-    function investUSDCMapleCash(uint256 _assets) public authorizedCaller {
+    function investUSDCMapleCash(uint256 _assets) public authorizedCaller nonReentrant{
 
         usdc.safeTransferFrom(msg.sender, address(this), _assets);
         usdcDeposited += _assets;
@@ -68,6 +68,7 @@ contract loanManager is Ownable, loanManagerStorage {
     function redeemUSDCMapleCash()public authorizedCaller nonReentrant{
         uint256 _shares = usdcSharesRequestedForRedeem;
         usdcRedeemed += mapleUSDCPool.redeem(_shares/10**12, nstblHub, address(this));
+        lUSDC.burn(nstblHub, _shares * 10**12);
         usdcSharesRequestedForRedeem = 0;
     }
 
