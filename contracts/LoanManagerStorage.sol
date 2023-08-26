@@ -7,6 +7,7 @@ import "./interfaces/IPool.sol";
 import "./LMTokenLP.sol";
 
 contract loanManagerStorage {
+
     address public nstblHub;
 
     IERC20 public immutable usdc;

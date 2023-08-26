@@ -5,23 +5,23 @@ import { Test, console } from "forge-std/Test.sol";
 import { loanManager } from "../contracts/LoanManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IPoolManager } from "../contracts/interfaces/IPoolManager.sol";
+import { IWithdrawalManager } from "../contracts/interfaces/IWithdrawalManager.sol";
 import { IPool } from "../contracts/interfaces/IPool.sol";
 
-contract CounterTest is Test {
-    loanManager public loan;
+contract TestBase is Test{
+
+     loanManager public loan;
     // Token public token;
     IERC20 public lusdc;
     IERC20 public usdc;
     IPool public pool;
     IPoolManager public poolManager;
+    IWithdrawalManager public withdrawalManager;
     address public poolDelegate = 0x8c8C2431658608F5649B8432764a930c952d8A98;
     address owner = address(123);
     address user = address(456);
 
-    string public name = "Nealthy loan token USDC";
-    string public symbol = "lUSDC";
-
-    function setUp() public {
+    function setUp() public virtual{
         vm.label(poolDelegate, "poolDelegate");
 
         vm.startPrank(owner);
@@ -39,6 +39,14 @@ contract CounterTest is Test {
         vm.label(address(pool), "Pool");
         poolManager = IPoolManager(0x219654A61a0BC394055652986BE403fa14405Bb8);
         vm.label(address(poolManager), "poolManager");
+        withdrawalManager = IWithdrawalManager(0x1146691782c089bCF0B19aCb8620943a35eebD12);
+    }
+}
+contract BasicTests is TestBase {
+
+
+    function setUp() public override{
+        super.setUp();
     }
 
     function testInvest() public {
@@ -110,13 +118,69 @@ contract CounterTest is Test {
 
     }
 
-     function testRedeem() public {
+    //  function testRedeem() public {
+
+    //     vm.prank(owner);
+    //     loan.setAuthorizedCaller(user);
+
+    //     deal(address(usdc), user, 1e7 * 1e6, true);
+    //     assertEq(usdc.balanceOf(user), 1e7 * 1e6);
+
+    //     //first whitelist user
+    //     vm.startPrank(poolDelegate);
+    //     poolManager.setAllowedLender(address(loan), true);
+    //     (bool out,) = address(poolManager).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
+    //     assertTrue(out);
+    //     vm.stopPrank();
+
+    //     vm.startPrank(user);
+    //     usdc.approve(address(loan), 1e7 * 1e6);
+    //     loan.investUSDCMapleCash(1e7 * 1e6);
+    //     assertEq(usdc.balanceOf(user),0);
+    //     console.log("LP balance", pool.balanceOf(address(loan)));
+
+
+    //     uint256 lusdcLPTokens = lusdc.totalSupply();
+    //     console.log("Shares converted to assets before warp: ", loan.getAssets(lusdcLPTokens));
+    //     console.log("Shares converted to exit assets before warp: ", loan.getAssetsWithUnrealisedLosses(lusdcLPTokens));
+
+    //     //time warp
+    //     vm.warp(block.timestamp + 100 days);
+
+    //     console.log("Shares converted to assets after 100 days: ", loan.getAssets(lusdcLPTokens));
+    //     console.log("Shares converted to exit assets after 100 days: ", loan.getAssetsWithUnrealisedLosses(lusdcLPTokens));
+        
+    //     //requesting redeem
+    //     loan.requestRedeemUSDCMapleCash(lusdcLPTokens);
+    //      //preview redemption
+    //     uint256 b = loan.previewRedeemAsset(lusdcLPTokens);
+    //     console.log("Resulting assets: ", b);
+    //     // // console.log("Escrow Shares: ", escrowShares);
+    //     assertEq(pool.balanceOf(address(loan)), 0);
+    //     // vm.expectRevert();
+    //     // loan.redeemUSDCMapleCash();
+
+    //     vm.warp(block.timestamp + 7 days);
+    //     loan.redeemUSDCMapleCash();
+
+    //     vm.stopPrank();
+
+    // }
+}
+
+contract RedeemTests is TestBase {
+
+    function setUp() public override{
+        super.setUp();
+    }
+
+    function testRedeem_SingleRedemption_withinWindow() external{
 
         vm.prank(owner);
         loan.setAuthorizedCaller(user);
 
-        deal(address(usdc), user, 1e7 * 1e6, true);
-        assertEq(usdc.balanceOf(user), 1e7 * 1e6);
+        deal(address(usdc), user, 1e6 * 1e6, true);
+        assertEq(usdc.balanceOf(user), 1e6 * 1e6);
 
         //first whitelist user
         vm.startPrank(poolDelegate);
@@ -126,37 +190,139 @@ contract CounterTest is Test {
         vm.stopPrank();
 
         vm.startPrank(user);
-        usdc.approve(address(loan), 1e7 * 1e6);
-        loan.investUSDCMapleCash(1e7 * 1e6);
+        usdc.approve(address(loan), 1e6 * 1e6);
+        loan.investUSDCMapleCash(1e6 * 1e6);
         assertEq(usdc.balanceOf(user),0);
         console.log("LP balance", pool.balanceOf(address(loan)));
-
 
         uint256 lusdcLPTokens = lusdc.totalSupply();
         console.log("Shares converted to assets before warp: ", loan.getAssets(lusdcLPTokens));
         console.log("Shares converted to exit assets before warp: ", loan.getAssetsWithUnrealisedLosses(lusdcLPTokens));
 
         //time warp
-        vm.warp(block.timestamp + 100 days);
+        vm.warp(block.timestamp + 2 weeks);
 
-        console.log("Shares converted to assets after 100 days: ", loan.getAssets(lusdcLPTokens));
-        console.log("Shares converted to exit assets after 100 days: ", loan.getAssetsWithUnrealisedLosses(lusdcLPTokens));
+        console.log("Shares converted to assets after 2 weeks: ", loan.getAssets(lusdcLPTokens));
+        console.log("Shares converted to exit assets after 2 weeks: ", loan.getAssetsWithUnrealisedLosses(lusdcLPTokens));
         
+        assertEq(withdrawalManager.exitCycleId(address(loan)), 0);
+
+        uint256 _currCycleId =withdrawalManager.getCurrentCycleId();
         //requesting redeem
+        // vm.expectRevert();
         loan.requestRedeemUSDCMapleCash(lusdcLPTokens);
-         //preview redemption
-        uint256 b = loan.previewRedeemAsset(lusdcLPTokens);
-        console.log("Resulting assets: ", b);
-        // // console.log("Escrow Shares: ", escrowShares);
-        assertEq(pool.balanceOf(address(loan)), 0);
-        vm.expectRevert();
+        // loan.requestRedeemUSDCMapleCash(lusdcLPTokens);
+    
+        uint256 _exitCycleId = withdrawalManager.exitCycleId(address(loan));
+
+        assertEq(_exitCycleId, _currCycleId+2);
+        (uint256 exitWindowStart, ) = withdrawalManager.getWindowAtId(_exitCycleId);
+
+        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
         loan.redeemUSDCMapleCash();
 
-        vm.warp(block.timestamp + 2 days);
+        uint256 usdcBal1 = usdc.balanceOf(user);
+        vm.warp(exitWindowStart);
+        uint256 expectedUSDC = loan.getAssetsWithUnrealisedLosses(lusdcLPTokens);
         loan.redeemUSDCMapleCash();
-        
+        uint256 usdcBal2 = usdc.balanceOf(user);
+        console.log(usdcBal2-usdcBal1, expectedUSDC);
+        console.log((usdcBal2-usdcBal1)-expectedUSDC);
+
         vm.stopPrank();
 
+    
     }
+
+    function testRedeem_MultipleRedemption_withinWindow() external{
+
+        vm.prank(owner);
+        loan.setAuthorizedCaller(user);
+
+        deal(address(usdc), user, 1e6 * 1e6, true);
+        assertEq(usdc.balanceOf(user), 1e6 * 1e6);
+
+        //first whitelist user
+        vm.startPrank(poolDelegate);
+        poolManager.setAllowedLender(address(loan), true);
+        (bool out,) = address(poolManager).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
+        assertTrue(out);
+        vm.stopPrank();
+
+        vm.startPrank(user);
+        usdc.approve(address(loan), 1e6 * 1e6);
+        loan.investUSDCMapleCash(1e6 * 1e6);
+        assertEq(usdc.balanceOf(user),0);
+        console.log("LP balance", pool.balanceOf(address(loan)));
+
+        uint256 lusdcLPTokens = lusdc.totalSupply();
+        console.log("Shares converted to assets before warp: ", loan.getAssets(lusdcLPTokens));
+        console.log("Shares converted to exit assets before warp: ", loan.getAssetsWithUnrealisedLosses(lusdcLPTokens));
+
+        //time warp
+        vm.warp(block.timestamp + 2 weeks);
+
+        console.log("Shares converted to assets after 2 weeks: ", loan.getAssets(lusdcLPTokens));
+        console.log("Shares converted to exit assets after 2 weeks: ", loan.getAssetsWithUnrealisedLosses(lusdcLPTokens));
+        
+        assertEq(withdrawalManager.exitCycleId(address(loan)), 0);
+
+        uint256 lpTokens1 = (lusdcLPTokens*60)/100;
+        uint256 lpTokens2 = lusdcLPTokens-lpTokens1;
+
+        uint256 _currCycleId =withdrawalManager.getCurrentCycleId();
+        //requesting redeem
+        loan.requestRedeemUSDCMapleCash(lpTokens1);
+
+        uint256 _exitCycleId = withdrawalManager.exitCycleId(address(loan));
+
+        assertEq(_exitCycleId, _currCycleId+2);
+        (uint256 exitWindowStart, ) = withdrawalManager.getWindowAtId(_exitCycleId);
+
+        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        loan.redeemUSDCMapleCash();
+
+        uint256 usdcBal1 = usdc.balanceOf(user);
+        uint256 expectedUSDC = loan.getAssetsWithUnrealisedLosses(lpTokens1);
+        vm.warp(exitWindowStart);
+        loan.redeemUSDCMapleCash();
+        uint256 usdcBal2 = usdc.balanceOf(user);
+        console.log(usdcBal2-usdcBal1, expectedUSDC);
+        console.log((usdcBal2-usdcBal1)-expectedUSDC);
+
+        _currCycleId =withdrawalManager.getCurrentCycleId();
+        //requesting redeem
+        loan.requestRedeemUSDCMapleCash(lpTokens2);
+
+        _exitCycleId = withdrawalManager.exitCycleId(address(loan));
+
+        assertEq(_exitCycleId, _currCycleId+2);
+        (exitWindowStart, ) = withdrawalManager.getWindowAtId(_exitCycleId);
+
+        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        loan.redeemUSDCMapleCash();
+
+        usdcBal1 = usdc.balanceOf(user);
+        vm.warp(exitWindowStart);
+        expectedUSDC = loan.getAssetsWithUnrealisedLosses(lpTokens2);
+        loan.redeemUSDCMapleCash();
+        usdcBal2 = usdc.balanceOf(user);
+        console.log(usdcBal2-usdcBal1, expectedUSDC);
+        console.log((usdcBal2-usdcBal1)-expectedUSDC);
+        
+        console.log(pool.balanceOf(address(loan)));
+        vm.stopPrank();
+
+    
+    }
+
 }
+
+// contract FailureTests is BasicTests {
+
+//     function setUp() public override {
+
+//     }
+
+// }
 

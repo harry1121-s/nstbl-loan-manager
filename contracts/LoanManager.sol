@@ -9,9 +9,21 @@ import { console } from "forge-std/Test.sol";
 contract loanManager is Ownable, loanManagerStorage {
     using SafeERC20 for IERC20;
 
+    uint256 private _locked = 1;
+
     modifier authorizedCaller() {
         require(msg.sender == nstblHub, "Loan Manager: unAuth");
         _;
+    }
+
+    modifier nonReentrant() {
+        require(_locked == 1, "P:LOCKED");
+
+        _locked = 2;
+
+        _;
+
+        _locked = 1;
     }
 
     constructor(address _nstblHub, address _mapleUSDCPool, address _usdc, address _admin) Ownable(msg.sender) {
@@ -37,7 +49,7 @@ contract loanManager is Ownable, loanManagerStorage {
 
     }
 
-    function requestRedeemUSDCMapleCash(uint256 _shares) public authorizedCaller {
+    function requestRedeemUSDCMapleCash(uint256 _shares) public authorizedCaller nonReentrant{
 
         require(mapleUSDCPool.balanceOf(address(this)) >= _shares/10**12, "Insufficient amount");
         usdcSharesRequestedForRedeem = _shares;
@@ -53,7 +65,7 @@ contract loanManager is Ownable, loanManagerStorage {
         return mapleUSDCPool.convertToExitAssets(_shares/10**12);
     }
 
-    function redeemUSDCMapleCash()public authorizedCaller{
+    function redeemUSDCMapleCash()public authorizedCaller nonReentrant{
         uint256 _shares = usdcSharesRequestedForRedeem;
         usdcRedeemed += mapleUSDCPool.redeem(_shares/10**12, nstblHub, address(this));
         usdcSharesRequestedForRedeem = 0;
