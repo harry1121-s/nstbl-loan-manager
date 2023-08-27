@@ -8,12 +8,12 @@ contract LMTokenLP is ERC20 {
     address public admin;
 
     modifier authorizedCaller() {
-        require(msg.sender == loanManager, "Loan Manager: unAuth");
+        require(msg.sender == loanManager, "Token: LoanManager unAuth");
         _;
     }
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "Admin: unAuth");
+        require(msg.sender == admin, "Token: Admin unAuth");
         _;
     }
 

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./LoanManagerStorage.sol";
 import { console } from "forge-std/Test.sol";
 
-contract loanManager is Ownable, loanManagerStorage {
+contract LoanManager is Ownable, loanManagerStorage {
     using SafeERC20 for IERC20;
 
     uint256 private _locked = 1;

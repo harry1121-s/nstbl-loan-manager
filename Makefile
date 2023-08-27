@@ -1,8 +1,3 @@
-# Submodule management
-
-install:
-	@git submodule update --init --recursive
-
 # Build and test
 
 profile ?=default
@@ -14,7 +9,7 @@ test:
 	forge test
 
 testToken:
-	forge test --match-path ./tests/Token.t.sol
+	forge test --match-path ./tests/unit/Token.t.sol
 
 testLoanManager:
 	forge test --match-path ./tests/LoanManager.t.sol --fork-url https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW -vv

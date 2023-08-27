@@ -1,9 +1,9 @@
 [profile.default]
 contracts       = 'contracts'             # The source directory
-test            = 'tests'                  # The test directory
+test            = 'tests'                 # The test directory
 libs            = ['modules']             # A list of library directories
 optimizer       = false                   # Enable or disable the solc optimizer
-optimizer_runs  = 200                     # The number of optimizer runs
+optimizer_runs  = 8000                    # The number of optimizer runs
 verbosity       = 3                       # The verbosity of tests
 block_timestamp = 1_685_721_539           # Timestamp for tests (non-zero)
 gas_limit       = "18446744073709551615"  # Gas limit for tests
