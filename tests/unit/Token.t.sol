@@ -5,7 +5,6 @@ import { Test, console } from "forge-std/Test.sol";
 import { LMTokenLP } from "../../contracts/LMTokenLP.sol";
 
 contract TestToken is Test {
-
     /*//////////////////////////////////////////////////////////////
                                  STATE
     //////////////////////////////////////////////////////////////*/
@@ -79,16 +78,19 @@ contract TestToken is Test {
     }
 
     function test_burn_fuzz(uint256 mint_amount, uint256 burn_amount) public {
-        // Test that only admin can set the new LoanManager
-        vm.expectRevert("Token: LoanManager unAuth");
-        token.burn(LoanManager, burn_amount);
-
         vm.assume(mint_amount >= burn_amount);
 
         vm.startPrank(LoanManager);
         token.mint(LoanManager, mint_amount);
         token.burn(LoanManager, burn_amount);
         vm.stopPrank();
+
         assertEq(token.balanceOf(LoanManager), mint_amount - burn_amount);
+    }
+
+    function test_burn_accessControl() public {
+        // Test that only admin can set the new LoanManager
+        vm.expectRevert("Token: LoanManager unAuth");
+        token.burn(LoanManager, 100);
     }
 }

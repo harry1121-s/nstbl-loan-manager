@@ -993,7 +993,6 @@
 //         });
 //     }
 
-
 //     function test_redeem_oneLPWithImpairedLoan() external {
 //         // Check balance on pool
 //         assertEq(fundsAsset.balanceOf(address(pool)), 3_000_000e6 * 2);
@@ -1070,7 +1069,6 @@
 //         assertEq(withdrawalManager.lockedShares(lp1),   0);
 //         assertEq(withdrawalManager.totalCycleShares(3), 0);
 //     }
-
 
 //     function test_redeem_twoLPsWithImpairedLoan() external {
 //         // Check balance on pool

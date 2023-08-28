@@ -6,10 +6,15 @@ pragma solidity ^0.8.19;
 import { IWithdrawalManagerStorage } from "./IWithdrawalManagerStorage.sol";
 
 interface IWithdrawalManager is IWithdrawalManagerStorage {
-
-    /**************************************************************************************************************************************/
-    /*** State Changing Functions                                                                                                       ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * State Changing Functions                                                                                                       **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev   Add shares to the withdrawal manager.
@@ -23,7 +28,9 @@ interface IWithdrawalManager is IWithdrawalManagerStorage {
      *  @param requestedShares_ Amount of initially requested shares.
      *  @param owner_           Address of the account which will be processed for exit.
      */
-    function processExit(uint256 requestedShares_, address owner_) external returns (uint256 redeemableShares_, uint256 resultingAssets_);
+    function processExit(uint256 requestedShares_, address owner_)
+        external
+        returns (uint256 redeemableShares_, uint256 resultingAssets_);
 
     /**
      *  @dev   Remove shares to the withdrawal manager.
@@ -39,9 +46,15 @@ interface IWithdrawalManager is IWithdrawalManagerStorage {
      */
     function setExitConfig(uint256 cycleDuration_, uint256 windowDuration_) external;
 
-    /**************************************************************************************************************************************/
-    /*** View Functions                                                                                                                 ***/
-    /**************************************************************************************************************************************/
+    /**
+     *
+     */
+    /**
+     * View Functions                                                                                                                 **
+     */
+    /**
+     *
+     */
 
     /**
      *  @dev    Gets the asset address used in this withdrawal manager.
@@ -77,7 +90,9 @@ interface IWithdrawalManager is IWithdrawalManagerStorage {
      *  @return partialLiquidity_ Boolean indicating if there is enough liquidity to facilitate a full redemption.
      */
     function getRedeemableAmounts(uint256 lockedShares_, address owner_)
-        external view returns (uint256 redeemableShares_, uint256 resultingAssets_, bool partialLiquidity_);
+        external
+        view
+        returns (uint256 redeemableShares_, uint256 resultingAssets_, bool partialLiquidity_);
 
     /**
      *  @dev    Gets the timestamp of the beginning of the withdrawal window for a given cycle.
@@ -132,7 +147,10 @@ interface IWithdrawalManager is IWithdrawalManagerStorage {
      *  @return redeemableShares_ The amount of shares that can be redeemed.
      *  @return resultingAssets_  The amount of assets that will be returned for `redeemableShares`.
      */
-    function previewRedeem(address owner_, uint256 shares_) external view returns (uint256 redeemableShares_, uint256 resultingAssets_);
+    function previewRedeem(address owner_, uint256 shares_)
+        external
+        view
+        returns (uint256 redeemableShares_, uint256 resultingAssets_);
 
     /**
      *  @dev    Gets the amount of shares that can be withdrawn.
@@ -141,6 +159,8 @@ interface IWithdrawalManager is IWithdrawalManagerStorage {
      *  @return redeemableAssets_ The amount of assets that can be withdrawn.
      *  @return resultingShares_  The amount of shares that will be burned.
      */
-    function previewWithdraw(address owner_, uint256 assets_) external view returns (uint256 redeemableAssets_, uint256 resultingShares_);
-
+    function previewWithdraw(address owner_, uint256 assets_)
+        external
+        view
+        returns (uint256 redeemableAssets_, uint256 resultingShares_);
 }

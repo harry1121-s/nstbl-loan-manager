@@ -2,12 +2,11 @@
 pragma solidity ^0.8.7;
 
 interface IWithdrawalManagerStorage {
-
     struct CycleConfig {
-        uint64 initialCycleId;    // Identifier of the first withdrawal cycle using this configuration.
-        uint64 initialCycleTime;  // Timestamp of the first withdrawal cycle using this configuration.
-        uint64 cycleDuration;     // Duration of the withdrawal cycle.
-        uint64 windowDuration;    // Duration of the withdrawal window.
+        uint64 initialCycleId; // Identifier of the first withdrawal cycle using this configuration.
+        uint64 initialCycleTime; // Timestamp of the first withdrawal cycle using this configuration.
+        uint64 cycleDuration; // Duration of the withdrawal cycle.
+        uint64 windowDuration; // Duration of the withdrawal window.
     }
 
     /**
@@ -19,7 +18,8 @@ interface IWithdrawalManagerStorage {
      *  @return windowDuration   Duration of the withdrawal window.
      */
     function cycleConfigs(uint256 configId_)
-        external returns (uint64 initialCycleId, uint64 initialCycleTime, uint64 cycleDuration, uint64 windowDuration);
+        external
+        returns (uint64 initialCycleId, uint64 initialCycleTime, uint64 cycleDuration, uint64 windowDuration);
 
     /**
      *  @dev    Gets the id of the cycle that account can exit on.
@@ -59,5 +59,4 @@ interface IWithdrawalManagerStorage {
      *  @return totalCycleShares_ The amount of shares in the cycle.
      */
     function totalCycleShares(uint256 cycleId_) external view returns (uint256 totalCycleShares_);
-
 }

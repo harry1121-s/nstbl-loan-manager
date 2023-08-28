@@ -6,15 +6,13 @@ import "modules/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IPool.sol";
 import "./LMTokenLP.sol";
 
-contract loanManagerStorage {
-
+contract LoanManagerStorage {
     address public nstblHub;
 
     IERC20 public immutable usdc;
     IERC20 public usdtAsset;
 
     LMTokenLP public lUSDC;
-    address public lUSDCAdd;
     LMTokenLP public lUSDT;
 
     uint256 public usdcDeposited;
