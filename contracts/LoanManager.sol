@@ -12,6 +12,11 @@ contract LoanManager is Ownable, LoanManagerStorage {
 
     uint256 private _locked = 1;
 
+
+    /*//////////////////////////////////////////////////////////////
+                               MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
     modifier authorizedCaller() {
         require(msg.sender == nstblHub, "Loan Manager: unAuth");
         _;
@@ -27,6 +32,10 @@ contract LoanManager is Ownable, LoanManagerStorage {
         _locked = 1;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                              CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+    
     constructor(address _nstblHub, address _mapleUSDCPool, address _usdc, address _admin) Ownable(msg.sender) {
         nstblHub = _nstblHub;
         mapleUSDCPool = IPool(_mapleUSDCPool);
