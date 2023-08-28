@@ -10,4 +10,8 @@ interface IPool {
     function balanceOf(address account) external view returns (uint256);
     function convertToExitAssets(uint256 shares_) external returns (uint256 assets_);
     function previewDeposit(uint256 assets_) external returns (uint256 shares_);
+    function convertToShares(uint256 assets_) external returns (uint256 shares_);
+    function convertToExitShares(uint256 amount_) external returns (uint256 shares_);
+    function unrealizedLosses() external returns (uint256 unrealizedLosses_);
+    function totalAssets() external returns (uint256 totalAssets_);
 }

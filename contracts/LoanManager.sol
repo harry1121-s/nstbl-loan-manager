@@ -53,6 +53,13 @@ contract LoanManager is Ownable, LoanManagerStorage {
         escrowedUSDCShares = mapleUSDCPool.requestRedeem(_shares / 10 ** 12, address(this));
     }
 
+    function redeemUSDCMapleCash() public authorizedCaller nonReentrant {
+        uint256 _shares = usdcSharesRequestedForRedeem;
+        usdcRedeemed += mapleUSDCPool.redeem(_shares / 10 ** 12, nstblHub, address(this));
+        lUSDC.burn(nstblHub, _shares * 10 ** 12);
+        usdcSharesRequestedForRedeem = 0;
+    }
+
     function getAssets(uint256 _shares) public returns (uint256) {
         return mapleUSDCPool.convertToAssets(_shares / 10 ** 12);
     }
@@ -61,12 +68,22 @@ contract LoanManager is Ownable, LoanManagerStorage {
         return mapleUSDCPool.convertToExitAssets(_shares / 10 ** 12);
     }
 
-    function redeemUSDCMapleCash() public authorizedCaller nonReentrant {
-        uint256 _shares = usdcSharesRequestedForRedeem;
-        usdcRedeemed += mapleUSDCPool.redeem(_shares / 10 ** 12, nstblHub, address(this));
-        lUSDC.burn(nstblHub, _shares * 10 ** 12);
-        usdcSharesRequestedForRedeem = 0;
+    function getShares(uint256 _assets) public returns(uint256) {
+        return mapleUSDCPool.convertToShares(_assets);
     }
+
+    function getExitShares(uint256 _assets) public returns (uint256){
+        return mapleUSDCPool.convertToExitShares(_assets);
+    }
+
+    function getUnrealizedLosses() public returns (uint256) {
+        return mapleUSDCPool.unrealizedLosses();
+    }
+
+    function getTotalAssets() public returns (uint256) {
+        return mapleUSDCPool.totalAssets();
+    }
+
 
     // function investUSDTMapleCash(uint256 _assets)public authorizedCaller{
 
