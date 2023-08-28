@@ -7,6 +7,10 @@ contract LMTokenLP is ERC20 {
     address public loanManager;
     address public admin;
 
+    /*//////////////////////////////////////////////////////////////
+                               MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
     modifier authorizedCaller() {
         require(msg.sender == loanManager, "Token: LoanManager unAuth");
         _;
@@ -17,10 +21,18 @@ contract LMTokenLP is ERC20 {
         _;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                              CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
     constructor(string memory _name, string memory _symbol, address _admin) ERC20(_name, _symbol) {
         admin = _admin;
         loanManager = msg.sender;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                        ACCOUNT MINT/BURN
+    //////////////////////////////////////////////////////////////*/
 
     function mint(address _user, uint256 _amount) public authorizedCaller {
         _mint(_user, _amount);
@@ -29,6 +41,10 @@ contract LMTokenLP is ERC20 {
     function burn(address _user, uint256 _amount) public authorizedCaller {
         _burn(_user, _amount);
     }
+
+    /*//////////////////////////////////////////////////////////////
+                               OWNERSHIP
+    //////////////////////////////////////////////////////////////*/
 
     function setLoanManager(address _loanManager) public onlyAdmin {
         loanManager = _loanManager;
