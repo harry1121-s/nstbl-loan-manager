@@ -26,10 +26,10 @@ interface ILoanManager {
                                  VIEWS
     //////////////////////////////////////////////////////////////*/
 
-    function previewDeposit(address asset, uint256 amount) external view returns (uint256);
+    function calculateShares(address asset, uint256 amount) external view returns (uint256);
     
-    function previewRedeem(address asset, uint256 shares) external view returns (uint256);
+    function calculateAssets(address asset, uint256 shares) external view returns (uint256);
 
     function unrealizedLosses(address asset, uint256 shares) external view returns (uint256);
-    
+
 }
