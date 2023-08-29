@@ -15,8 +15,8 @@ contract LoanManagerStorage {
     address public nstblHub;
     address public admin;
 
-    address public usdc;
-    address public usdt;
+    address public immutable usdc;
+    address public immutable usdt;
 
     LMTokenLP public lUSDC;
     LMTokenLP public lUSDT;

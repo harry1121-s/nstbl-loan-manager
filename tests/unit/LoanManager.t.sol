@@ -12,43 +12,15 @@ contract TestDeposit is BaseTest {
     }
 
     function testInvestUSDC() public {
-        erc20_deal(USDC, NSTBL_HUB, 1e7 * 1e6);
-
-        _setAllowedLender(poolDelegateUSDC);
-
-        vm.startPrank(NSTBL_HUB);
-        usdc.approve(address(loanManager), 1e7 * 1e6);
-
-        uint256 sharesToReceive = usdcPool.previewDeposit(1e7 * 1e6);
-
-        loanManager.deposit(address(usdc), 1e7 * 1e6);
-        assertEq(usdc.balanceOf(user), 0);
-        assertEq(usdcPool.balanceOf(address(loanManager)), sharesToReceive);
-        console.log("LM lUSDC minted to nstblHub: ", lusdc.balanceOf(NSTBL_HUB));
-        console.log(lusdc.totalSupply());
-        vm.stopPrank();
+        _investAssets(USDC, address(usdcPool));
     }
 
     function testInvestUSDT() public {
-        erc20_deal(USDT, NSTBL_HUB, 1e7 * 1e6);
-
-        _setAllowedLender(poolDelegateUSDT);
-
-        vm.startPrank(NSTBL_HUB);
-        usdt.safeIncreaseAllowance(address(loanManager), 1e7 * 1e6);
-
-        uint256 sharesToReceive = usdtPool.previewDeposit(1e7 * 1e6);
-
-        loanManager.deposit(address(usdt), 1e7 * 1e6);
-        assertEq(usdt.balanceOf(user), 0);
-        assertEq(usdtPool.balanceOf(address(loanManager)), sharesToReceive);
-        console.log("LM lUSDT minted to nstblHub: ", lusdt.balanceOf(NSTBL_HUB));
-        console.log(lusdt.totalSupply());
-        vm.stopPrank();
+        _investAssets(USDT, address(usdtPool));
     }
 }
 
-contract TestRequestRedeem is TestDeposit {
+contract TestRequestRedeem is BaseTest {
     using SafeERC20 for IERC20;
 
     function setUp() public override {
@@ -56,7 +28,7 @@ contract TestRequestRedeem is TestDeposit {
     }
 
     function testRedeemRequestUSDC() external {
-        testInvestUSDC();
+        _investAssets(USDC, address(usdcPool));
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
@@ -71,7 +43,7 @@ contract TestRequestRedeem is TestDeposit {
     }
 
     function testRedeemRequestUSDC_PendingRedemption() external {
-        testInvestUSDC();
+        _investAssets(USDC, address(usdcPool));
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
@@ -90,7 +62,7 @@ contract TestRequestRedeem is TestDeposit {
     }
 
     function testRedeemRequestUSDT() external {
-        testInvestUSDT();
+        _investAssets(USDT, address(usdtPool));
 
         uint256 lmUSDT = lusdt.balanceOf(NSTBL_HUB);
 
@@ -105,7 +77,7 @@ contract TestRequestRedeem is TestDeposit {
     }
 
     function testRedeemRequestUSDT_PendingRedemption() external {
-        testInvestUSDT();
+        _investAssets(USDT, address(usdtPool));
 
         uint256 lmUSDT = lusdt.balanceOf(NSTBL_HUB);
 
@@ -124,11 +96,11 @@ contract TestRequestRedeem is TestDeposit {
     }
 }
 
-contract TestRedeem is TestDeposit {
+contract TestRedeem is BaseTest {
     using SafeERC20 for IERC20;
 
     function testRedeemUSDC() external {
-        testInvestUSDC();
+        _investAssets(USDC, address(usdcPool));
 
         // time warp
         vm.warp(block.timestamp + 2 weeks);
@@ -165,7 +137,7 @@ contract TestRedeem is TestDeposit {
     }
 
     function testRedeemUSDT() external {
-        testInvestUSDT();
+        _investAssets(USDT, address(usdtPool));
 
         // time warp
         vm.warp(block.timestamp + 2 weeks);

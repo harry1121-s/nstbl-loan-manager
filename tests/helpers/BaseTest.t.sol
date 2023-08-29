@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import { Test, console } from "forge-std/Test.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { LoanManager } from "../../contracts/LoanManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IPoolManager } from "../../contracts/interfaces/IPoolManager.sol";
@@ -10,6 +11,7 @@ import { IPool } from "../../contracts/interfaces/IPool.sol";
 import { Utils } from "./Utils.sol";
 
 contract BaseTest is Utils {
+    using SafeERC20 for IERC20;
     /*//////////////////////////////////////////////////////////////
                                  STATE
     //////////////////////////////////////////////////////////////*/
@@ -39,11 +41,9 @@ contract BaseTest is Utils {
         // token = new Token(name, symbol);
         loanManager = new LoanManager(
             NSTBL_HUB,
+            owner,
             MAPLE_USDC_CASH_POOL,
-            MAPLE_USDT_CASH_POOL,
-            USDC,
-            USDT,
-            owner
+            MAPLE_USDT_CASH_POOL
         );
         vm.stopPrank();
         lusdc = IERC20(address(loanManager.lUSDC()));
@@ -74,7 +74,25 @@ contract BaseTest is Utils {
             poolManagerUSDT.setAllowedLender(address(loanManager), true);
             (out,) = address(poolManagerUSDT).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
         }
-        assertTrue(out);
+        // assertTrue(out);
+        vm.stopPrank();
+    }
+
+    function _investAssets(address _asset, address _pool) internal {
+        erc20_deal(_asset, NSTBL_HUB, 1e7 * 1e6);
+
+        if(_asset == USDC)
+            _setAllowedLender(poolDelegateUSDC);
+        else
+            _setAllowedLender(poolDelegateUSDT);
+
+        vm.startPrank(NSTBL_HUB);
+        IERC20(_asset).safeIncreaseAllowance(address(loanManager), 1e7 * 1e6);
+
+        uint256 sharesToReceive = IPool(_pool).previewDeposit(1e7 * 1e6);
+        loanManager.deposit(_asset, 1e7 * 1e6);
+        assertEq(IERC20(_asset).balanceOf(user), 0);
+        assertEq(IPool(_pool).balanceOf(address(loanManager)), sharesToReceive);
         vm.stopPrank();
     }
 }

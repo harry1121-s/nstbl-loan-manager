@@ -53,16 +53,14 @@ contract LoanManager is LoanManagerStorage {
         address _nstblHub,
         address _admin,
         address _mapleUSDCPool,
-        address _mapleUSDTPool,
-        address _usdc,
-        address _usdt
+        address _mapleUSDTPool
     ) {
         nstblHub = _nstblHub;
         admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
         mapleUSDTPool = _mapleUSDTPool;
-        usdc = _usdc;
-        usdt = _usdt;
+        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+        usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
         lUSDC = new LMTokenLP("Loan Manager USDC", "lUSDC", _admin);
         lUSDT = new LMTokenLP("Loan Manager USDT", "lUSDT", _admin);
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
@@ -78,7 +76,10 @@ contract LoanManager is LoanManagerStorage {
         nonReentrant
         validInput(_asset, _amount)
     {
+            console.log("Asset:", _asset);
+            console.log("Asset:", usdc);
         if (_asset == usdc) {
+            console.log("Asset:");
             _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC));
         } else if (_asset == usdt) {
             _depositMapleCash(_amount, usdt, mapleUSDTPool, address(lUSDT));
@@ -91,6 +92,7 @@ contract LoanManager is LoanManagerStorage {
         nonReentrant
         validInput(_asset, _lmTokens)
     {
+        console.log(usdc, usdt, _asset);
         if (_asset == usdc) {
             _requestRedeemMapleCash(_lmTokens, usdc, mapleUSDCPool, address(lUSDC));
         } else if (_asset == usdt) {
@@ -114,7 +116,8 @@ contract LoanManager is LoanManagerStorage {
     function _depositMapleCash(uint256 _amount, address _asset, address _pool, address _lpToken) internal {
         uint256 lpTokens;
         uint256 sharesReceived;
-
+        console.log("Here");
+        console.log(_asset);
         IERC20Helper(_asset).safeTransferFrom(msg.sender, address(this), _amount);
         IERC20Helper(_asset).safeIncreaseAllowance(_pool, _amount);
 
