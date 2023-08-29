@@ -3,7 +3,6 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-// import "./interfaces/ILoanManager.sol";
 import { LoanManagerStorage, IPool, IERC20, LMTokenLP } from "./LoanManagerStorage.sol";
 import { console } from "forge-std/Test.sol";
 
@@ -127,6 +126,7 @@ contract LoanManager is Ownable, LoanManagerStorage {
         escrowedMapleUSDCShares = mapleUSDCPool.requestRedeem(_lmTokens / 10 ** adjustedDecimals, address(this));
         lUSDC.transferFrom(msg.sender, address(this), _lmTokens);
         awaitingUSDCRedemption = true;
+        emit RequestRedeem(address(usdc), _lmTokens, escrowedMapleUSDCShares);
     }
 
     function _requestRedeemUSDTMapleCash(uint256 _lmTokens) internal {
@@ -136,6 +136,7 @@ contract LoanManager is Ownable, LoanManagerStorage {
         escrowedMapleUSDTShares = mapleUSDTPool.requestRedeem(_lmTokens / 10 ** adjustedDecimals, address(this));
         lUSDT.transferFrom(msg.sender, address(this), _lmTokens);
         awaitingUSDTRedemption = true;
+        emit RequestRedeem(address(usdt), _lmTokens, escrowedMapleUSDTShares);
     }
 
     function redeem(address _asset) public authorizedCaller nonReentrant validAsset(_asset){
@@ -149,18 +150,25 @@ contract LoanManager is Ownable, LoanManagerStorage {
 
     function _redeemUSDC() internal {
         uint256 _shares = lusdcRequestedForRedeem / 10 ** adjustedDecimals;
-        usdcRedeemed += mapleUSDCPool.redeem(_shares, nstblHub, address(this));
+        usdcRedeemed = mapleUSDCPool.redeem(_shares, nstblHub, address(this));
+        totalUsdcRedeemed += usdcRedeemed;
         lUSDC.burn(address(this), lusdcRequestedForRedeem);
         lusdcRequestedForRedeem = 0;
+        escrowedMapleUSDCShares = 0;
         awaitingUSDCRedemption = false;
+        emit Redeem(address(usdc), _shares, usdcRedeemed);
     }
 
     function _redeemUSDT() internal {
         uint256 _shares = lusdtRequestedForRedeem / 10 ** adjustedDecimals;
-        usdtRedeemed += mapleUSDTPool.redeem(_shares, nstblHub, address(this));
+        usdtRedeemed = mapleUSDTPool.redeem(_shares, nstblHub, address(this));
+        totalUsdtRedeemed += usdtRedeemed;
         lUSDT.burn(address(this), lusdtRequestedForRedeem);
         lusdtRequestedForRedeem = 0;
+        escrowedMapleUSDTShares = 0;
         awaitingUSDTRedemption = false;
+        emit Redeem(address(usdt), _shares, usdcRedeemed);
+
     }
 
     function depositPreview() public returns (uint256) { }

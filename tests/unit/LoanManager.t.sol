@@ -160,6 +160,7 @@ contract TestRedeem is TestDeposit {
         assertEq(usdcBal2 - usdcBal1, expectedUSDC);
         assertEq(lusdc.balanceOf(address(loanManager)), 0);
         assertEq(lusdc.totalSupply(), 0);
+        assertFalse(loanManager.awaitingUSDCRedemption());
         vm.stopPrank();
     }
 
@@ -196,6 +197,7 @@ contract TestRedeem is TestDeposit {
         // assertEq(usdtBal2 - usdtBal1, expectedUSDT);
         assertEq(lusdt.balanceOf(address(loanManager)), 0);
         assertEq(lusdt.totalSupply(), 0);
+        assertFalse(loanManager.awaitingUSDTRedemption());
         vm.stopPrank();
     }
 }
