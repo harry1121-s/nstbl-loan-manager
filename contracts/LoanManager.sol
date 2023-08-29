@@ -12,13 +12,23 @@ contract LoanManager is Ownable, LoanManagerStorage {
 
     uint256 private _locked = 1;
 
-
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
     modifier authorizedCaller() {
         require(msg.sender == nstblHub, "Loan Manager: unAuth");
+        _;
+    }
+
+    modifier validInput(address _asset, uint256 _amount) {
+        require(_asset != address(0), "LM: Invalid Target address");
+        require(_amount > 0, "LM: Insufficient amount");
+        _;
+    }
+
+    modifier validAsset(address _asset) {
+        require(_asset != address(0), "LM: Invalid Target address");
         _;
     }
 
@@ -35,8 +45,15 @@ contract LoanManager is Ownable, LoanManagerStorage {
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
-    
-    constructor(address _nstblHub, address _mapleUSDCPool, address _mapleUSDTPool, address _usdc, address _usdt, address _admin) Ownable(msg.sender) {
+
+    constructor(
+        address _nstblHub,
+        address _mapleUSDCPool,
+        address _mapleUSDTPool,
+        address _usdc,
+        address _usdt,
+        address _admin
+    ) Ownable(msg.sender) {
         nstblHub = _nstblHub;
         mapleUSDCPool = IPool(_mapleUSDCPool);
         mapleUSDTPool = IPool(_mapleUSDTPool);
@@ -44,20 +61,25 @@ contract LoanManager is Ownable, LoanManagerStorage {
         usdt = IERC20(_usdt);
         lUSDC = new LMTokenLP("Loan Manager USDC", "lUSDC", _admin);
         lUSDT = new LMTokenLP("Loan Manager USDT", "lUSDT", _admin);
-        adjustedDecimals = lUSDC.decimals()-mapleUSDCPool.decimals();
+        adjustedDecimals = lUSDC.decimals() - mapleUSDCPool.decimals();
     }
 
-    function deposit(address _asset, uint256 _amount) public authorizedCaller nonReentrant {
-        require(_asset != address(0), "LM: Invalid Target address");
-        require( _amount > 0, "LM: Insufficient amount");
+    function deposit(address _asset, uint256 _amount)
+        public
+        authorizedCaller
+        nonReentrant
+        validInput(_asset, _amount)
+    {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        // require( _amount > 0, "LM: Insufficient amount");
 
-        if(_asset == address(usdc)){
+        if (_asset == address(usdc)) {
             _investUSDCMapleCash(_amount);
-        }
-        else if(_asset == address(usdt)){
+        } else if (_asset == address(usdt)) {
             _investUSDTMapleCash(_amount);
         }
     }
+
     function _investUSDCMapleCash(uint256 _amount) internal {
         usdc.safeTransferFrom(msg.sender, address(this), _amount);
         usdcDeposited += _amount;
@@ -65,11 +87,11 @@ contract LoanManager is Ownable, LoanManagerStorage {
         usdcSharesReceived = mapleUSDCPool.previewDeposit(_amount);
         mapleUSDCPool.deposit(_amount, address(this));
         totalUSDCSharesReceived += usdcSharesReceived;
-        uint256 lpTokens = usdcSharesReceived * 10**adjustedDecimals;
+        uint256 lpTokens = usdcSharesReceived * 10 ** adjustedDecimals;
         lUSDC.mint(nstblHub, lpTokens);
         emit Deposit(address(usdc), _amount, lpTokens, usdcSharesReceived);
-
     }
+
     function _investUSDTMapleCash(uint256 _amount) internal {
         usdt.safeTransferFrom(msg.sender, address(this), _amount);
         usdtDeposited += _amount;
@@ -77,76 +99,133 @@ contract LoanManager is Ownable, LoanManagerStorage {
         usdtSharesReceived = mapleUSDTPool.previewDeposit(_amount);
         mapleUSDTPool.deposit(_amount, address(this));
         totalUSDTSharesReceived += usdtSharesReceived;
-        uint256 lpTokens = usdtSharesReceived * 10**adjustedDecimals;
+        uint256 lpTokens = usdtSharesReceived * 10 ** adjustedDecimals;
         lUSDT.mint(nstblHub, lpTokens);
         emit Deposit(address(usdt), _amount, lpTokens, usdtSharesReceived);
-
     }
-    
-    function requestRedeem(address _asset, uint256 _lmTokens) public authorizedCaller nonReentrant {
-        require(_asset != address(0), "LM: Invalid Target address");
-        require( _lmTokens > 0, "LM: Insufficient amount");
 
-        if(_asset == address(usdc)){
+    function requestRedeem(address _asset, uint256 _lmTokens)
+        public
+        authorizedCaller
+        nonReentrant
+        validInput(_asset, _lmTokens)
+    {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        // require( _lmTokens > 0, "LM: Insufficient amount");
+
+        if (_asset == address(usdc)) {
             _requestRedeemUSDCMapleCash(_lmTokens);
-        }
-        else if(_asset == address(usdt)){
+        } else if (_asset == address(usdt)) {
             _requestRedeemUSDTMapleCash(_lmTokens);
         }
     }
 
     function _requestRedeemUSDCMapleCash(uint256 _lmTokens) internal {
         require(!awaitingUSDCRedemption, "LM: USDC Redemption Pending");
-        require(mapleUSDCPool.balanceOf(address(this)) >= _lmTokens / 10**adjustedDecimals, "Insufficient amount");
+        require(mapleUSDCPool.balanceOf(address(this)) >= _lmTokens / 10 ** adjustedDecimals, "Insufficient amount");
         lusdcRequestedForRedeem = _lmTokens;
-        escrowedMapleUSDCShares = mapleUSDCPool.requestRedeem(_lmTokens / 10**adjustedDecimals, address(this));
+        escrowedMapleUSDCShares = mapleUSDCPool.requestRedeem(_lmTokens / 10 ** adjustedDecimals, address(this));
         lUSDC.transferFrom(msg.sender, address(this), _lmTokens);
         awaitingUSDCRedemption = true;
     }
 
     function _requestRedeemUSDTMapleCash(uint256 _lmTokens) internal {
         require(!awaitingUSDTRedemption, "LM: USDT Redemption Pending");
-        require(mapleUSDTPool.balanceOf(address(this)) >= _lmTokens / 10**adjustedDecimals, "Insufficient amount");
+        require(mapleUSDTPool.balanceOf(address(this)) >= _lmTokens / 10 ** adjustedDecimals, "Insufficient amount");
         lusdtRequestedForRedeem = _lmTokens;
-        escrowedMapleUSDTShares = mapleUSDTPool.requestRedeem(_lmTokens / 10**adjustedDecimals, address(this));
+        escrowedMapleUSDTShares = mapleUSDTPool.requestRedeem(_lmTokens / 10 ** adjustedDecimals, address(this));
         lUSDT.transferFrom(msg.sender, address(this), _lmTokens);
         awaitingUSDTRedemption = true;
     }
 
-    // function redeemUSDCMapleCash() public authorizedCaller nonReentrant {
-    //     uint256 _shares = usdcSharesRequestedForRedeem;
-    //     usdcRedeemed += mapleUSDCPool.redeem(_shares / 10 ** 12, nstblHub, address(this));
-    //     lUSDC.burn(nstblHub, _shares * 10 ** 12);
-    //     usdcSharesRequestedForRedeem = 0;
-    // }
-
-    function depositPreview() public returns (uint256){
-
-    }
-    function getAssets(uint256 _shares) public returns (uint256) {
-        return mapleUSDCPool.convertToAssets(_shares / 10 ** 12);
+    function redeem(address _asset) public authorizedCaller nonReentrant validAsset(_asset){
+        // require(_asset != address(0), "LM: Invalid Target address");
+        if (_asset == address(usdc)) {
+            _redeemUSDC();
+        } else if (_asset == address(usdt)) {
+            _redeemUSDT();
+        }
     }
 
-    function getAssetsWithUnrealisedLosses(uint256 _shares) public returns (uint256) {
-        return mapleUSDCPool.convertToExitAssets(_shares / 10 ** 12);
+    function _redeemUSDC() internal {
+        uint256 _shares = lusdcRequestedForRedeem / 10 ** adjustedDecimals;
+        usdcRedeemed += mapleUSDCPool.redeem(_shares, nstblHub, address(this));
+        lUSDC.burn(address(this), lusdcRequestedForRedeem);
+        lusdcRequestedForRedeem = 0;
+        awaitingUSDCRedemption = false;
     }
 
-    function getShares(uint256 _assets) public returns(uint256) {
-        return mapleUSDCPool.convertToShares(_assets);
+    function _redeemUSDT() internal {
+        uint256 _shares = lusdtRequestedForRedeem / 10 ** adjustedDecimals;
+        usdtRedeemed += mapleUSDTPool.redeem(_shares, nstblHub, address(this));
+        lUSDT.burn(address(this), lusdtRequestedForRedeem);
+        lusdtRequestedForRedeem = 0;
+        awaitingUSDTRedemption = false;
     }
 
-    function getExitShares(uint256 _assets) public returns (uint256){
-        return mapleUSDCPool.convertToExitShares(_assets);
+    function depositPreview() public returns (uint256) { }
+
+    function getAssets(address _asset, uint256 _lmTokens) public validInput(_asset, _lmTokens) returns (uint256) {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        // require( _lmTokens > 0, "LM: Insufficient amount");
+        if (_asset == address(usdc)) {
+            return mapleUSDCPool.convertToAssets(_lmTokens / 10 ** adjustedDecimals);
+        } else if (_asset == address(usdt)) {
+            return mapleUSDTPool.convertToAssets(_lmTokens / 10 ** adjustedDecimals);
+        }
     }
 
-    function getUnrealizedLosses() public returns (uint256) {
-        return mapleUSDCPool.unrealizedLosses();
+    function getAssetsWithUnrealisedLosses(address _asset, uint256 _lmTokens)
+        public
+        validInput(_asset, _lmTokens)
+        returns (uint256)
+    {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        // require( _lmTokens > 0, "LM: Insufficient amount");
+        if (_asset == address(usdc)) {
+            return mapleUSDCPool.convertToExitAssets(_lmTokens / 10 ** adjustedDecimals);
+        } else if (_asset == address(usdt)) {
+            return mapleUSDTPool.convertToExitAssets(_lmTokens / 10 ** adjustedDecimals);
+        }
     }
 
-    function getTotalAssets() public returns (uint256) {
-        return mapleUSDCPool.totalAssets();
+    function getShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        // require( _amount > 0, "LM: Insufficient amount");
+        if (_asset == address(usdc)) {
+            return mapleUSDCPool.convertToShares(_amount / 10 ** adjustedDecimals);
+        } else if (_asset == address(usdt)) {
+            return mapleUSDTPool.convertToShares(_amount / 10 ** adjustedDecimals);
+        }
     }
 
+    function getExitShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        // require( _amount > 0, "LM: Insufficient amount");
+        if (_asset == address(usdc)) {
+            return mapleUSDCPool.convertToExitShares(_amount / 10 ** adjustedDecimals);
+        } else if (_asset == address(usdt)) {
+            return mapleUSDTPool.convertToExitShares(_amount / 10 ** adjustedDecimals);
+        }
+    }
+
+    function getUnrealizedLosses(address _asset) public validAsset(_asset) returns (uint256) {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        if (_asset == address(usdc)) {
+            return mapleUSDCPool.unrealizedLosses();
+        } else if (_asset == address(usdt)) {
+            return mapleUSDTPool.unrealizedLosses();
+        }
+    }
+
+    function getTotalAssets(address _asset) public validAsset(_asset) returns (uint256) {
+        // require(_asset != address(0), "LM: Invalid Target address");
+        if (_asset == address(usdc)) {
+            return mapleUSDCPool.totalAssets();
+        } else if (_asset == address(usdt)) {
+            return mapleUSDTPool.totalAssets();
+        }
+    }
 
     // function investUSDTMapleCash(uint256 _assets)public authorizedCaller{
 

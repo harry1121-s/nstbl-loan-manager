@@ -7,7 +7,6 @@ import "./interfaces/IPool.sol";
 import "./LMTokenLP.sol";
 
 contract LoanManagerStorage {
-
     event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
 
     event RequestRedeem(address indexed asset, uint256 shares);
@@ -39,7 +38,6 @@ contract LoanManagerStorage {
     uint256 public lusdtRequestedForRedeem;
     uint256 public escrowedMapleUSDTShares;
     uint256 public usdtRedeemed;
-
 
     IPool public mapleUSDCPool;
 

@@ -27,9 +27,8 @@ interface ILoanManager {
     //////////////////////////////////////////////////////////////*/
 
     function calculateShares(address asset, uint256 amount) external view returns (uint256);
-    
+
     function calculateAssets(address asset, uint256 shares) external view returns (uint256);
 
     function unrealizedLosses(address asset, uint256 shares) external view returns (uint256);
-
 }

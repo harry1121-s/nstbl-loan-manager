@@ -10,7 +10,6 @@ import { IPool } from "../../contracts/interfaces/IPool.sol";
 import { Utils } from "./Utils.sol";
 
 contract BaseTest is Utils {
-
     /*//////////////////////////////////////////////////////////////
                                  STATE
     //////////////////////////////////////////////////////////////*/
@@ -36,7 +35,6 @@ contract BaseTest is Utils {
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual {
-        
         vm.startPrank(owner);
         // token = new Token(name, symbol);
         loanManager = new LoanManager(
@@ -64,17 +62,15 @@ contract BaseTest is Utils {
         vm.label(address(usdcPool), "USDC Pool");
         vm.label(poolDelegateUSDC, "poolDelegate USDC");
         vm.label(address(poolManagerUSDC), "poolManager USDC");
-
     }
 
     function _setAllowedLender(address _delegate) internal {
         bool out;
         vm.startPrank(_delegate);
-        if(_delegate == poolDelegateUSDC){
+        if (_delegate == poolDelegateUSDC) {
             poolManagerUSDC.setAllowedLender(address(loanManager), true);
             (out,) = address(poolManagerUSDC).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
-        }
-        else{
+        } else {
             poolManagerUSDT.setAllowedLender(address(loanManager), true);
             (out,) = address(poolManagerUSDT).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
         }
