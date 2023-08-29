@@ -1,35 +1,136 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../helpers/BaseTest.t.sol";
 
 contract TestDeposit is BaseTest {
-    function setUp() public override {
+    using SafeERC20 for IERC20;
+
+    function setUp() public virtual override {
         super.setUp();
     }
 
-    function testInvest() public {
-        vm.prank(owner);
-        loanManager.setAuthorizedCaller(user);
+    function testInvestUSDC() public {
 
-        erc20_deal(USDC, user, 1e7 * 1e6);
+        erc20_deal(USDC, NSTBL_HUB, 1e7 * 1e6);
 
-        _setAllowedLender();
+        _setAllowedLender(poolDelegateUSDC);
 
-        vm.startPrank(user);
+        vm.startPrank(NSTBL_HUB);
         usdc.approve(address(loanManager), 1e7 * 1e6);
         
-        uint256 sharesToReceive = pool.previewDeposit(1e7 * 1e6);
+        uint256 sharesToReceive = usdcPool.previewDeposit(1e7 * 1e6);
 
-        console.log("Deposit Preview: ", pool.previewDeposit(1e7 * 1e6));
-        loanManager.investUSDCMapleCash(1e7 * 1e6);
+        
+        loanManager.deposit(address(usdc), 1e7 * 1e6);
         assertEq(usdc.balanceOf(user), 0);
-
-        console.log("Maple USDC shares balance: ", pool.balanceOf(address(loanManager)));
-        // console.log("LM lUSDC minted to nstblHub: ", lusdc.balanceOf(0x749f88e87EaEb030E478164cFd3681E27d0bcB42));
-        console.log("LM lUSDC minted to nstblHub: ", lusdc.balanceOf(address(loanManager)));
+        assertEq(usdcPool.balanceOf(address(loanManager)), sharesToReceive);
+        console.log("LM lUSDC minted to nstblHub: ", lusdc.balanceOf(NSTBL_HUB));
         console.log(lusdc.totalSupply());
         vm.stopPrank();
     }
 
+    function testInvestUSDT() public {
+
+        erc20_deal(USDT, NSTBL_HUB, 1e7 * 1e6);
+
+        _setAllowedLender(poolDelegateUSDT);
+
+        vm.startPrank(NSTBL_HUB);
+        usdt.safeIncreaseAllowance(address(loanManager), 1e7 * 1e6);
+        
+        uint256 sharesToReceive = usdtPool.previewDeposit(1e7 * 1e6);
+
+        
+        loanManager.deposit(address(usdt), 1e7 * 1e6);
+        assertEq(usdt.balanceOf(user), 0);
+        assertEq(usdtPool.balanceOf(address(loanManager)), sharesToReceive);
+        console.log("LM lUSDT minted to nstblHub: ", lusdt.balanceOf(NSTBL_HUB));
+        console.log(lusdt.totalSupply());
+        vm.stopPrank();
+    }
+
 }
+
+contract TestRequestRedeem is TestDeposit {
+
+    using SafeERC20 for IERC20;
+    
+    function setUp() public override{
+        super.setUp();
+    }
+
+    function testRedeemRequestUSDC() external {
+        testInvestUSDC();
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+
+        vm.startPrank(NSTBL_HUB);
+        lusdc.approve(address(loanManager), lmUSDC);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), 0);
+        assertEq(lusdc.balanceOf(address(loanManager)), lmUSDC);
+        assertEq(usdcPool.balanceOf(address(loanManager)),0);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10**12);
+        vm.stopPrank();
+
+    }
+
+    function testRedeemRequestUSDC_Multiple() external {
+
+        testInvestUSDC();
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+
+        vm.startPrank(NSTBL_HUB);
+        lusdc.approve(address(loanManager), lmUSDC/2);
+        loanManager.requestRedeem(address(usdc), lmUSDC/2);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC/2);
+        assertEq(lusdc.balanceOf(address(loanManager)), lmUSDC/2);
+        assertEq(usdcPool.balanceOf(address(loanManager)), lmUSDC / (2 * 10**12));
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / (2 * 10**12));
+
+        vm.expectRevert("LM: USDC Redemption Pending");
+        loanManager.requestRedeem(address(usdc), lmUSDC/2);
+
+        vm.stopPrank();
+    }
+
+     function testRedeemRequestUSDT() external {
+        testInvestUSDT();
+
+        uint256 lmUSDT = lusdt.balanceOf(NSTBL_HUB);
+
+        vm.startPrank(NSTBL_HUB);
+        lusdt.safeIncreaseAllowance(address(loanManager), lmUSDT);
+        loanManager.requestRedeem(address(usdt), lmUSDT);
+        assertEq(lusdt.balanceOf(NSTBL_HUB), 0);
+        assertEq(lusdt.balanceOf(address(loanManager)), lmUSDT);
+        assertEq(usdtPool.balanceOf(address(loanManager)),0);
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10**12);
+        vm.stopPrank();
+
+    }
+
+    function testRedeemRequestUSDT_Multiple() external {
+
+        testInvestUSDT();
+
+        uint256 lmUSDT = lusdt.balanceOf(NSTBL_HUB);
+
+        vm.startPrank(NSTBL_HUB);
+        lusdt.safeIncreaseAllowance(address(loanManager), lmUSDT/2);
+        loanManager.requestRedeem(address(usdt), lmUSDT/2);
+        assertEq(lusdt.balanceOf(NSTBL_HUB), lmUSDT/2);
+        assertEq(lusdt.balanceOf(address(loanManager)), lmUSDT/2);
+        assertEq(usdtPool.balanceOf(address(loanManager)), lmUSDT / (2 * 10**12));
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / (2 * 10**12));
+
+        vm.expectRevert("LM: USDT Redemption Pending");
+        loanManager.requestRedeem(address(usdt), lmUSDT/2);
+
+        vm.stopPrank();
+    }
+}
+

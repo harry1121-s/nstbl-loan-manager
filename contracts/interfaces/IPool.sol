@@ -14,4 +14,5 @@ interface IPool {
     function convertToExitShares(uint256 amount_) external returns (uint256 shares_);
     function unrealizedLosses() external returns (uint256 unrealizedLosses_);
     function totalAssets() external returns (uint256 totalAssets_);
+    function decimals() external returns (uint8);
 }

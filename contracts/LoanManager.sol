@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
+// import "./interfaces/ILoanManager.sol";
 import { LoanManagerStorage, IPool, IERC20, LMTokenLP } from "./LoanManagerStorage.sol";
 import { console } from "forge-std/Test.sol";
 
@@ -36,39 +36,93 @@ contract LoanManager is Ownable, LoanManagerStorage {
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
     
-    constructor(address _nstblHub, address _mapleUSDCPool, address _usdc, address _admin) Ownable(msg.sender) {
+    constructor(address _nstblHub, address _mapleUSDCPool, address _mapleUSDTPool, address _usdc, address _usdt, address _admin) Ownable(msg.sender) {
         nstblHub = _nstblHub;
         mapleUSDCPool = IPool(_mapleUSDCPool);
-        // mapleUSDTPool = IPool(_mapleUSDTPool);
+        mapleUSDTPool = IPool(_mapleUSDTPool);
         usdc = IERC20(_usdc);
-        // usdtAsset = IERC20(_USDTAsset);
+        usdt = IERC20(_usdt);
         lUSDC = new LMTokenLP("Loan Manager USDC", "lUSDC", _admin);
-        // console.log(lUSDC);
+        lUSDT = new LMTokenLP("Loan Manager USDT", "lUSDT", _admin);
+        adjustedDecimals = lUSDC.decimals()-mapleUSDCPool.decimals();
     }
 
-    function investUSDCMapleCash(uint256 _assets) public authorizedCaller nonReentrant {
-        usdc.safeTransferFrom(msg.sender, address(this), _assets);
-        usdcDeposited += _assets;
-        usdc.approve(address(mapleUSDCPool), _assets);
-        usdcSharesReceived = mapleUSDCPool.previewDeposit(_assets);
-        mapleUSDCPool.deposit(_assets, address(this));
+    function deposit(address _asset, uint256 _amount) public authorizedCaller nonReentrant {
+        require(_asset != address(0), "LM: Invalid Target address");
+        require( _amount > 0, "LM: Insufficient amount");
+
+        if(_asset == address(usdc)){
+            _investUSDCMapleCash(_amount);
+        }
+        else if(_asset == address(usdt)){
+            _investUSDTMapleCash(_amount);
+        }
+    }
+    function _investUSDCMapleCash(uint256 _amount) internal {
+        usdc.safeTransferFrom(msg.sender, address(this), _amount);
+        usdcDeposited += _amount;
+        usdc.approve(address(mapleUSDCPool), _amount);
+        usdcSharesReceived = mapleUSDCPool.previewDeposit(_amount);
+        mapleUSDCPool.deposit(_amount, address(this));
         totalUSDCSharesReceived += usdcSharesReceived;
-        lUSDC.mint(nstblHub, usdcSharesReceived * 10 ** 12);
+        uint256 lpTokens = usdcSharesReceived * 10**adjustedDecimals;
+        lUSDC.mint(nstblHub, lpTokens);
+        emit Deposit(address(usdc), _amount, lpTokens, usdcSharesReceived);
+
+    }
+    function _investUSDTMapleCash(uint256 _amount) internal {
+        usdt.safeTransferFrom(msg.sender, address(this), _amount);
+        usdtDeposited += _amount;
+        usdt.safeIncreaseAllowance(address(mapleUSDTPool), _amount);
+        usdtSharesReceived = mapleUSDTPool.previewDeposit(_amount);
+        mapleUSDTPool.deposit(_amount, address(this));
+        totalUSDTSharesReceived += usdtSharesReceived;
+        uint256 lpTokens = usdtSharesReceived * 10**adjustedDecimals;
+        lUSDT.mint(nstblHub, lpTokens);
+        emit Deposit(address(usdt), _amount, lpTokens, usdtSharesReceived);
+
+    }
+    
+    function requestRedeem(address _asset, uint256 _lmTokens) public authorizedCaller nonReentrant {
+        require(_asset != address(0), "LM: Invalid Target address");
+        require( _lmTokens > 0, "LM: Insufficient amount");
+
+        if(_asset == address(usdc)){
+            _requestRedeemUSDCMapleCash(_lmTokens);
+        }
+        else if(_asset == address(usdt)){
+            _requestRedeemUSDTMapleCash(_lmTokens);
+        }
     }
 
-    function requestRedeemUSDCMapleCash(uint256 _shares) public authorizedCaller nonReentrant {
-        require(mapleUSDCPool.balanceOf(address(this)) >= _shares / 10 ** 12, "Insufficient amount");
-        usdcSharesRequestedForRedeem = _shares;
-        escrowedUSDCShares = mapleUSDCPool.requestRedeem(_shares / 10 ** 12, address(this));
+    function _requestRedeemUSDCMapleCash(uint256 _lmTokens) internal {
+        require(!awaitingUSDCRedemption, "LM: USDC Redemption Pending");
+        require(mapleUSDCPool.balanceOf(address(this)) >= _lmTokens / 10**adjustedDecimals, "Insufficient amount");
+        lusdcRequestedForRedeem = _lmTokens;
+        escrowedMapleUSDCShares = mapleUSDCPool.requestRedeem(_lmTokens / 10**adjustedDecimals, address(this));
+        lUSDC.transferFrom(msg.sender, address(this), _lmTokens);
+        awaitingUSDCRedemption = true;
     }
 
-    function redeemUSDCMapleCash() public authorizedCaller nonReentrant {
-        uint256 _shares = usdcSharesRequestedForRedeem;
-        usdcRedeemed += mapleUSDCPool.redeem(_shares / 10 ** 12, nstblHub, address(this));
-        lUSDC.burn(nstblHub, _shares * 10 ** 12);
-        usdcSharesRequestedForRedeem = 0;
+    function _requestRedeemUSDTMapleCash(uint256 _lmTokens) internal {
+        require(!awaitingUSDTRedemption, "LM: USDT Redemption Pending");
+        require(mapleUSDTPool.balanceOf(address(this)) >= _lmTokens / 10**adjustedDecimals, "Insufficient amount");
+        lusdtRequestedForRedeem = _lmTokens;
+        escrowedMapleUSDTShares = mapleUSDTPool.requestRedeem(_lmTokens / 10**adjustedDecimals, address(this));
+        lUSDT.transferFrom(msg.sender, address(this), _lmTokens);
+        awaitingUSDTRedemption = true;
     }
 
+    // function redeemUSDCMapleCash() public authorizedCaller nonReentrant {
+    //     uint256 _shares = usdcSharesRequestedForRedeem;
+    //     usdcRedeemed += mapleUSDCPool.redeem(_shares / 10 ** 12, nstblHub, address(this));
+    //     lUSDC.burn(nstblHub, _shares * 10 ** 12);
+    //     usdcSharesRequestedForRedeem = 0;
+    // }
+
+    function depositPreview() public returns (uint256){
+
+    }
     function getAssets(uint256 _shares) public returns (uint256) {
         return mapleUSDCPool.convertToAssets(_shares / 10 ** 12);
     }
