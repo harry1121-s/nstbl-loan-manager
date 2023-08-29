@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
-// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "modules/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IPool.sol";
+import "./interfaces/IERC20Helper.sol";
 import "./LMTokenLP.sol";
 
 contract LoanManagerStorage {
@@ -14,34 +13,27 @@ contract LoanManagerStorage {
     event Redeem(address indexed asset, uint256 shares, uint256 tokensReceived);
 
     address public nstblHub;
+    address public admin;
 
-    IERC20 public immutable usdc;
-    IERC20 public usdt;
+    address public usdc;
+    address public usdt;
 
     LMTokenLP public lUSDC;
     LMTokenLP public lUSDT;
 
     uint256 public adjustedDecimals;
-    bool public awaitingUSDCRedemption;
-    bool public awaitingUSDTRedemption;
 
-    uint256 public usdcDeposited;
-    uint256 public usdcSharesReceived;
-    uint256 public totalUSDCSharesReceived;
-    uint256 public lusdcRequestedForRedeem;
-    uint256 public escrowedMapleUSDCShares;
-    uint256 public usdcRedeemed;
-    uint256 public totalUsdcRedeemed;
+    mapping(address => bool) public awaitingRedemption;
+    mapping(address => uint256) public totalAssetsReceived;
+    mapping(address => uint256) public totalSharesReceived;
+    mapping(address => uint256) public totalLPTokensMinted;
+    mapping(address => uint256) public totalLPTokensBurned;
 
-    uint256 public usdtDeposited;
-    uint256 public usdtSharesReceived;
-    uint256 public totalUSDTSharesReceived;
-    uint256 public lusdtRequestedForRedeem;
-    uint256 public escrowedMapleUSDTShares;
-    uint256 public usdtRedeemed;
-    uint256 public totalUsdtRedeemed;
+    mapping(address => uint256) public lpTokensRequestedForRedeem;
+    mapping(address => uint256) public escrowedMapleShares;
+    mapping(address => uint256) public assetsRedeemed;
 
-    IPool public mapleUSDCPool;
+    address public mapleUSDCPool;
 
-    IPool public mapleUSDTPool;
+    address public mapleUSDTPool;
 }

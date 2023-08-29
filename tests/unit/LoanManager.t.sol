@@ -83,7 +83,7 @@ contract TestRequestRedeem is TestDeposit {
         // assertEq(usdcPool.balanceOf(address(loanManager)), lmUSDC / (2 * 10 ** 12));
         // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / (2 * 10 ** 12));
 
-        vm.expectRevert("LM: USDC Redemption Pending");
+        vm.expectRevert("LM: Redemption Pending");
         loanManager.requestRedeem(address(usdc), lmUSDC / 2);
 
         vm.stopPrank();
@@ -117,7 +117,7 @@ contract TestRequestRedeem is TestDeposit {
         // assertEq(usdtPool.balanceOf(address(loanManager)), lmUSDT / (2 * 10 ** 12));
         // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / (2 * 10 ** 12));
 
-        vm.expectRevert("LM: USDT Redemption Pending");
+        vm.expectRevert("LM: Redemption Pending");
         loanManager.requestRedeem(address(usdt), lmUSDT / 2);
 
         vm.stopPrank();
@@ -160,7 +160,7 @@ contract TestRedeem is TestDeposit {
         assertEq(usdcBal2 - usdcBal1, expectedUSDC);
         assertEq(lusdc.balanceOf(address(loanManager)), 0);
         assertEq(lusdc.totalSupply(), 0);
-        assertFalse(loanManager.awaitingUSDCRedemption());
+        assertFalse(loanManager.awaitingRedemption(address(usdc)));
         vm.stopPrank();
     }
 
@@ -197,7 +197,7 @@ contract TestRedeem is TestDeposit {
         // assertEq(usdtBal2 - usdtBal1, expectedUSDT);
         assertEq(lusdt.balanceOf(address(loanManager)), 0);
         assertEq(lusdt.totalSupply(), 0);
-        assertFalse(loanManager.awaitingUSDTRedemption());
+        assertFalse(loanManager.awaitingRedemption(address(usdt)));
         vm.stopPrank();
     }
 }
