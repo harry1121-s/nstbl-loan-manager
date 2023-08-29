@@ -192,7 +192,7 @@ contract LoanManager is LoanManagerStorage {
         }
     }
 
-    function getUnrealizedLosses(address _asset) public validAsset(_asset) returns (uint256) {
+    function getUnrealizedLossesMaple(address _asset) public validAsset(_asset) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).unrealizedLosses();
         } else if (_asset == usdt) {
@@ -200,7 +200,7 @@ contract LoanManager is LoanManagerStorage {
         }
     }
 
-    function getTotalAssets(address _asset) public validAsset(_asset) returns (uint256) {
+    function getTotalAssetsMaple(address _asset) public validAsset(_asset) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).totalAssets();
         } else if (_asset == usdt) {
