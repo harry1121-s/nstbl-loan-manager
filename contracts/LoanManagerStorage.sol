@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./interfaces/IPool.sol";
+import "./interfaces/IWithdrawalManagerStorage.sol";
 import "./interfaces/IERC20Helper.sol";
 import "./LMTokenLP.sol";
 
@@ -21,6 +22,10 @@ contract LoanManagerStorage {
     address public immutable MAPLE_POOL_MANAGER_USDC = 0x219654A61a0BC394055652986BE403fa14405Bb8;
     address public immutable MAPLE_POOL_MANAGER_USDT = 0xE76b219f83E887E2503E14c343Bb7E0B62A7Af5d;
 
+    address public immutable MAPLE_WITHDRAWAL_MANAGER_USDC = 0x1146691782c089bCF0B19aCb8620943a35eebD12;
+    address public immutable MAPLE_WITHDRAWAL_MANAGER_USDT = 0xF0A66F70064aD3198Abb35AAE26B1eeeaEa62C4B;
+
+
     LMTokenLP public lUSDC;
     LMTokenLP public lUSDT;
 
@@ -32,7 +37,6 @@ contract LoanManagerStorage {
     mapping(address => uint256) public totalLPTokensMinted;
     mapping(address => uint256) public totalLPTokensBurned;
 
-    mapping(address => uint256) public lpTokensRequestedForRedeem;
     mapping(address => uint256) public escrowedMapleShares;
     mapping(address => uint256) public assetsRedeemed;
 

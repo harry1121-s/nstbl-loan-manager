@@ -107,41 +107,61 @@ contract TestRequestRedeem is BaseTest {
         super.setUp();
     }
 
-    // function test_requestRedeem_USDC() external {
-    //     uint256 amount = 1e7 * 1e6;
-    //     _investAssets(USDC, address(usdcPool), amount);
+    function test_requestRedeem_USDC() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
 
-    //     uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
-    //     vm.startPrank(NSTBL_HUB);
-    //     lusdc.approve(address(loanManager), lmUSDC);
-    //     loanManager.requestRedeem(address(usdc), lmUSDC);
-    //     assertEq(lusdc.balanceOf(NSTBL_HUB), 0);
-    //     assertEq(lusdc.balanceOf(address(loanManager)), lmUSDC);
-    //     assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-    //     assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
-    //     vm.stopPrank();
-    // }
+        vm.startPrank(NSTBL_HUB);
+        lusdc.approve(address(loanManager), lmUSDC);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
+        assertEq(lusdc.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+        vm.stopPrank();
 
-    // function test_requestRedeem_USDC_pass_fuzz(uint256 amount) external {
-    //     // Constraint input amount
-    //     vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
-    //     uint256 shares = usdcPool.previewDeposit(amount);
-    //     vm.assume(shares > 0);
+    }
 
-    //     _investAssets(USDC, address(usdcPool), amount);
+    function test_requestRedeemAndDeposit_USDC() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
 
-    //     uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
-    //     vm.startPrank(NSTBL_HUB);
-    //     lusdc.approve(address(loanManager), lmUSDC);
-    //     loanManager.requestRedeem(address(usdc), lmUSDC);
-    //     assertEq(lusdc.balanceOf(NSTBL_HUB), 0);
-    //     assertEq(lusdc.balanceOf(address(loanManager)), lmUSDC);
-    //     assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-    //     assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
-    //     vm.stopPrank();
-    // }
+        vm.startPrank(NSTBL_HUB);
+        lusdc.approve(address(loanManager), lmUSDC);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
+        assertEq(lusdc.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+        assertTrue(loanManager.awaitingRedemption(USDC));
+        vm.stopPrank();
+        _investAssets(USDC, address(usdcPool), amount);
+
+    }
+
+    function test_requestRedeem_USDC_pass_fuzz(uint256 amount) external {
+        // Constraint input amount
+        vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        uint256 shares = usdcPool.previewDeposit(amount);
+        vm.assume(shares > 0);
+
+        _investAssets(USDC, address(usdcPool), amount);
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+
+        vm.startPrank(NSTBL_HUB);
+        lusdc.approve(address(loanManager), lmUSDC);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
+        assertEq(lusdc.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+        vm.stopPrank();
+    }
 
     // function test_requestRedeem_USDC_invalid_fuzz(uint256 amount, uint256 redeemAmount) external {
     //     // Constraint input amount

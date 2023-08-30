@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { LoanManagerStorage, IPool, IERC20Helper, LMTokenLP } from "./LoanManagerStorage.sol";
+import { IPool, IERC20Helper, IWithdrawalManagerStorage, LMTokenLP, LoanManagerStorage } from "./LoanManagerStorage.sol";
 import { console } from "forge-std/Test.sol";
 
 contract LoanManager is LoanManagerStorage {
@@ -78,26 +78,26 @@ contract LoanManager is LoanManagerStorage {
         }
     }
 
-    function requestRedeem(address _asset, uint256 _lmTokens)
+    function requestRedeem(address _asset, uint256 _lpTokens)
         public
         authorizedCaller
         nonReentrant
-        validInput(_asset, _lmTokens)
+        validInput(_asset, _lpTokens)
     {
         console.log(usdc, usdt, _asset);
         if (_asset == usdc) {
-            _requestRedeemMapleCash(_lmTokens, usdc, mapleUSDCPool, address(lUSDC));
+            _requestRedeemMapleCash(_lpTokens, usdc, mapleUSDCPool, address(lUSDC));
         } else if (_asset == usdt) {
-            _requestRedeemMapleCash(_lmTokens, usdt, mapleUSDTPool, address(lUSDT));
+            _requestRedeemMapleCash(_lpTokens, usdt, mapleUSDTPool, address(lUSDT));
         }
     }
 
     function redeem(address _asset) public authorizedCaller nonReentrant validAsset(_asset) {
         // require(_asset != address(0), "LM: Invalid Target address");
         if (_asset == usdc) {
-            _redeemMapleCash(usdc, mapleUSDCPool, address(lUSDC));
+            _redeemMapleCash(usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
         } else if (_asset == usdt) {
-            _redeemMapleCash(usdt, mapleUSDTPool, address(lUSDT));
+            _redeemMapleCash(usdt, mapleUSDTPool, address(lUSDT), MAPLE_WITHDRAWAL_MANAGER_USDT);
         }
     }
 
@@ -124,24 +124,22 @@ contract LoanManager is LoanManagerStorage {
         emit Deposit(_asset, _amount, lpTokens, sharesReceived);
     }
 
-    function _requestRedeemMapleCash(uint256 _lmTokens, address _asset, address _pool, address _lpToken) internal {
+    function _requestRedeemMapleCash(uint256 _lpTokens, address _asset, address _pool, address _lpToken) internal {
         require(!awaitingRedemption[_asset], "LM: Redemption Pending");
-        require(IPool(_pool).balanceOf(address(this)) >= _lmTokens / 10 ** adjustedDecimals, "LM: Insufficient amount");
-        lpTokensRequestedForRedeem[_lpToken] = _lmTokens;
-        escrowedMapleShares[_lpToken] = IPool(_pool).requestRedeem(_lmTokens / 10 ** adjustedDecimals, address(this));
-        IERC20Helper(_lpToken).transferFrom(msg.sender, address(this), _lmTokens);
+        require(IPool(_pool).balanceOf(address(this)) >= _lpTokens / 10 ** adjustedDecimals, "LM: Insufficient Shares");
+        escrowedMapleShares[_lpToken] = IPool(_pool).requestRedeem(_lpTokens / 10 ** adjustedDecimals, address(this));
         awaitingRedemption[_asset] = true;
-        emit RequestRedeem(_asset, _lmTokens, escrowedMapleShares[_lpToken]);
+        emit RequestRedeem(_asset, _lpTokens, escrowedMapleShares[_lpToken]);
     }
 
-    function _redeemMapleCash(address _asset, address _pool, address _lpToken) internal {
-        uint256 _shares = lpTokensRequestedForRedeem[_lpToken] / 10 ** adjustedDecimals;
+    function _redeemMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
+        uint256 _shares = escrowedMapleShares[_lpToken];
         uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
         assetsRedeemed[_asset] += stablesRedeemed;
-        IERC20Helper(_lpToken).burn(address(this), lpTokensRequestedForRedeem[_lpToken]);
-        lpTokensRequestedForRedeem[_lpToken] = 0;
-        escrowedMapleShares[_lpToken] = 0;
-        awaitingRedemption[_asset] = false;
+        escrowedMapleShares[_lpToken] = IWithdrawalManagerStorage(_withdrawManager).lockedShares(address(this));
+        IERC20Helper(_lpToken).burn(address(this), (_shares-escrowedMapleShares[_lpToken]) * 10**adjustedDecimals);
+        if(escrowedMapleShares[_lpToken] == 0)
+            awaitingRedemption[_asset] = false;
         emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
     }
 
@@ -149,23 +147,27 @@ contract LoanManager is LoanManagerStorage {
                            LM Getter Functions
     //////////////////////////////////////////////////////////////*/
 
-    function getAssets(address _asset, uint256 _lmTokens) public validInput(_asset, _lmTokens) returns (uint256) {
+    function getLpTokensPendingRedemption(address _lpToken)public view returns(uint256) {
+        return escrowedMapleShares[_lpToken] * 10**adjustedDecimals;
+    }
+
+    function getAssets(address _asset, uint256 _lpTokens) public validInput(_asset, _lpTokens) returns (uint256) {
         if (_asset == usdc) {
-            return IPool(mapleUSDCPool).convertToAssets(_lmTokens / 10 ** adjustedDecimals);
+            return IPool(mapleUSDCPool).convertToAssets(_lpTokens / 10 ** adjustedDecimals);
         } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToAssets(_lmTokens / 10 ** adjustedDecimals);
+            return IPool(mapleUSDTPool).convertToAssets(_lpTokens / 10 ** adjustedDecimals);
         }
     }
 
-    function getAssetsWithUnrealisedLosses(address _asset, uint256 _lmTokens)
+    function getAssetsWithUnrealisedLosses(address _asset, uint256 _lpTokens)
         public
-        validInput(_asset, _lmTokens)
+        validInput(_asset, _lpTokens)
         returns (uint256)
     {
         if (_asset == usdc) {
-            return IPool(mapleUSDCPool).convertToExitAssets(_lmTokens / 10 ** adjustedDecimals);
+            return IPool(mapleUSDCPool).convertToExitAssets(_lpTokens / 10 ** adjustedDecimals);
         } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToExitAssets(_lmTokens / 10 ** adjustedDecimals);
+            return IPool(mapleUSDTPool).convertToExitAssets(_lpTokens / 10 ** adjustedDecimals);
         }
     }
 
