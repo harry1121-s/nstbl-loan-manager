@@ -1,0 +1,56 @@
+Date : 2023-08-30 11:32:53
+Directory : /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts
+Total : 18 files,  4 codes, 0 comments, 2 blanks, all 6 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Solidity |         18 |          4 |          0 |          2 |          6 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                           | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                              |         18 |          4 |          0 |          2 |          6 |
+| . (Files)                                                                                                      |          3 |        235 |         34 |         63 |        332 |
+| ..                                                                                                             |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../..                                                                                                          |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../..                                                                                                       |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../..                                                                                                    |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../../..                                                                                                 |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../../../harryrpo1                                                                                       |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../../../harryrpo1/Desktop                                                                               |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../../../harryrpo1/Desktop/nealthy                                                                       |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../../../harryrpo1/Desktop/nealthy/nstbl-loan-manager                                                    |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../../../harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts                                          |          9 |       -365 |       -447 |       -157 |       -969 |
+| ../../../../../harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts (Files)                                  |          3 |       -231 |        -34 |        -61 |       -326 |
+| ../../../../../harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces                               |          6 |       -134 |       -413 |        -96 |       -643 |
+| interfaces                                                                                                     |          6 |        134 |        413 |         96 |        643 |
++----------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                       | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/LMTokenLP.sol                            | Solidity |         30 |         13 |         14 |         57 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/LoanManager.sol                          | Solidity |        177 |         20 |         35 |        232 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/LoanManagerStorage.sol                   | Solidity |         28 |          1 |         14 |         43 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IERC20Helper.sol              | Solidity |          6 |          4 |          4 |         14 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/ILoanManager.sol              | Solidity |         12 |         10 |         13 |         35 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IPool.sol                     | Solidity |         16 |          1 |          2 |         19 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IPoolManager.sol              | Solidity |         49 |        251 |         45 |        345 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManager.sol        | Solidity |         33 |        111 |         23 |        167 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManagerStorage.sol | Solidity |         18 |         36 |          9 |         63 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LMTokenLP.sol                                    | Solidity |        -30 |        -13 |        -14 |        -57 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LoanManager.sol                                  | Solidity |       -175 |        -20 |        -34 |       -229 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LoanManagerStorage.sol                           | Solidity |        -26 |         -1 |        -13 |        -40 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IERC20Helper.sol                      | Solidity |         -6 |         -4 |         -4 |        -14 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/ILoanManager.sol                      | Solidity |        -12 |        -10 |        -13 |        -35 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IPool.sol                             | Solidity |        -16 |         -1 |         -2 |        -19 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IPoolManager.sol                      | Solidity |        -49 |       -251 |        -45 |       -345 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManager.sol                | Solidity |        -33 |       -111 |        -23 |       -167 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManagerStorage.sol         | Solidity |        -18 |        -36 |         -9 |        -63 |
+| Total                                                                                                          |          |          4 |          0 |          2 |          6 |
++----------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

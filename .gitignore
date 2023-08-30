@@ -4,6 +4,8 @@ forge-cache/
 out/
 
 docs/
+coverage/
+lcov.info
 
 # Ignores development broadcast logs
 !/broadcast

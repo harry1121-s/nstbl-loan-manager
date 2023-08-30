@@ -1,0 +1,35 @@
+Date : 2023-08-30 11:32:53
+Directory : /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts
+Total : 9 files,  369 codes, 447 comments, 159 blanks, all 975 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Solidity |          9 |        369 |        447 |        159 |        975 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                           | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                              |          9 |        369 |        447 |        159 |        975 |
+| . (Files)                                                                                                      |          3 |        235 |         34 |         63 |        332 |
+| interfaces                                                                                                     |          6 |        134 |        413 |         96 |        643 |
++----------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                       | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/LMTokenLP.sol                            | Solidity |         30 |         13 |         14 |         57 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/LoanManager.sol                          | Solidity |        177 |         20 |         35 |        232 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/LoanManagerStorage.sol                   | Solidity |         28 |          1 |         14 |         43 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IERC20Helper.sol              | Solidity |          6 |          4 |          4 |         14 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/ILoanManager.sol              | Solidity |         12 |         10 |         13 |         35 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IPool.sol                     | Solidity |         16 |          1 |          2 |         19 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IPoolManager.sol              | Solidity |         49 |        251 |         45 |        345 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManager.sol        | Solidity |         33 |        111 |         23 |        167 |
+| /Users/angadsinghagarwal/Desktop/Nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManagerStorage.sol | Solidity |         18 |         36 |          9 |         63 |
+| Total                                                                                                          |          |        369 |        447 |        159 |        975 |
++----------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
