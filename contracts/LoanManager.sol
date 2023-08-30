@@ -84,7 +84,7 @@ contract LoanManager is LoanManagerStorage {
         nonReentrant
         validInput(_asset, _lpTokens)
     {
-        console.log(usdc, usdt, _asset);
+        // console.log(usdc, usdt, _asset);
         if (_asset == usdc) {
             _requestRedeemMapleCash(_lpTokens, usdc, mapleUSDCPool, address(lUSDC));
         } else if (_asset == usdt) {
@@ -137,9 +137,12 @@ contract LoanManager is LoanManagerStorage {
         uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
         assetsRedeemed[_asset] += stablesRedeemed;
         escrowedMapleShares[_lpToken] = IWithdrawalManagerStorage(_withdrawManager).lockedShares(address(this));
-        IERC20Helper(_lpToken).burn(address(this), (_shares-escrowedMapleShares[_lpToken]) * 10**adjustedDecimals);
+        console.log("lpTokens requested for burn - ", (_shares-escrowedMapleShares[_lpToken]) * 10**adjustedDecimals);
+        IERC20Helper(_lpToken).burn(nstblHub, (_shares-escrowedMapleShares[_lpToken]) * 10**adjustedDecimals);
+        console.log("remaing shares - ", escrowedMapleShares[_lpToken]);
         if(escrowedMapleShares[_lpToken] == 0)
             awaitingRedemption[_asset] = false;
+        console.log("Awaiting Redemption: ", awaitingRedemption[_asset]);
         emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
     }
 
