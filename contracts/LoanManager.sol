@@ -76,10 +76,7 @@ contract LoanManager is LoanManagerStorage {
         nonReentrant
         validInput(_asset, _amount)
     {
-            console.log("Asset:", _asset);
-            console.log("Asset:", usdc);
         if (_asset == usdc) {
-            console.log("Asset:");
             _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC));
         } else if (_asset == usdt) {
             _depositMapleCash(_amount, usdt, mapleUSDTPool, address(lUSDT));

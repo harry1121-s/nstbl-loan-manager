@@ -29,4 +29,4 @@ To make it easier to perform some tasks within the repo, a few commands are avai
 
 ## About Nealthy
 
-[Nealthy](https://www.nealthy.com) is a VARA regulated crypto asset management company. Nealthy provides on-chain index products for KYC/KYB individuals and institutions to invest in. 
+[Nealthy](https://www.nealthy.com) is a VARA regulated crypto asset management company. Nealthy provides on-chain index products for KYC/KYB individuals and institutions to invest in.

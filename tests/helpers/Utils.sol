@@ -13,7 +13,11 @@ contract Utils is Test {
     address public NSTBL_HUB = 0x749f88e87EaEb030E478164cFd3681E27d0bcB42;
     address public MAPLE_USDC_CASH_POOL = 0xfe119e9C24ab79F1bDd5dd884B86Ceea2eE75D92;
     address public MAPLE_USDT_CASH_POOL = 0xf05681A33a9ADF14076990789A89ab3dA3F6B536;
-
+    address public MAPLE_POOL_MANAGER_USDC = 0x219654A61a0BC394055652986BE403fa14405Bb8;
+    address public MAPLE_POOL_MANAGER_USDT = 0xE76b219f83E887E2503E14c343Bb7E0B62A7Af5d;
+    address public WITHDRAWAL_MANAGER_USDC = 0x1146691782c089bCF0B19aCb8620943a35eebD12;
+    address public WITHDRAWAL_MANAGER_USDT = 0xF0A66F70064aD3198Abb35AAE26B1eeeaEa62C4B;
+    
     // EOA addresses
     address owner = address(123);
     address user = address(456);

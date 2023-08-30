@@ -52,16 +52,17 @@ contract BaseTest is Utils {
         usdt = IERC20(USDT);
         usdcPool = IPool(MAPLE_USDC_CASH_POOL);
         usdtPool = IPool(MAPLE_USDT_CASH_POOL);
-        poolManagerUSDC = IPoolManager(0x219654A61a0BC394055652986BE403fa14405Bb8);
-        poolManagerUSDT = IPoolManager(0xE76b219f83E887E2503E14c343Bb7E0B62A7Af5d);
-        withdrawalManagerUSDC = IWithdrawalManager(0x1146691782c089bCF0B19aCb8620943a35eebD12);
-        withdrawalManagerUSDT = IWithdrawalManager(0xF0A66F70064aD3198Abb35AAE26B1eeeaEa62C4B);
+        poolManagerUSDC = IPoolManager(MAPLE_POOL_MANAGER_USDC);
+        poolManagerUSDT = IPoolManager(MAPLE_POOL_MANAGER_USDT);
+        withdrawalManagerUSDC = IWithdrawalManager(WITHDRAWAL_MANAGER_USDC);
+        withdrawalManagerUSDT = IWithdrawalManager(WITHDRAWAL_MANAGER_USDT);
 
         vm.label(address(loanManager), "LoanManager");
         vm.label(address(usdc), "USDC");
         vm.label(address(usdcPool), "USDC Pool");
         vm.label(poolDelegateUSDC, "poolDelegate USDC");
         vm.label(address(poolManagerUSDC), "poolManager USDC");
+
     }
 
     function _setAllowedLender(address _delegate) internal {
@@ -78,8 +79,8 @@ contract BaseTest is Utils {
         vm.stopPrank();
     }
 
-    function _investAssets(address _asset, address _pool) internal {
-        erc20_deal(_asset, NSTBL_HUB, 1e7 * 1e6);
+    function _investAssets(address _asset, address _pool, uint256 amount) internal {
+        erc20_deal(_asset, NSTBL_HUB, amount);
 
         if(_asset == USDC)
             _setAllowedLender(poolDelegateUSDC);
@@ -87,12 +88,20 @@ contract BaseTest is Utils {
             _setAllowedLender(poolDelegateUSDT);
 
         vm.startPrank(NSTBL_HUB);
-        IERC20(_asset).safeIncreaseAllowance(address(loanManager), 1e7 * 1e6);
+        IERC20(_asset).safeIncreaseAllowance(address(loanManager), amount);
 
-        uint256 sharesToReceive = IPool(_pool).previewDeposit(1e7 * 1e6);
-        loanManager.deposit(_asset, 1e7 * 1e6);
-        assertEq(IERC20(_asset).balanceOf(user), 0);
-        assertEq(IPool(_pool).balanceOf(address(loanManager)), sharesToReceive);
+        loanManager.deposit(_asset, amount);
         vm.stopPrank();
+    }
+
+    function _getLiquidityCap(address _pool) internal view returns (uint256) {
+        (bool out, bytes memory val) = address(_pool).staticcall(abi.encodeWithSignature("liquidityCap()"));
+        return uint256(bytes32(val));
+    }
+
+    function _getUpperBoundDeposit(address pool, address poolManager) internal returns(uint256) {
+        uint256 upperBound = _getLiquidityCap(poolManager);
+        uint256 totalAssets = IPool(pool).totalAssets();
+        return upperBound - totalAssets;
     }
 }
