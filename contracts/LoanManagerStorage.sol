@@ -18,6 +18,9 @@ contract LoanManagerStorage {
     address public immutable usdc;
     address public immutable usdt;
 
+    address public immutable MAPLE_POOL_MANAGER_USDC = 0x219654A61a0BC394055652986BE403fa14405Bb8;
+    address public immutable MAPLE_POOL_MANAGER_USDT = 0xE76b219f83E887E2503E14c343Bb7E0B62A7Af5d;
+
     LMTokenLP public lUSDC;
     LMTokenLP public lUSDT;
 

@@ -49,12 +49,7 @@ contract LoanManager is LoanManagerStorage {
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(
-        address _nstblHub,
-        address _admin,
-        address _mapleUSDCPool,
-        address _mapleUSDTPool
-    ) {
+    constructor(address _nstblHub, address _admin, address _mapleUSDCPool, address _mapleUSDTPool) {
         nstblHub = _nstblHub;
         admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
@@ -77,9 +72,9 @@ contract LoanManager is LoanManagerStorage {
         validInput(_asset, _amount)
     {
         if (_asset == usdc) {
-            _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC));
+            _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC), MAPLE_POOL_MANAGER_USDC);
         } else if (_asset == usdt) {
-            _depositMapleCash(_amount, usdt, mapleUSDTPool, address(lUSDT));
+            _depositMapleCash(_amount, usdt, mapleUSDTPool, address(lUSDT), MAPLE_POOL_MANAGER_USDT);
         }
     }
 
@@ -110,7 +105,10 @@ contract LoanManager is LoanManagerStorage {
                            LM Internal Functions
     //////////////////////////////////////////////////////////////*/
 
-    function _depositMapleCash(uint256 _amount, address _asset, address _pool, address _lpToken) internal {
+    function _depositMapleCash(uint256 _amount, address _asset, address _pool, address _lpToken, address _poolManager)
+        internal
+    {
+        require(isValidDepositAmount(_amount, _pool, _poolManager), "LM: Amount exceeds upperBound");
         uint256 lpTokens;
         uint256 sharesReceived;
         console.log("Here");
@@ -213,6 +211,14 @@ contract LoanManager is LoanManagerStorage {
             assetValue = IPool(mapleUSDCPool).previewRedeem(_shares / 10 ** 12);
         }
         return assetValue;
+    }
+
+    function isValidDepositAmount(uint256 _amount, address _pool, address _poolManager) public returns (bool) {
+        (bool out, bytes memory val) = address(_poolManager).staticcall(abi.encodeWithSignature("liquidityCap()"));
+        uint256 upperBound = uint256(bytes32(val));
+        uint256 totalAssets = IPool(_pool).totalAssets();
+        uint256 shares = IPool(_pool).previewDeposit(_amount);
+        return (shares > 0) && (_amount < (upperBound - totalAssets)) ? true : false;
     }
 
     /*//////////////////////////////////////////////////////////////

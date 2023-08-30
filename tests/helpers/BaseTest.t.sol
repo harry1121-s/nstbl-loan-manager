@@ -62,7 +62,6 @@ contract BaseTest is Utils {
         vm.label(address(usdcPool), "USDC Pool");
         vm.label(poolDelegateUSDC, "poolDelegate USDC");
         vm.label(address(poolManagerUSDC), "poolManager USDC");
-
     }
 
     function _setAllowedLender(address _delegate) internal {
@@ -82,10 +81,11 @@ contract BaseTest is Utils {
     function _investAssets(address _asset, address _pool, uint256 amount) internal {
         erc20_deal(_asset, NSTBL_HUB, amount);
 
-        if(_asset == USDC)
+        if (_asset == USDC) {
             _setAllowedLender(poolDelegateUSDC);
-        else
+        } else {
             _setAllowedLender(poolDelegateUSDT);
+        }
 
         vm.startPrank(NSTBL_HUB);
         IERC20(_asset).safeIncreaseAllowance(address(loanManager), amount);
@@ -94,14 +94,14 @@ contract BaseTest is Utils {
         vm.stopPrank();
     }
 
-    function _getLiquidityCap(address _pool) internal view returns (uint256) {
-        (bool out, bytes memory val) = address(_pool).staticcall(abi.encodeWithSignature("liquidityCap()"));
+    function _getLiquidityCap(address _poolManager) internal view returns (uint256) {
+        (bool out, bytes memory val) = address(_poolManager).staticcall(abi.encodeWithSignature("liquidityCap()"));
         return uint256(bytes32(val));
     }
 
-    function _getUpperBoundDeposit(address pool, address poolManager) internal returns(uint256) {
-        uint256 upperBound = _getLiquidityCap(poolManager);
-        uint256 totalAssets = IPool(pool).totalAssets();
+    function _getUpperBoundDeposit(address _pool, address _poolManager) internal returns (uint256) {
+        uint256 upperBound = _getLiquidityCap(_poolManager);
+        uint256 totalAssets = IPool(_pool).totalAssets();
         return upperBound - totalAssets;
     }
 }
