@@ -74,7 +74,7 @@ contract BaseTest is Utils {
             poolManagerUSDT.setAllowedLender(address(loanManager), true);
             (out,) = address(poolManagerUSDT).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
         }
-        // assertTrue(out);
+        assertTrue(out);
         vm.stopPrank();
     }
 
@@ -95,7 +95,7 @@ contract BaseTest is Utils {
     }
 
     function _getLiquidityCap(address _poolManager) internal view returns (uint256) {
-        (bool out, bytes memory val) = address(_poolManager).staticcall(abi.encodeWithSignature("liquidityCap()"));
+        (, bytes memory val) = address(_poolManager).staticcall(abi.encodeWithSignature("liquidityCap()"));
         return uint256(bytes32(val));
     }
 

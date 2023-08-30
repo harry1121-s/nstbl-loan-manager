@@ -69,7 +69,7 @@ contract LoanManager is LoanManagerStorage {
         public
         authorizedCaller
         nonReentrant
-        validInput(_asset, _amount)
+        validAsset(_asset)
     {
         if (_asset == usdc) {
             _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC), MAPLE_POOL_MANAGER_USDC);
@@ -108,11 +108,9 @@ contract LoanManager is LoanManagerStorage {
     function _depositMapleCash(uint256 _amount, address _asset, address _pool, address _lpToken, address _poolManager)
         internal
     {
-        require(isValidDepositAmount(_amount, _pool, _poolManager), "LM: Amount exceeds upperBound");
+        require(isValidDepositAmount(_amount, _pool, _poolManager), "LM: Invalid amount");
         uint256 lpTokens;
         uint256 sharesReceived;
-        console.log("Here");
-        console.log(_asset);
         IERC20Helper(_asset).safeTransferFrom(msg.sender, address(this), _amount);
         IERC20Helper(_asset).safeIncreaseAllowance(_pool, _amount);
 
@@ -214,7 +212,7 @@ contract LoanManager is LoanManagerStorage {
     }
 
     function isValidDepositAmount(uint256 _amount, address _pool, address _poolManager) public returns (bool) {
-        (bool out, bytes memory val) = address(_poolManager).staticcall(abi.encodeWithSignature("liquidityCap()"));
+        (, bytes memory val) = address(_poolManager).staticcall(abi.encodeWithSignature("liquidityCap()"));
         uint256 upperBound = uint256(bytes32(val));
         uint256 totalAssets = IPool(_pool).totalAssets();
         uint256 shares = IPool(_pool).previewDeposit(_amount);
