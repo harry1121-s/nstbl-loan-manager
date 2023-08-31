@@ -15,4 +15,6 @@ interface IPool {
     function unrealizedLosses() external returns (uint256 unrealizedLosses_);
     function totalAssets() external returns (uint256 totalAssets_);
     function decimals() external returns (uint8);
+    function totalSupply() external view returns (uint256);
+    function maxDeposit(address receiver_) external returns (uint256 maxAssets_);
 }

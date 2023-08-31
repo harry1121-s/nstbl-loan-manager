@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./interfaces/IPool.sol";
-import "./interfaces/IWithdrawalManagerStorage.sol";
+import "./interfaces/IWithdrawalManager.sol";
 import "./interfaces/IERC20Helper.sol";
 import "./LMTokenLP.sol";
 

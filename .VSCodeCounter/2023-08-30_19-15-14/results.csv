@@ -1,0 +1,11 @@
+"filename", "language", "Solidity", "comment", "blank", "total"
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LMTokenLP.sol", "Solidity", 30, 13, 14, 57
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LoanManager.sol", "Solidity", 178, 21, 36, 235
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LoanManagerStorage.sol", "Solidity", 30, 1, 16, 47
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IERC20Helper.sol", "Solidity", 6, 4, 4, 14
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/ILoanManager.sol", "Solidity", 12, 10, 13, 35
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IPool.sol", "Solidity", 16, 1, 2, 19
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IPoolManager.sol", "Solidity", 49, 251, 45, 345
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManager.sol", "Solidity", 33, 111, 23, 167
+"/Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IWithdrawalManagerStorage.sol", "Solidity", 18, 36, 9, 63
+"Total", "-", 372, 448, 162, 982

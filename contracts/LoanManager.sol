@@ -2,8 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { IPool, IERC20Helper, IWithdrawalManagerStorage, LMTokenLP, LoanManagerStorage } from "./LoanManagerStorage.sol";
-import { console } from "forge-std/Test.sol";
+import { IPool, IERC20Helper, IWithdrawalManagerStorage, IWithdrawalManager, LMTokenLP, LoanManagerStorage } from "./LoanManagerStorage.sol";
 
 contract LoanManager is LoanManagerStorage {
     using SafeERC20 for IERC20Helper;
@@ -84,7 +83,6 @@ contract LoanManager is LoanManagerStorage {
         nonReentrant
         validInput(_asset, _lpTokens)
     {
-        // console.log(usdc, usdt, _asset);
         if (_asset == usdc) {
             _requestRedeemMapleCash(_lpTokens, usdc, mapleUSDCPool, address(lUSDC));
         } else if (_asset == usdt) {
@@ -137,12 +135,9 @@ contract LoanManager is LoanManagerStorage {
         uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
         assetsRedeemed[_asset] += stablesRedeemed;
         escrowedMapleShares[_lpToken] = IWithdrawalManagerStorage(_withdrawManager).lockedShares(address(this));
-        console.log("lpTokens requested for burn - ", (_shares-escrowedMapleShares[_lpToken]) * 10**adjustedDecimals);
         IERC20Helper(_lpToken).burn(nstblHub, (_shares-escrowedMapleShares[_lpToken]) * 10**adjustedDecimals);
-        console.log("remaing shares - ", escrowedMapleShares[_lpToken]);
         if(escrowedMapleShares[_lpToken] == 0)
             awaitingRedemption[_asset] = false;
-        console.log("Awaiting Redemption: ", awaitingRedemption[_asset]);
         emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
     }
 
@@ -176,17 +171,17 @@ contract LoanManager is LoanManagerStorage {
 
     function getShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
         if (_asset == usdc) {
-            return IPool(mapleUSDCPool).convertToShares(_amount / 10 ** adjustedDecimals);
+            return IPool(mapleUSDCPool).convertToShares(_amount);
         } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToShares(_amount / 10 ** adjustedDecimals);
+            return IPool(mapleUSDTPool).convertToShares(_amount);
         }
     }
 
     function getExitShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
         if (_asset == usdc) {
-            return IPool(mapleUSDCPool).convertToExitShares(_amount / 10 ** adjustedDecimals);
+            return IPool(mapleUSDCPool).convertToExitShares(_amount);
         } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToExitShares(_amount / 10 ** adjustedDecimals);
+            return IPool(mapleUSDTPool).convertToExitShares(_amount);
         }
     }
 
@@ -206,12 +201,26 @@ contract LoanManager is LoanManagerStorage {
         }
     }
 
-    function previewRedeemAsset(address _asset, uint256 _shares) public returns (uint256) {
+    function previewRedeem(address _asset, uint256 _shares) public returns (uint256) {
         uint256 assetValue;
         if (_asset == usdc) {
             assetValue = IPool(mapleUSDCPool).previewRedeem(_shares / 10 ** 12);
         } else if (_asset == usdt) {
-            assetValue = IPool(mapleUSDCPool).previewRedeem(_shares / 10 ** 12);
+            assetValue = IPool(mapleUSDTPool).previewRedeem(_shares / 10 ** 12);
+        }
+        return assetValue;
+    }
+
+    function previewDepositAssets(address _asset, uint256 _amount) public returns (uint256) {
+        uint256 assetValue;
+        if (_asset == usdc) {
+            assetValue = IPool(mapleUSDCPool).previewDeposit(_amount);
+            // (, bytes memory val) = mapleUSDCPool.call(abi.encodeWithSignature(("previewDeposit(uint256)"), _lpToken / 10**adjustedDecimals));
+            // assetValue = uint256(bytes32(val));
+        } else if (_asset == usdt) {
+            assetValue = IPool(mapleUSDTPool).previewDeposit(_amount);
+            // (, bytes memory val) = mapleUSDTPool.call(abi.encodeWithSignature(("previewDeposit(uint256)"), _lpToken / 10**adjustedDecimals));
+            // assetValue = uint256(bytes32(val));
         }
         return assetValue;
     }

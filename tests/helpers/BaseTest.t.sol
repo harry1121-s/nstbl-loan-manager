@@ -6,7 +6,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { LoanManager } from "../../contracts/LoanManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IPoolManager } from "../../contracts/interfaces/IPoolManager.sol";
-import { IWithdrawalManager } from "../../contracts/interfaces/IWithdrawalManager.sol";
+import { IWithdrawalManager, IWithdrawalManagerStorage } from "../../contracts/interfaces/IWithdrawalManager.sol";
 import { IPool } from "../../contracts/interfaces/IPool.sol";
 import { Utils } from "./Utils.sol";
 

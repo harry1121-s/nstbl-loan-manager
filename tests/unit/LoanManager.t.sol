@@ -321,6 +321,7 @@ contract TestRedeem is BaseTest {
         console.log(usdcBal2 - usdcBal1, expectedUSDC);
         assertEq(lusdc.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares(address(lusdc)) * 10**12);
         assertEq(lusdc.totalSupply(), loanManager.escrowedMapleShares(address(lusdc)) * 10**12);
+        console.log("lUSDC pending redemption - ", loanManager.getLpTokensPendingRedemption(address(lusdc)));
         if(loanManager.escrowedMapleShares(address(lusdc)) == 0)
             assertFalse(loanManager.awaitingRedemption(address(usdc)));
         else
@@ -360,6 +361,7 @@ contract TestRedeem is BaseTest {
         console.log(usdtBal2 - usdtBal1, expectedUSDT);
         assertEq(lusdt.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares(address(lusdt)) * 10**12);
         assertEq(lusdt.totalSupply(), loanManager.escrowedMapleShares(address(lusdt)) * 10**12);
+        console.log("lUSDT pending redemption - ", loanManager.getLpTokensPendingRedemption(address(lusdt)));
         if(loanManager.escrowedMapleShares(address(lusdt)) == 0){
             assertFalse(loanManager.awaitingRedemption(address(usdt)));
 
@@ -539,4 +541,110 @@ contract TestRedeem is BaseTest {
             assertTrue(loanManager.awaitingRedemption(address(usdt)));
         vm.stopPrank();
     }
+}
+
+contract TestGetter is BaseTest {
+
+    function setUp() public override {
+        super.setUp();
+    }
+    function test_getAssets_fuzz(uint256 lpTokens) external {
+        vm.assume(lpTokens < 1e30);
+        vm.assume(lpTokens > 0);
+        assertEq(loanManager.getAssets(USDC, lpTokens), usdcPool.convertToAssets(lpTokens / 10**12));
+        assertEq(loanManager.getAssets(USDT, lpTokens), usdtPool.convertToAssets(lpTokens / 10**12));
+    }
+
+    function test_getAssets_with_unrealisedLosses_fuzz(uint256 lpTokens) external {
+        vm.assume(lpTokens < 1e30);
+        vm.assume(lpTokens > 0);
+        assertEq(loanManager.getAssetsWithUnrealisedLosses(USDC, lpTokens), usdcPool.convertToExitAssets(lpTokens / 10**12));
+        assertEq(loanManager.getAssetsWithUnrealisedLosses(USDT, lpTokens), usdtPool.convertToExitAssets(lpTokens / 10**12));
+    }
+
+    function test_getShares_fuzz(uint256 amount) external {
+        vm.assume(amount < 1e30);
+        vm.assume(amount > 0);
+        assertEq(loanManager.getShares(USDC, amount), usdcPool.convertToShares(amount));
+        assertEq(loanManager.getShares(USDT, amount), usdtPool.convertToShares(amount));
+    }
+
+    function test_getExitShares_fuzz(uint256 amount) external {
+        vm.assume(amount < 1e30);
+        vm.assume(amount > 0);
+        assertEq(loanManager.getExitShares(USDC, amount), usdcPool.convertToExitShares(amount));
+        assertEq(loanManager.getExitShares(USDT, amount), usdtPool.convertToExitShares(amount));
+    }
+
+    function test_getUnrealisedLosses_Maple() external {
+        assertEq(loanManager.getUnrealizedLossesMaple(USDC), usdcPool.unrealizedLosses());
+        assertEq(loanManager.getUnrealizedLossesMaple(USDT), usdtPool.unrealizedLosses());
+    }
+
+    function test_previewDepositAssets_fuzz(uint256 amount) external {
+        _setAllowedLender(poolDelegateUSDC);
+        _setAllowedLender(poolDelegateUSDT);
+        uint256 maxDeposit = usdcPool.maxDeposit(address(loanManager));
+        // console.log(maxDeposit);
+        vm.assume(amount < maxDeposit);
+        vm.assume(amount > 0);
+
+        uint256 totalSupply = usdcPool.totalSupply();
+        uint256 totalAssets = usdcPool.totalAssets();
+        uint256 sharesToMint = loanManager.previewDepositAssets(USDC, amount);
+
+        if (totalSupply == 0) {
+            assertEq(sharesToMint, amount);
+        } else if (totalAssets != 0) {
+            assertEq(sharesToMint, amount * totalSupply / totalAssets);
+        }
+
+        totalSupply = usdtPool.totalSupply();
+        totalAssets = usdtPool.totalAssets();
+        sharesToMint = loanManager.previewDepositAssets(USDT, amount);
+        if (totalSupply == 0) {
+            assertEq(sharesToMint, amount);
+        } else if (totalAssets != 0) {
+            assertEq(sharesToMint, amount * totalSupply / totalAssets);
+        }
+        
+    }
+
+    ////////Preview Redeem giving 0 output//////////
+
+    // function test_previewRedeem_fuzz(uint256 lpTokens) external {
+    //     uint256 amount = 1e7 * 1e6;
+    //     _investAssets(USDC, address(usdcPool), amount);
+
+    //     uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+    //     vm.assume(lpTokens < lmUSDC);
+    //     vm.assume(lpTokens > 0);
+
+    //     vm.startPrank(NSTBL_HUB);
+    //     loanManager.requestRedeem(address(usdc), lpTokens);
+    //     console.log("LockedShares: ", IWithdrawalManagerStorage(WITHDRAWAL_MANAGER_USDC).lockedShares(address(loanManager)));
+    //     // assertEq(loanManager.previewRedeem(USDC, lpTokens), usdcPool.previewRedeem(lpTokens/10**12));
+    //     // console.log(loanManager.previewRedeem(USDC, lpTokens), usdcPool.previewRedeem(lpTokens/10**12));
+
+    // }
+
+    // function test_previewRedeem() external {
+    //     uint256 amount = 1e7 * 1e6;
+    //     _investAssets(USDC, address(usdcPool), amount);
+
+    //     uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+    //     // vm.assume(lpTokens < lmUSDC);
+    //     // vm.assume(lpTokens > 0);
+
+    //     vm.startPrank(NSTBL_HUB);
+    //     loanManager.requestRedeem(address(usdc), lmUSDC);
+    //     vm.stopPrank();
+    //     console.log("LockedShares: ", IWithdrawalManagerStorage(WITHDRAWAL_MANAGER_USDC).lockedShares(address(loanManager)));
+    //     console.log(address(loanManager));
+    //     console.log(loanManager.previewRedeem(USDC, lmUSDC));
+    //     // assertEq(loanManager.previewRedeem(USDC, lpTokens), usdcPool.previewRedeem(lpTokens/10**12));
+    //     // console.log(loanManager.previewRedeem(USDC, lpTokens), usdcPool.previewRedeem(lpTokens/10**12));
+
+    // }
+
 }
