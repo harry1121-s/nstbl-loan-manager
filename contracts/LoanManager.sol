@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -89,7 +89,7 @@ contract LoanManager is LoanManagerStorage {
             _requestRedeemMapleCash(_lpTokens, usdt, mapleUSDTPool, address(lUSDT));
         }
     }
-
+    // @TODO: add a check for redemptionRequested   `
     function redeem(address _asset) public authorizedCaller nonReentrant validAsset(_asset) {
         // require(_asset != address(0), "LM: Invalid Target address");
         if (_asset == usdc) {
