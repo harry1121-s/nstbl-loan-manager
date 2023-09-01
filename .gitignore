@@ -13,3 +13,4 @@ lcov.info
 /broadcast/**/dry-run/
 
 .DS_Store
+node_modules
