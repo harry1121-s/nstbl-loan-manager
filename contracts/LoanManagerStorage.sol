@@ -13,11 +13,12 @@ contract LoanManagerStorage {
 
     event Redeem(address indexed asset, uint256 shares, uint256 tokensReceived);
 
-
     /*//////////////////////////////////////////////////////////////
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
 
+    uint256 public immutable ERR_CODE = type(uint256).max-1;
+    
     /// @notice addresses of USDC and USDT
     address public immutable usdc;
     address public immutable usdt;
@@ -63,5 +64,4 @@ contract LoanManagerStorage {
 
     mapping(address => uint256) public escrowedMapleShares;
     mapping(address => uint256) public assetsRedeemed;
-
 }

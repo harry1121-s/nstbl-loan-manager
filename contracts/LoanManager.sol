@@ -2,10 +2,19 @@
 pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { IPool, IERC20Helper, IWithdrawalManagerStorage, IWithdrawalManager, LMTokenLP, LoanManagerStorage } from "./LoanManagerStorage.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import {
+    IPool,
+    IERC20Helper,
+    IWithdrawalManagerStorage,
+    IWithdrawalManager,
+    LMTokenLP,
+    LoanManagerStorage
+} from "./LoanManagerStorage.sol";
 
 contract LoanManager is LoanManagerStorage {
     using SafeERC20 for IERC20Helper;
+    using Address for address;
 
     uint256 private _locked = 1;
 
@@ -64,12 +73,7 @@ contract LoanManager is LoanManagerStorage {
                             LP Functions
     //////////////////////////////////////////////////////////////*/
 
-    function deposit(address _asset, uint256 _amount)
-        public
-        authorizedCaller
-        nonReentrant
-        validAsset(_asset)
-    {
+    function deposit(address _asset, uint256 _amount) public authorizedCaller nonReentrant validAsset(_asset) {
         if (_asset == usdc) {
             _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC), MAPLE_POOL_MANAGER_USDC);
         } else if (_asset == usdt) {
@@ -90,8 +94,8 @@ contract LoanManager is LoanManagerStorage {
         }
     }
     // @TODO: add a check for redemptionRequested   `
+
     function redeem(address _asset) public authorizedCaller nonReentrant validAsset(_asset) {
-        // require(_asset != address(0), "LM: Invalid Target address");
         if (_asset == usdc) {
             _redeemMapleCash(usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
         } else if (_asset == usdt) {
@@ -135,9 +139,10 @@ contract LoanManager is LoanManagerStorage {
         uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
         assetsRedeemed[_asset] += stablesRedeemed;
         escrowedMapleShares[_lpToken] = IWithdrawalManagerStorage(_withdrawManager).lockedShares(address(this));
-        IERC20Helper(_lpToken).burn(nstblHub, (_shares-escrowedMapleShares[_lpToken]) * 10**adjustedDecimals);
-        if(escrowedMapleShares[_lpToken] == 0)
+        IERC20Helper(_lpToken).burn(nstblHub, (_shares - escrowedMapleShares[_lpToken]) * 10 ** adjustedDecimals);
+        if (escrowedMapleShares[_lpToken] == 0) {
             awaitingRedemption[_asset] = false;
+        }
         emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
     }
 
@@ -145,8 +150,8 @@ contract LoanManager is LoanManagerStorage {
                            LM Getter Functions
     //////////////////////////////////////////////////////////////*/
 
-    function getLpTokensPendingRedemption(address _lpToken)public view returns(uint256) {
-        return escrowedMapleShares[_lpToken] * 10**adjustedDecimals;
+    function getLpTokensPendingRedemption(address _lpToken) public view returns (uint256) {
+        return escrowedMapleShares[_lpToken] * 10 ** adjustedDecimals;
     }
 
     function getAssets(address _asset, uint256 _lpTokens) public validInput(_asset, _lpTokens) returns (uint256) {
@@ -155,6 +160,7 @@ contract LoanManager is LoanManagerStorage {
         } else if (_asset == usdt) {
             return IPool(mapleUSDTPool).convertToAssets(_lpTokens / 10 ** adjustedDecimals);
         }
+        return ERR_CODE;
     }
 
     function getAssetsWithUnrealisedLosses(address _asset, uint256 _lpTokens)
@@ -167,6 +173,7 @@ contract LoanManager is LoanManagerStorage {
         } else if (_asset == usdt) {
             return IPool(mapleUSDTPool).convertToExitAssets(_lpTokens / 10 ** adjustedDecimals);
         }
+        return ERR_CODE;
     }
 
     function getShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
@@ -175,6 +182,7 @@ contract LoanManager is LoanManagerStorage {
         } else if (_asset == usdt) {
             return IPool(mapleUSDTPool).convertToShares(_amount);
         }
+        return ERR_CODE;
     }
 
     function getExitShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
@@ -183,6 +191,7 @@ contract LoanManager is LoanManagerStorage {
         } else if (_asset == usdt) {
             return IPool(mapleUSDTPool).convertToExitShares(_amount);
         }
+        return ERR_CODE;
     }
 
     function getUnrealizedLossesMaple(address _asset) public validAsset(_asset) returns (uint256) {
@@ -191,6 +200,7 @@ contract LoanManager is LoanManagerStorage {
         } else if (_asset == usdt) {
             return IPool(mapleUSDTPool).unrealizedLosses();
         }
+        return ERR_CODE;
     }
 
     function getTotalAssetsMaple(address _asset) public validAsset(_asset) returns (uint256) {
@@ -199,6 +209,7 @@ contract LoanManager is LoanManagerStorage {
         } else if (_asset == usdt) {
             return IPool(mapleUSDTPool).totalAssets();
         }
+        return ERR_CODE;
     }
 
     function previewRedeem(address _asset, uint256 _shares) public returns (uint256) {
@@ -215,18 +226,14 @@ contract LoanManager is LoanManagerStorage {
         uint256 assetValue;
         if (_asset == usdc) {
             assetValue = IPool(mapleUSDCPool).previewDeposit(_amount);
-            // (, bytes memory val) = mapleUSDCPool.call(abi.encodeWithSignature(("previewDeposit(uint256)"), _lpToken / 10**adjustedDecimals));
-            // assetValue = uint256(bytes32(val));
         } else if (_asset == usdt) {
             assetValue = IPool(mapleUSDTPool).previewDeposit(_amount);
-            // (, bytes memory val) = mapleUSDTPool.call(abi.encodeWithSignature(("previewDeposit(uint256)"), _lpToken / 10**adjustedDecimals));
-            // assetValue = uint256(bytes32(val));
         }
         return assetValue;
     }
 
     function isValidDepositAmount(uint256 _amount, address _pool, address _poolManager) public returns (bool) {
-        (, bytes memory val) = address(_poolManager).staticcall(abi.encodeWithSignature("liquidityCap()"));
+        bytes memory val = _poolManager.functionStaticCall(abi.encodeWithSignature("liquidityCap()"));
         uint256 upperBound = uint256(bytes32(val));
         uint256 totalAssets = IPool(_pool).totalAssets();
         uint256 shares = IPool(_pool).previewDeposit(_amount);
