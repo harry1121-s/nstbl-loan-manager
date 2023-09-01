@@ -1,0 +1,196 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Errors",
+  "sourceName": "contracts/upgradeability/libraries/Errors.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ActionNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyEnabled",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ArrayMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Blocked",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CallerNotCollectNFT",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CallerNotFollowNFT",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CannotInitImplementation",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CollectNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "DisablingAlreadyTriggered",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "EmergencyAdminCanOnlyPauseFurther",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ExecutorInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GuardianEnabled",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InitParamsInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Initialized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidParameter",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPointedPub",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidReferrer",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MaxActionModuleIdReached",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NonERC721ReceiverImplementer",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotEOA",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotFollowing",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotGovernance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotGovernanceOrEmergencyAdmin",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotHub",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotOwnerOrApproved",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotProfileOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotWhitelisted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Paused",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProfileImageURILengthInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PublicationDoesNotExist",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PublishingPaused",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SelfBlock",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SelfFollow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SignatureExpired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SignatureInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TokenDoesNotExist",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x6055604b600b8282823980515f1a607314603f577f4e487b71000000000000000000000000000000000000000000000000000000005f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f80fdfea2646970667358221220d1a900377e7f6bd5b57577c6338416ec8aaf5df5da2e35a8f20a3656b1cdb93764736f6c63430008150033",
+  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040525f80fdfea2646970667358221220d1a900377e7f6bd5b57577c6338416ec8aaf5df5da2e35a8f20a3656b1cdb93764736f6c63430008150033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

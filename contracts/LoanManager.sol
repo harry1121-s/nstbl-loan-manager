@@ -2,9 +2,10 @@
 pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {VersionedInitializable} from './upgradeability/VersionedInitializable.sol';
 import { IPool, IERC20Helper, IWithdrawalManagerStorage, IWithdrawalManager, LMTokenLP, LoanManagerStorage } from "./LoanManagerStorage.sol";
 
-contract LoanManager is LoanManagerStorage {
+contract LoanManager is VersionedInitializable, LoanManagerStorage {
     using SafeERC20 for IERC20Helper;
 
     uint256 private _locked = 1;
@@ -48,8 +49,7 @@ contract LoanManager is LoanManagerStorage {
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address _nstblHub, address _admin, address _mapleUSDCPool, address _mapleUSDTPool) {
-        nstblHub = _nstblHub;
+    constructor(address _admin, address _mapleUSDCPool, address _mapleUSDTPool) {
         admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
         mapleUSDTPool = _mapleUSDTPool;
@@ -60,6 +60,9 @@ contract LoanManager is LoanManagerStorage {
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
     }
 
+    function initialize(address _nstblHub) public initializer{
+        nstblHub = _nstblHub;
+    }
     /*//////////////////////////////////////////////////////////////
                             LP Functions
     //////////////////////////////////////////////////////////////*/
@@ -239,5 +242,9 @@ contract LoanManager is LoanManagerStorage {
 
     function setAuthorizedCaller(address _caller) public onlyAdmin {
         nstblHub = _caller;
+    }
+
+    function getRevision() internal pure virtual override returns (uint256) {
+        return REVISION;
     }
 }

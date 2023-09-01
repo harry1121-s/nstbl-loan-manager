@@ -14,6 +14,8 @@ contract LoanManagerStorage {
     event Redeem(address indexed asset, uint256 shares, uint256 tokensReceived);
 
 
+    uint256 internal constant REVISION = 1;
+    
     /*//////////////////////////////////////////////////////////////
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
