@@ -15,3 +15,4 @@ lcov.info
 .DS_Store
 node_modules
 credentials.json
+artifacts
