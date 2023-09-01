@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.21;
 
-import "./interfaces/IPool.sol";
-import "./interfaces/IWithdrawalManager.sol";
+import "./interfaces/maple/IPool.sol";
+import "./interfaces/maple/IWithdrawalManager.sol";
 import "./interfaces/IERC20Helper.sol";
 import "./LMTokenLP.sol";
 

@@ -5,9 +5,9 @@ import { Test, console } from "forge-std/Test.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { LoanManager } from "../../contracts/LoanManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IPoolManager } from "../../contracts/interfaces/IPoolManager.sol";
-import { IWithdrawalManager, IWithdrawalManagerStorage } from "../../contracts/interfaces/IWithdrawalManager.sol";
-import { IPool } from "../../contracts/interfaces/IPool.sol";
+import { IPoolManager } from "../../contracts/interfaces/maple/IPoolManager.sol";
+import { IWithdrawalManager, IWithdrawalManagerStorage } from "../../contracts/interfaces/maple/IWithdrawalManager.sol";
+import { IPool } from "../../contracts/interfaces/maple/IPool.sol";
 import { Utils } from "./Utils.sol";
 
 contract BaseTest is Utils {

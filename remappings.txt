@@ -1,6 +1,7 @@
 ds-test/=modules/forge-std/lib/ds-test/src/
 forge-std/=modules/forge-std/src/
 @openzeppelin/=modules/openzeppelin-contracts/
-
-openzeppelin-contracts/=modules/seadrop/lib/openzeppelin-contracts/contracts/
-openzeppelin-contracts-upgradeable/=modules/seadrop/lib/openzeppelin-contracts-upgradeable/contracts/
+pool-v2/=modules/pool-v2
+withdrawal-manager/=modules/maplecore-v2/withdrawal-manager
+erc20/=modules/maplecore-v2/erc20
+maple-proxy-factory/=modules/maplecore-v2/maple-proxy-factory
