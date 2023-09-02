@@ -622,4 +622,23 @@ contract TestGetter is BaseTest {
             assertEq(sharesToMint, amount * totalSupply / totalAssets);
         }
     }
+
+    function test_previewRedeem_USDC() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        vm.stopPrank();
+
+        assertEq(loanManager.previewRedeem(USDC, lmUSDC), 0);
+        uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
+        uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
+
+        vm.warp(exitWindowStart);
+        console.log("Assets available for Redemption: ", loanManager.previewRedeem(USDC, lmUSDC));
+    }
 }

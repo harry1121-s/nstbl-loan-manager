@@ -213,23 +213,21 @@ contract LoanManager is LoanManagerStorage {
     }
 
     function previewRedeem(address _asset, uint256 _shares) public returns (uint256) {
-        uint256 assetValue;
         if (_asset == usdc) {
-            assetValue = IPool(mapleUSDCPool).previewRedeem(_shares / 10 ** 12);
+            return IPool(mapleUSDCPool).previewRedeem(_shares / 10 ** 12);
         } else if (_asset == usdt) {
-            assetValue = IPool(mapleUSDTPool).previewRedeem(_shares / 10 ** 12);
+            return IPool(mapleUSDTPool).previewRedeem(_shares / 10 ** 12);
         }
-        return assetValue;
+        return ERR_CODE;
     }
 
     function previewDepositAssets(address _asset, uint256 _amount) public returns (uint256) {
-        uint256 assetValue;
         if (_asset == usdc) {
-            assetValue = IPool(mapleUSDCPool).previewDeposit(_amount);
+            return IPool(mapleUSDCPool).previewDeposit(_amount);
         } else if (_asset == usdt) {
-            assetValue = IPool(mapleUSDTPool).previewDeposit(_amount);
+            return IPool(mapleUSDTPool).previewDeposit(_amount);
         }
-        return assetValue;
+        return ERR_CODE;
     }
 
     function isValidDepositAmount(uint256 _amount, address _pool, address _poolManager) public returns (bool) {

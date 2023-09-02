@@ -17,8 +17,8 @@ contract LoanManagerStorage {
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
 
-    uint256 public immutable ERR_CODE = type(uint256).max-1;
-    
+    uint256 public immutable ERR_CODE = type(uint256).max - 1;
+
     /// @notice addresses of USDC and USDT
     address public immutable usdc;
     address public immutable usdt;
