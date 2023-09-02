@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import "./interfaces/maple/IPool.sol";
 import "./interfaces/maple/IWithdrawalManager.sol";
 import "./interfaces/IERC20Helper.sol";
-import "./LMTokenLP.sol";
+import "./TokenLP.sol";
 
 contract LoanManagerStorage {
     event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
@@ -40,8 +40,8 @@ contract LoanManagerStorage {
 
     /// @notice addresses of the LP tokens issued by Nealthy LoanManager for USDC and USDT
     /// @dev is immutable since tokens are deployed in the constructor
-    LMTokenLP public immutable lUSDC;
-    LMTokenLP public immutable lUSDT;
+    TokenLP public immutable lUSDC;
+    TokenLP public immutable lUSDT;
 
     /// @notice used to convert between maple LP token and Nealthy LoanManager's LP token
     uint256 public immutable adjustedDecimals;
@@ -56,12 +56,24 @@ contract LoanManagerStorage {
     /// @notice address of the NSTBL Hub
     address public nstblHub;
 
+    /// @notice mapping to check for pending redemptions for an asset
     mapping(address => bool) public awaitingRedemption;
+
+    /// @notice mapping to store total amount of an asset received for deposit
     mapping(address => uint256) public totalAssetsReceived;
+
+    /// @notice mapping to store total shares issued to the Loan Manager contract per asset
     mapping(address => uint256) public totalSharesReceived;
+
+    /// @notice mapping to store total amount of LP tokens minted 
     mapping(address => uint256) public totalLPTokensMinted;
+
+    /// @notice mapping to store total amount of LP tokens burned 
     mapping(address => uint256) public totalLPTokensBurned;
 
+    /// @notice mapping to store escrowed shares in the Maple protocol pool corresponding to each LP token
     mapping(address => uint256) public escrowedMapleShares;
+
+    /// @notice mapping to store total assets received per asset from Maple protocol pool after redemption
     mapping(address => uint256) public assetsRedeemed;
 }

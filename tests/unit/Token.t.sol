@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import { Test, console } from "forge-std/Test.sol";
-import { LMTokenLP } from "../../contracts/LMTokenLP.sol";
+import { TokenLP } from "../../contracts/TokenLP.sol";
 
 contract TestToken is Test {
     /*//////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@ contract TestToken is Test {
     //////////////////////////////////////////////////////////////*/
 
     // Main contract
-    LMTokenLP public token;
+    TokenLP public token;
 
     // EOA addresses
     address public LoanManager = vm.addr(1);
@@ -25,7 +25,7 @@ contract TestToken is Test {
     //////////////////////////////////////////////////////////////*/
     function setUp() public {
         vm.prank(admin);
-        token = new LMTokenLP(name, symbol, admin);
+        token = new TokenLP(name, symbol, admin);
         vm.label(address(token), "Token");
         vm.label(LoanManager, "LoanManager");
 

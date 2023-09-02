@@ -8,10 +8,16 @@ import {
     IERC20Helper,
     IWithdrawalManagerStorage,
     IWithdrawalManager,
-    LMTokenLP,
+    TokenLP,
     LoanManagerStorage
 } from "./LoanManagerStorage.sol";
 
+/**
+ * @title LoanManager contract for managing Maple Protocol loans
+ * @author Angad S. Agarwal, Harshit Singhal
+ * @notice This contract is intended to be used by NSTBL hub and future nealthy products
+ * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations.
+ */
 contract LoanManager is LoanManagerStorage {
     using SafeERC20 for IERC20Helper;
     using Address for address;
@@ -22,27 +28,42 @@ contract LoanManager is LoanManagerStorage {
                                MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @dev Modifier to ensure that only authorized callers can execute a function.
+     */
     modifier authorizedCaller() {
         require(msg.sender == nstblHub, "Loan Manager: unAuth Hub");
         _;
     }
 
+    /**
+     * @dev Modifier to ensure that only the admin can execute a function.
+     */
     modifier onlyAdmin() {
         require(msg.sender == admin, "LM: unAuth Admin");
         _;
     }
 
+    /**
+     * @dev Modifier to validate input parameters.
+     */
     modifier validInput(address _asset, uint256 _amount) {
         require(_asset != address(0), "LM: Invalid Target address");
         require(_amount > 0, "LM: Insufficient amount");
         _;
     }
 
+    /**
+     * @dev Modifier to validate asset addresses.
+     */
     modifier validAsset(address _asset) {
         require(_asset != address(0), "LM: Invalid Target address");
         _;
     }
 
+    /**
+     * @dev Modifier to prevent reentrancy attacks.
+     */
     modifier nonReentrant() {
         require(_locked == 1, "P:LOCKED");
 
@@ -57,6 +78,13 @@ contract LoanManager is LoanManagerStorage {
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @dev Constructor to initialize the LoanManager contract.
+     * @param _nstblHub The address of the Nealtgy NSTBL Hub contract.
+     * @param _admin The address of the admin for this contract.
+     * @param _mapleUSDCPool The address of the Maple Protocol USDC pool.
+     * @param _mapleUSDTPool The address of the Maple Protocol USDT pool.
+     */
     constructor(address _nstblHub, address _admin, address _mapleUSDCPool, address _mapleUSDTPool) {
         nstblHub = _nstblHub;
         admin = _admin;
@@ -64,8 +92,8 @@ contract LoanManager is LoanManagerStorage {
         mapleUSDTPool = _mapleUSDTPool;
         usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
         usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
-        lUSDC = new LMTokenLP("Loan Manager USDC", "lUSDC", _admin);
-        lUSDT = new LMTokenLP("Loan Manager USDT", "lUSDT", _admin);
+        lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", _admin);
+        lUSDT = new TokenLP("Loan Manager USDT", "lUSDT", _admin);
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
     }
 
@@ -73,6 +101,12 @@ contract LoanManager is LoanManagerStorage {
                             LP Functions
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @dev Deposit assets into the Maple Protocol pool and mint LP tokens (lUSDC/lUSDT) to the NSTBL Hub.
+     * @notice The LP tokens corresponding to the shares issued by the Maple Protocol pool are minted.
+     * @param _asset The address of the asset to deposit. (USDC/USDT)
+     * @param _amount The amount of the asset to deposit.
+     */
     function deposit(address _asset, uint256 _amount) public authorizedCaller nonReentrant validAsset(_asset) {
         if (_asset == usdc) {
             _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC), MAPLE_POOL_MANAGER_USDC);
@@ -81,6 +115,12 @@ contract LoanManager is LoanManagerStorage {
         }
     }
 
+    /**
+     * @dev Request the redemption of LP tokens issued. (lUSDC/lUSDT)
+     * @notice The shares corresponding to the LP tokens are requested for redemption from the Maple Protocol pool.
+     * @param _asset The address of the asset to redeem. (USDC/USDT)
+     * @param _lpTokens The amount of LP tokens to redeem.
+     */
     function requestRedeem(address _asset, uint256 _lpTokens)
         public
         authorizedCaller
@@ -93,9 +133,15 @@ contract LoanManager is LoanManagerStorage {
             _requestRedeemMapleCash(_lpTokens, usdt, mapleUSDTPool, address(lUSDT));
         }
     }
-    // @TODO: add a check for redemptionRequested   `
-
+    
+    /**
+     * @dev Redeem LP tokens issued. (lUSDC/lUSDT)
+     * @notice The shares corresponding to the LP tokens that were requested for redemption are redeemed from the Maple Protocol pool.
+     * @notice The shares are burned in the Maple Protocol pool contract and the LP tokens are burned here.
+     * @param _asset The address of the asset to redeem. (USDC/USDT)
+     */
     function redeem(address _asset) public authorizedCaller nonReentrant validAsset(_asset) {
+        require(awaitingRedemption[_asset], "LM: No redemption requested");
         if (_asset == usdc) {
             _redeemMapleCash(usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
         } else if (_asset == usdt) {
@@ -107,6 +153,15 @@ contract LoanManager is LoanManagerStorage {
                            LM Internal Functions
     //////////////////////////////////////////////////////////////*/
 
+    /**
+    * @dev Internal function to deposit assets into the Maple Protocol pool and mint LP tokens.
+    * @param _amount The amount of the asset to deposit.
+    * @param _asset The address of the asset being deposited.
+    * @param _pool The address of the Maple Protocol pool.
+    * @param _lpToken The address of the LP token associated with the pool.
+    * @param _poolManager The address of the Maple Protocol pool manager contract.
+    * @notice This function checks if the deposit amount is valid, transfers the assets from the sender to this contract, approves the pool to spend the assets, updates relevant accounting data, and emits a `Deposit` event.
+    */
     function _depositMapleCash(uint256 _amount, address _asset, address _pool, address _lpToken, address _poolManager)
         internal
     {
@@ -126,6 +181,14 @@ contract LoanManager is LoanManagerStorage {
         emit Deposit(_asset, _amount, lpTokens, sharesReceived);
     }
 
+    /**
+    * @dev Internal function to request the redemption of LP tokens issued. (lUSDC/lUSDT)
+    * @param _lpTokens The amount of LP tokens to redeem.
+    * @param _asset The address of the asset to redeem.
+    * @param _pool The address of the Maple Protocol pool.
+    * @param _lpToken The address of the LP token associated with the pool.
+    * @notice This function checks if redemption is pending and if there are sufficient shares to redeem, records the escrowed shares, and emits a `RequestRedeem` event.
+    */
     function _requestRedeemMapleCash(uint256 _lpTokens, address _asset, address _pool, address _lpToken) internal {
         require(!awaitingRedemption[_asset], "LM: Redemption Pending");
         require(IPool(_pool).balanceOf(address(this)) >= _lpTokens / 10 ** adjustedDecimals, "LM: Insufficient Shares");
@@ -134,6 +197,14 @@ contract LoanManager is LoanManagerStorage {
         emit RequestRedeem(_asset, _lpTokens, escrowedMapleShares[_lpToken]);
     }
 
+    /**
+    * @dev Internal function to Redeem LP tokens issued. (lUSDC/lUSDT)
+    * @param _asset The address of the asset to redeem.
+    * @param _pool The address of the Maple Protocol pool.
+    * @param _lpToken The address of the LP token associated with the pool.
+    * @param _withdrawManager The address of the withdrawal manager contract.
+    * @notice This function redeems Maple Protocol tokens, burns the associated LP tokens, updates relevant accounting data, and emits a `Redeem` event.
+    */
     function _redeemMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
         uint256 _shares = escrowedMapleShares[_lpToken];
         uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
@@ -150,10 +221,21 @@ contract LoanManager is LoanManagerStorage {
                            LM Getter Functions
     //////////////////////////////////////////////////////////////*/
 
+    /**
+    * @dev Get the number of LP tokens pending redemption for a specific LP token.
+    * @param _lpToken The address of the LP token for which you want to check pending redemptions.
+    * @return The number of LP tokens pending redemption, adjusted to the contract's decimals.
+    */
     function getLpTokensPendingRedemption(address _lpToken) public view returns (uint256) {
         return escrowedMapleShares[_lpToken] * 10 ** adjustedDecimals;
     }
 
+    /**
+    * @dev Get the total assets represented by a given amount of LP tokens for a specific asset.
+    * @param _asset The address of the asset for which you want to convert LP tokens to assets. 
+    * @param _lpTokens The amount of LP tokens to convert.
+    * @return The total assets represented by the LP tokens, adjusted to the contract's decimals, or an error code if the asset is not supported.
+    */
     function getAssets(address _asset, uint256 _lpTokens) public validInput(_asset, _lpTokens) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).convertToAssets(_lpTokens / 10 ** adjustedDecimals);
@@ -163,6 +245,12 @@ contract LoanManager is LoanManagerStorage {
         return ERR_CODE;
     }
 
+    /**
+    * @dev Get the total assets with unrealized losses(from Maple Protocol's loans) represented by a given amount of LP tokens for a specific asset.
+    * @param _asset The address of the asset for which you want to convert LP tokens to assets with unrealized losses.
+    * @param _lpTokens The amount of LP tokens to convert.
+    * @return The total assets with unrealized losses represented by the LP tokens, adjusted to the contract's decimals, or an error code if the asset is not supported.
+    */
     function getAssetsWithUnrealisedLosses(address _asset, uint256 _lpTokens)
         public
         validInput(_asset, _lpTokens)
@@ -176,6 +264,12 @@ contract LoanManager is LoanManagerStorage {
         return ERR_CODE;
     }
 
+    /**
+    * @dev Get the number of shares (issued by Maple protocol pool to the Loan Manager) represented by a given amount of an asset.
+    * @param _asset The address of the asset for which you want to convert an amount to shares.
+    * @param _amount The amount of the asset to convert.
+    * @return The number of shares represented by the amount of the asset, or an error code if the asset is not supported.
+    */
     function getShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).convertToShares(_amount);
@@ -185,6 +279,12 @@ contract LoanManager is LoanManagerStorage {
         return ERR_CODE;
     }
 
+    /**
+    * @dev Get the number of exit shares represented by a given amount of an asset.
+    * @param _asset The address of the asset for which you want to convert an amount to exit shares.
+    * @param _amount The amount of the asset to convert.
+    * @return The number of exit shares represented by the amount of the asset, or an error code if the asset is not supported.
+    */
     function getExitShares(address _asset, uint256 _amount) public validInput(_asset, _amount) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).convertToExitShares(_amount);
@@ -194,6 +294,11 @@ contract LoanManager is LoanManagerStorage {
         return ERR_CODE;
     }
 
+    /**
+    * @dev Get the total unrealized losses (from Maple Protocol's loans) for a specific asset within the Maple Protocol pool.
+    * @param _asset The address of the asset for which you want to retrieve unrealized losses.
+    * @return The total unrealized losses for the asset, or an error code if the asset is not supported.
+    */
     function getUnrealizedLossesMaple(address _asset) public validAsset(_asset) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).unrealizedLosses();
@@ -203,6 +308,11 @@ contract LoanManager is LoanManagerStorage {
         return ERR_CODE;
     }
 
+    /**
+    * @dev Get the total amount for a specific asset within the Maple Protocol pool.
+    * @param _asset The address of the asset for which you want to retrieve the total amount.
+    * @return The total amount for the asset, or an error code if the asset is not supported.
+    */
     function getTotalAssetsMaple(address _asset) public validAsset(_asset) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).totalAssets();
@@ -212,15 +322,28 @@ contract LoanManager is LoanManagerStorage {
         return ERR_CODE;
     }
 
-    function previewRedeem(address _asset, uint256 _shares) public returns (uint256) {
+    /**
+    * @dev Preview the redemption of assets based on the given asset and number of LP tokens.
+    * @notice This function returns correct value only when a redemption has been requested and when called within the redemption window.
+    * @param _asset The address of the asset for which you want to preview the redemption.
+    * @param _lpTokens The number of LP tokens to be redeemed.
+    * @return The previewed amount of redeemed assets, or an error code if the asset is not supported.
+    */
+    function previewRedeem(address _asset, uint256 _lpTokens) public returns (uint256) {
         if (_asset == usdc) {
-            return IPool(mapleUSDCPool).previewRedeem(_shares / 10 ** 12);
+            return IPool(mapleUSDCPool).previewRedeem(_lpTokens / 10 ** 12);
         } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).previewRedeem(_shares / 10 ** 12);
+            return IPool(mapleUSDTPool).previewRedeem(_lpTokens / 10 ** 12);
         }
         return ERR_CODE;
     }
 
+    /**
+    * @dev Preview the deposit of assets based on the given asset and amount.
+    * @param _asset The address of the asset for which you want to preview the deposit.
+    * @param _amount The amount of assets to be deposited.
+    * @return The previewed amount of shares that would be minted to the Loan Manager, or an error code if the asset is not supported.
+    */
     function previewDepositAssets(address _asset, uint256 _amount) public returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).previewDeposit(_amount);
@@ -230,6 +353,13 @@ contract LoanManager is LoanManagerStorage {
         return ERR_CODE;
     }
 
+    /**
+    * @dev Check if a deposit amount is valid based on the liquidity cap and total assets in the Maple Protocol pool.
+    * @param _amount The amount to deposit.
+    * @param _pool The address of the Maple Protocol pool contract.
+    * @param _poolManager The address of the Maple Protocol pool manager contract.
+    * @return true if the deposit amount is valid; otherwise, false.
+    */
     function isValidDepositAmount(uint256 _amount, address _pool, address _poolManager) public returns (bool) {
         bytes memory val = _poolManager.functionStaticCall(abi.encodeWithSignature("liquidityCap()"));
         uint256 upperBound = uint256(bytes32(val));
@@ -242,6 +372,16 @@ contract LoanManager is LoanManagerStorage {
                            LM Admin Functions
     //////////////////////////////////////////////////////////////*/
 
+    /**
+    * @dev Set an authorized caller address for the Loan Manager contract.
+    * @param _caller The address to be set as an authorized caller.
+    * @notice This function can only be called by the admin of the Loan Manager contract.
+    * @param _caller The address to be set as an authorized caller.
+    * @notice This function is used to update the authorized caller address for the Loan Manager contract.
+    * Only the admin has the permission to call this function. The authorized caller is typically a trusted contract or entity
+    * that can interact with the Loan Manager contract on behalf of the Maple Protocol, granting specific permissions.
+    * @notice Use this function with caution, as it can grant or revoke important privileges to the designated caller.
+    */
     function setAuthorizedCaller(address _caller) public onlyAdmin {
         nstblHub = _caller;
     }
