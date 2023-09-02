@@ -14,7 +14,7 @@ import {
 
 /**
  * @title LoanManager contract for managing Maple Protocol loans
- * @author Angad S. Agarwal, Harshit Singhal
+ * @author Angad Singh Agarwal, Harshit Singhal
  * @notice This contract is intended to be used by NSTBL hub and future nealthy products
  * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations.
  */
@@ -80,7 +80,7 @@ contract LoanManager is LoanManagerStorage {
 
     /**
      * @dev Constructor to initialize the LoanManager contract.
-     * @param _nstblHub The address of the Nealtgy NSTBL Hub contract.
+     * @param _nstblHub The address of the Nealthy NSTBL Hub contract.
      * @param _admin The address of the admin for this contract.
      * @param _mapleUSDCPool The address of the Maple Protocol USDC pool.
      * @param _mapleUSDTPool The address of the Maple Protocol USDT pool.

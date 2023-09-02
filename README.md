@@ -9,7 +9,7 @@ This repository contains the core contracts of the nSTBL V1 protocol that are re
 | -------- | ------- |
 | [`LoanManager`](https://github.com/) | LoanManager contains the logic for borrowing assets from NSTBL vault to generate yield from maple cash pools |
 | [`LoanManagerStorage`](https://github.com/) | Contains all the storage variables for LoanManager contracts, upon upgrade new storage variables should be added to the bottom of this file |
-| [`LMTokenLP`](https://github.com/) | ERC20 token that is an LP token issued to nSTBL vault when LoanManager borrows assets from NSTBL vault. |
+| [`TokenLP`](https://github.com/) | ERC20 token that is an LP token issued to nSTBL vault when LoanManager borrows assets from NSTBL vault. |
 
 ## Dependencies/Inheritance
 
