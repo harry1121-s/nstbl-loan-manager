@@ -31,12 +31,15 @@ contract BaseTest is Utils {
     IWithdrawalManager public withdrawalManagerUSDC;
     IPoolManager public poolManagerUSDT;
     IWithdrawalManager public withdrawalManagerUSDT;
+    uint256 mainnetFork;
 
     /*//////////////////////////////////////////////////////////////
                                  SETUP
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual {
+        mainnetFork = vm.createFork("https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW");
+        vm.selectFork(mainnetFork);
         vm.startPrank(owner);
         // token = new Token(name, symbol);
         loanManager = new LoanManager(

@@ -118,6 +118,9 @@ contract TestRequestRedeem is BaseTest {
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
         vm.startPrank(NSTBL_HUB);
+        vm.expectRevert("LM: Insufficient Shares");
+        loanManager.requestRedeem(address(usdc), (lmUSDC*11)/10);
+
         loanManager.requestRedeem(address(usdc), lmUSDC);
         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
         assertEq(lusdc.balanceOf(address(loanManager)), 0);
@@ -133,6 +136,9 @@ contract TestRequestRedeem is BaseTest {
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
         vm.startPrank(NSTBL_HUB);
+
+        vm.expectRevert("LM: No redemption requested");
+        loanManager.redeem(USDC);
 
         loanManager.requestRedeem(address(usdc), lmUSDC);
         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
@@ -361,7 +367,8 @@ contract TestRedeem is BaseTest {
         console.log(usdtBal2 - usdtBal1, expectedUSDT);
         assertEq(lusdt.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12);
         assertEq(lusdt.totalSupply(), loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12);
-        console.log("lUSDT pending redemption - ", loanManager.getLpTokensPendingRedemption(address(lusdt)));
+        uint256 pendingRedemption = loanManager.getLpTokensPendingRedemption(address(lusdt));
+        console.log("lUSDT pending redemption - ", pendingRedemption);
         if (loanManager.escrowedMapleShares(address(lusdt)) == 0) {
             assertFalse(loanManager.awaitingRedemption(address(usdt)));
         } else {
@@ -558,6 +565,16 @@ contract TestGetter is BaseTest {
         super.setUp();
     }
 
+    function test_getters_fail() external {
+        assertEq(loanManager.getAssets(address(1234), 1e30), loanManager.ERR_CODE());
+        assertEq(loanManager.getAssetsWithUnrealisedLosses(address(1234), 1e30), loanManager.ERR_CODE());
+        assertEq(loanManager.getShares(address(1234), 1e30), loanManager.ERR_CODE());
+        assertEq(loanManager.getExitShares(address(1234), 1e30), loanManager.ERR_CODE());
+        assertEq(loanManager.getUnrealizedLossesMaple(address(1234)), loanManager.ERR_CODE());
+        assertEq(loanManager.getTotalAssetsMaple(address(1234)), loanManager.ERR_CODE());
+
+    }
+
     function test_getAssets_fuzz(uint256 lpTokens) external {
         vm.assume(lpTokens < 1e30);
         vm.assume(lpTokens > 0);
@@ -615,12 +632,18 @@ contract TestGetter is BaseTest {
 
         totalSupply = usdtPool.totalSupply();
         totalAssets = usdtPool.totalAssets();
+        assertEq(loanManager.previewDepositAssets(address(123), amount), loanManager.ERR_CODE());
         sharesToMint = loanManager.previewDepositAssets(USDT, amount);
         if (totalSupply == 0) {
             assertEq(sharesToMint, amount);
         } else if (totalAssets != 0) {
             assertEq(sharesToMint, amount * totalSupply / totalAssets);
         }
+    }
+
+    function test_getTotalAssetsMaple() external {
+        console.log("Maple USDC assets - ", loanManager.getTotalAssetsMaple(USDC));
+        console.log("Maple USDT assets - ", loanManager.getTotalAssetsMaple(USDT));
     }
 
     function test_previewRedeem_USDC() external {
@@ -632,6 +655,7 @@ contract TestGetter is BaseTest {
         loanManager.requestRedeem(address(usdc), lmUSDC);
         vm.stopPrank();
 
+        assertEq(loanManager.previewRedeem(address(1234), lmUSDC), loanManager.ERR_CODE());
         assertEq(loanManager.previewRedeem(USDC, lmUSDC), 0);
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -640,5 +664,46 @@ contract TestGetter is BaseTest {
 
         vm.warp(exitWindowStart);
         console.log("Assets available for Redemption: ", loanManager.previewRedeem(USDC, lmUSDC));
+    }
+
+    function test_previewRedeem_USDT() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDT, address(usdtPool), amount);
+
+        uint256 lmUSDT = lusdt.balanceOf(NSTBL_HUB);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdt), lmUSDT);
+        vm.stopPrank();
+
+        assertEq(loanManager.previewRedeem(address(1234), lmUSDT), loanManager.ERR_CODE());
+        assertEq(loanManager.previewRedeem(USDT, lmUSDT), 0);
+        uint256 _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
+        uint256 _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (uint256 exitWindowStart,) = withdrawalManagerUSDT.getWindowAtId(_exitCycleId);
+
+        vm.warp(exitWindowStart);
+        console.log("Assets available for Redemption: ", loanManager.previewRedeem(USDT, lmUSDT));
+    }
+
+    function test_IsValidDepositAmount_USDC_fuzz() external {
+        assertTrue(loanManager.isValidDepositAmount(1e12, MAPLE_USDC_CASH_POOL, MAPLE_POOL_MANAGER_USDC));
+    }
+}
+
+contract TestSetter is BaseTest {
+    function setUp() public override {
+        super.setUp();
+    }
+
+    function test_setAuthorizedCaller() external {
+        address admin = loanManager.admin();
+        address NSTBL_HUB_2 = address(1234);
+
+        vm.prank(admin);
+        loanManager.setAuthorizedCaller(NSTBL_HUB_2);
+
+        assertEq(loanManager.nstblHub(), NSTBL_HUB_2);
+        
     }
 }
