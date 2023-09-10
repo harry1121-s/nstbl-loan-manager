@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
-
-import {Errors} from './libraries/Errors.sol';
-import {StorageLib} from './libraries/StorageLib.sol';
-
 /**
  * @title VersionedInitializable
  *
@@ -22,24 +18,40 @@ import {StorageLib} from './libraries/StorageLib.sol';
  * Initializable contract
  */
 abstract contract VersionedInitializable {
-    address private immutable originalImpl;
 
+    address private immutable originalImpl;
+    uint256 constant LAST_INITIALIZED_REVISION_SLOT = 11;
+
+    error CannotInitImplementation();
+    error Initialized();
     /**
      * @dev Modifier to use in the initializer function of a contract.
      */
     modifier initializer() {
         if (address(this) == originalImpl) {
-            revert Errors.CannotInitImplementation();
+            revert CannotInitImplementation();
         }
-        if (getRevision() <= StorageLib.getLastInitializedRevision()) {
-            revert Errors.Initialized();
+        if (getRevision() <= getLastInitializedRevision()) {
+            revert Initialized();
         }
-        StorageLib.setLastInitializedRevision(getRevision());
+        setLastInitializedRevision(getRevision());
         _;
     }
 
     constructor() {
         originalImpl = address(this);
+    }
+
+    function getLastInitializedRevision() internal view returns (uint256 _lastInitializedRevision) {
+        assembly {
+            _lastInitializedRevision := sload(LAST_INITIALIZED_REVISION_SLOT)
+        }
+    }
+
+    function setLastInitializedRevision(uint256 newLastInitializedRevision) internal {
+        assembly {
+            sstore(LAST_INITIALIZED_REVISION_SLOT, newLastInitializedRevision)
+        }
     }
 
     /**

@@ -14,6 +14,9 @@ testToken:
 testLoanManager:
 	forge test --match-path ./tests/unit/LoanManager.t.sol --fork-url https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW -vvvvv --gas-report
 
+testLoanManagerUpgrad:
+	forge test --match-path ./tests/unit/LoanManagerUpgrad.t.sol --fork-url https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW -vvv --gas-report
+
 debug: 
 	forge test -vvvvv
 
