@@ -8,10 +8,10 @@ import {
     IERC20Helper,
     IWithdrawalManagerStorage,
     IWithdrawalManager,
-    VersionedInitializable,
     TokenLP,
-    LoanManagerStorage
-} from "./LoanManagerStorage.sol";
+    LoanManagerStorage2
+} from "./LoanManagerStorage2.sol";
+import {VersionedInitializable} from "./upgradeability/VersionedInitializable.sol";
 
 /**
  * @title LoanManager contract for managing Maple Protocol loans
@@ -19,7 +19,7 @@ import {
  * @notice This contract is intended to be used by NSTBL hub and future nealthy products
  * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations.
  */
-contract LoanManagerV3 is LoanManagerStorage, VersionedInitializable {
+contract LoanManagerV3 is LoanManagerStorage2, VersionedInitializable {
     using SafeERC20 for IERC20Helper;
     using Address for address;
 
@@ -81,12 +81,23 @@ contract LoanManagerV3 is LoanManagerStorage, VersionedInitializable {
     //////////////////////////////////////////////////////////////*/
 
    
-    constructor(address _admin, address _mapleUSDCPool, address _mapleUSDTPool){
-        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-        usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    constructor(address _admin, address _mapleUSDCPool, address _mapleUSDTPool, address _lUSDC, address _lUSDT){
+        // usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+        // usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
         admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
         mapleUSDTPool = _mapleUSDTPool;
+        lUSDC = TokenLP(_lUSDC);
+        lUSDT = TokenLP(_lUSDT);
+        adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
+
+    }
+
+    function initialize(uint256 _val, uint256 _val2, uint256 _val3) external initializer{
+        newVal = _val;
+        newVal2 = _val2;
+        newVal3 = _val3;
+        newVal4 = newVal+newVal2;
     }
     // function initialize(address _nstblHub) external initializer {
     //     nstblHub = _nstblHub;
@@ -389,5 +400,9 @@ contract LoanManagerV3 is LoanManagerStorage, VersionedInitializable {
 
     function getVersion() public pure returns(uint256 _version) {
         _version = getRevision();
+    }
+
+    function getLocked() public view returns(uint256 locked) {
+        locked = _locked;
     }
 }

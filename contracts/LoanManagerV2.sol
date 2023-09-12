@@ -8,10 +8,10 @@ import {
     IERC20Helper,
     IWithdrawalManagerStorage,
     IWithdrawalManager,
-    VersionedInitializable,
     TokenLP,
     LoanManagerStorage
 } from "./LoanManagerStorage.sol";
+import {VersionedInitializable} from "./upgradeability/VersionedInitializable.sol";
 
 /**
  * @title LoanManager contract for managing Maple Protocol loans
@@ -390,5 +390,9 @@ contract LoanManagerV2 is LoanManagerStorage, VersionedInitializable {
 
     function getVersion() public pure returns(uint256 _version) {
         _version = getRevision();
+    }
+
+    function getLocked() public view returns(uint256 locked) {
+        locked = _locked;
     }
 }

@@ -76,10 +76,14 @@ contract BaseTest is Utils {
         assertEq(loanManager.admin(), owner);
         assertEq(loanManager.mapleUSDCPool(), MAPLE_USDC_CASH_POOL);
         assertEq(loanManager.mapleUSDTPool(), MAPLE_USDT_CASH_POOL);
+        TokenLP lToken = loanManager.lUSDC();
+        console.log(lToken.name());
+        console.log(lmImp1.adjustedDecimals());
+        console.log(loanManager.adjustedDecimals());
     }
 
     function testProxyAdmin_fakeOwner() external {
-        proxyAdmin = ProxyAdmin(0x4eF9Ec1703A96340b4F3F9De197622f98A11CD19);
+        proxyAdmin = ProxyAdmin(0x8D7716695F608dC7d9C55071F400022B65542687);
         assertEq(proxyAdmin.owner(), owner);
 
         address fakeOwner = address(1234);
@@ -90,7 +94,7 @@ contract BaseTest is Utils {
     }
 
     function testProxyAdmin_Initializer() external {
-        proxyAdmin = ProxyAdmin(0x4eF9Ec1703A96340b4F3F9De197622f98A11CD19);
+        proxyAdmin = ProxyAdmin(0x8D7716695F608dC7d9C55071F400022B65542687);
         assertEq(proxyAdmin.owner(), owner);
 
         vm.startPrank(owner);
@@ -102,7 +106,7 @@ contract BaseTest is Utils {
     }
 
     function testProxyAdmin_Same_Implementation() external {
-        proxyAdmin = ProxyAdmin(0x4eF9Ec1703A96340b4F3F9De197622f98A11CD19);
+        proxyAdmin = ProxyAdmin(0x8D7716695F608dC7d9C55071F400022B65542687);
         vm.startPrank(owner);
         //upgrading to the same implementation with empty initializer data
         //Expecting no changes in storage of the proxy contract
@@ -129,7 +133,7 @@ contract BaseTest is Utils {
     function testProxyAdmin_New_Implementation_noConstructor() external {
         lmImp2 = new LoanManagerV2();
 
-        proxyAdmin = ProxyAdmin(0x4eF9Ec1703A96340b4F3F9De197622f98A11CD19);
+        proxyAdmin = ProxyAdmin(0x8D7716695F608dC7d9C55071F400022B65542687);
         vm.startPrank(owner);
 
         //upgrading without any changes to the code and storage
@@ -144,33 +148,32 @@ contract BaseTest is Utils {
         console.log("Implementation Version - ", loanManager2.getVersion());
         assertEq(loanManager2.getVersion(), 2);
 
-        // assertEq(loanManager2.usdc(), USDC);
-        // assertEq(loanManager2.usdt(), USDT);
-        // assertEq(loanManager2.admin(), owner);
-        // assertEq(loanManager2.mapleUSDCPool(), MAPLE_USDC_CASH_POOL);
-        // assertEq(loanManager2.mapleUSDTPool(), MAPLE_USDT_CASH_POOL);
+        assertEq(loanManager2.usdc(), USDC);
+        assertEq(loanManager2.usdt(), USDT);
+        assertEq(loanManager2.admin(), address(0));
+        assertEq(loanManager2.mapleUSDCPool(), address(0));
+        assertEq(loanManager2.mapleUSDTPool(), address(0));
 
-        assertEq(loanManager2.adjustedDecimals(), 12);
+        assertEq(loanManager2.adjustedDecimals(), 0);
         assertEq(loanManager2.nstblHub(), NSTBL_HUB);
         TokenLP lToken = loanManager2.lUSDC();
-        assertEq(lToken.name(), "Loan Manager USDC");
-        assertEq(lToken.totalSupply(), 0);
+        assertEq(address(lToken), address(0));
 
         lToken = loanManager2.lUSDT();
-        assertEq(lToken.name(), "Loan Manager USDT");
-        assertEq(lToken.totalSupply(), 0);
+        assertEq(address(lToken), address(0));
 
-
-
+        console.log("Locked Value - - ", loanManager2.getLocked());
     }
 
-     function testProxyAdmin_New_Implementation_withConstructor() external {
-        lmImp3 = new LoanManagerV3(owner, MAPLE_USDC_CASH_POOL, MAPLE_USDT_CASH_POOL);
+    function testProxyAdmin_New_Implementation_withConstructor() external {
 
-        proxyAdmin = ProxyAdmin(0x4eF9Ec1703A96340b4F3F9De197622f98A11CD19);
+        
+        lmImp3 = new LoanManagerV3(owner, MAPLE_USDC_CASH_POOL, MAPLE_USDT_CASH_POOL, address(loanManager.lUSDC()), address(loanManager.lUSDT()));
+
+        proxyAdmin = ProxyAdmin(0x8D7716695F608dC7d9C55071F400022B65542687);
         vm.startPrank(owner);
-
-        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(lmProxy)), address(lmImp3), "");
+        bytes memory data = abi.encodeCall(lmImp3.initialize, (100, 50, 20));
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(lmProxy)), address(lmImp3), data);
         vm.stopPrank();
 
         loanManager3 = LoanManagerV3(address(lmProxy));
@@ -196,7 +199,11 @@ contract BaseTest is Utils {
         assertEq(lToken.name(), "Loan Manager USDT");
         assertEq(lToken.totalSupply(), 0);
 
-
+        assertEq(loanManager3.newVal(), 100);
+        assertEq(loanManager3.newVal2(), 50);
+        assertEq(loanManager3.newVal3(), 20);
+        assertEq(loanManager3.newVal4(), 150);
+        console.log("Locked Val - -", loanManager3.getLocked());
 
     }
 

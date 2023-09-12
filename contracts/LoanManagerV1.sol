@@ -3,23 +3,22 @@ pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import {VersionedInitializable} from "./upgradeability/VersionedInitializable.sol";
 import {
     IPool,
     IERC20Helper,
     IWithdrawalManagerStorage,
     IWithdrawalManager,
-    VersionedInitializable,
     TokenLP,
     LoanManagerStorage
 } from "./LoanManagerStorage.sol";
-
 /**
  * @title LoanManager contract for managing Maple Protocol loans
  * @author Angad Singh Agarwal, Harshit Singhal
  * @notice This contract is intended to be used by NSTBL hub and future nealthy products
  * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations.
  */
-contract LoanManagerV1 is LoanManagerStorage, VersionedInitializable {
+contract LoanManagerV1 is VersionedInitializable, LoanManagerStorage {
     using SafeERC20 for IERC20Helper;
     using Address for address;
 
@@ -81,17 +80,17 @@ contract LoanManagerV1 is LoanManagerStorage, VersionedInitializable {
     //////////////////////////////////////////////////////////////*/
 
     constructor(address _admin, address _mapleUSDCPool, address _mapleUSDTPool){
-        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-        usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+        // usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+        // usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
         admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
         mapleUSDTPool = _mapleUSDTPool;
-    }
-    function initialize(address _nstblHub) external initializer {
-        nstblHub = _nstblHub;
         lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", admin);
         lUSDT = new TokenLP("Loan Manager USDT", "lUSDT", admin);
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
+    }
+    function initialize(address _nstblHub) external initializer {
+        nstblHub = _nstblHub;
     }
 
     /*//////////////////////////////////////////////////////////////

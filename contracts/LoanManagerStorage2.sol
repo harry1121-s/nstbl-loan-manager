@@ -6,7 +6,7 @@ import "./interfaces/maple/IWithdrawalManager.sol";
 import "./interfaces/IERC20Helper.sol";
 import "./TokenLP.sol";
 
-contract LoanManagerStorage {
+contract LoanManagerStorage2 {
     event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
 
     event RequestRedeem(address indexed asset, uint256 lTokens, uint256 escrowedShares);
@@ -77,7 +77,10 @@ contract LoanManagerStorage {
     /// @notice mapping to store total assets received per asset from Maple protocol pool after redemption
     mapping(address => uint256) public assetsRedeemed;
 
-
-
-    uint256[49] __gap;
+    uint256 public newVal;
+    uint256 public newVal2;
+    uint256 public newVal3;
+    uint256 public newVal4;
+    
+    uint256[45] __gap;
 }
