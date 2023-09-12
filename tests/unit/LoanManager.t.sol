@@ -461,7 +461,7 @@ contract TestRedeem is BaseTest {
         vm.stopPrank();
     }
 
-    function test_requestRedeem_USDC_partialLP_pass_fuzz(uint256 amount, uint256 redeemAmount) external {
+    function test_redeem_USDC_partialLP_pass_fuzz(uint256 amount, uint256 redeemAmount) external {
         // Constraint input amount
         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
         uint256 shares = usdcPool.previewDeposit(amount);
@@ -478,6 +478,7 @@ contract TestRedeem is BaseTest {
         loanManager.requestRedeem(address(usdc), redeemAmount);
 
         assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12, "loanmanager");
+        assertEq(redeemAmount, loanManager.escrowedMapleShares(address(lusdc))*1e12);
         // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12, "withdrawal");
 
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
@@ -497,10 +498,10 @@ contract TestRedeem is BaseTest {
         console.log(usdcBal2 - usdcBal1, expectedUSDC);
         assertEq(
             lusdc.balanceOf(NSTBL_HUB),
-            lmUSDC - redeemAmount - loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12
+            lmUSDC - (redeemAmount - loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12)
         );
         assertEq(
-            lusdc.totalSupply(), lmUSDC - redeemAmount - loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12
+            lusdc.totalSupply(), lmUSDC - (redeemAmount - loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12)
         );
         if (loanManager.escrowedMapleShares(address(lusdc)) == 0) {
             assertFalse(loanManager.awaitingRedemption(address(usdc)));
@@ -510,7 +511,7 @@ contract TestRedeem is BaseTest {
         vm.stopPrank();
     }
 
-    function test_requestRedeem_USDT_partialLP_pass_fuzz(uint256 amount, uint256 redeemAmount) external {
+    function test_redeem_USDT_partialLP_pass_fuzz(uint256 amount, uint256 redeemAmount) external {
         // Constraint input amount
         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDT)));
         uint256 shares = usdtPool.previewDeposit(amount);
@@ -546,10 +547,10 @@ contract TestRedeem is BaseTest {
         console.log(usdtBal2 - usdtBal1, expectedUSDT);
         assertEq(
             lusdt.balanceOf(NSTBL_HUB),
-            lmUSDT - redeemAmount - loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12
+            lmUSDT - (redeemAmount - loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12)
         );
         assertEq(
-            lusdt.totalSupply(), lmUSDT - redeemAmount - loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12
+            lusdt.totalSupply(), lmUSDT - (redeemAmount - loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12)
         );
         if (loanManager.escrowedMapleShares(address(lusdt)) == 0) {
             assertFalse(loanManager.awaitingRedemption(address(usdt)));

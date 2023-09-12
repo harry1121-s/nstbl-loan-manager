@@ -47,7 +47,7 @@ contract LoanManagerStorage {
     uint256 public immutable adjustedDecimals;
 
     /// @notice address of the admin
-    address public immutable admin;
+    address public admin;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE

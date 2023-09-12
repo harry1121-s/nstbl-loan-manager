@@ -11,7 +11,6 @@ import {
     TokenLP,
     LoanManagerStorage
 } from "./LoanManagerStorage.sol";
-
 /**
  * @title LoanManager contract for managing Maple Protocol loans
  * @author Angad Singh Agarwal, Harshit Singhal
@@ -172,11 +171,12 @@ contract LoanManager is LoanManagerStorage {
         IERC20Helper(_asset).safeIncreaseAllowance(_pool, _amount);
 
         totalAssetsReceived[_asset] += _amount;
-        sharesReceived = IPool(_pool).previewDeposit(_amount);
-        totalSharesReceived[_asset] += sharesReceived;
+        uint256 balBefore = IPool(_pool).balanceOf(address(this));
         IPool(_pool).deposit(_amount, address(this));
+        sharesReceived = IPool(_pool).balanceOf(address(this)) - balBefore;
+        totalSharesReceived[_asset] += sharesReceived;
         lpTokens = sharesReceived * 10 ** adjustedDecimals;
-        totalLPTokensMinted[address(lUSDC)] += lpTokens;
+        totalLPTokensMinted[_lpToken] += lpTokens;
         IERC20Helper(_lpToken).mint(nstblHub, lpTokens);
         emit Deposit(_asset, _amount, lpTokens, sharesReceived);
     }
@@ -383,6 +383,12 @@ contract LoanManager is LoanManagerStorage {
     * @notice Use this function with caution, as it can grant or revoke important privileges to the designated caller.
     */
     function setAuthorizedCaller(address _caller) public onlyAdmin {
+        require(_caller != address(0));
         nstblHub = _caller;
+    }
+
+    function changeAdmin(address _admin) public onlyAdmin {
+        require(_admin != address(0));
+        admin = _admin;
     }
 }
