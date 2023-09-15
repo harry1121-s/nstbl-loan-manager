@@ -102,7 +102,7 @@ contract BaseTest is Utils {
         return uint256(bytes32(val));
     }
 
-    function _getUpperBoundDeposit(address _pool, address _poolManager) internal returns (uint256) {
+    function _getUpperBoundDeposit(address _pool, address _poolManager) internal view returns (uint256) {
         uint256 upperBound = _getLiquidityCap(_poolManager);
         uint256 totalAssets = IPool(_pool).totalAssets();
         return upperBound - totalAssets;

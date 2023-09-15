@@ -314,7 +314,7 @@ contract TestRedeem is BaseTest {
         assertEq(_exitCycleId, _currCycleId + 2);
         (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
 
-        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdc));
 
         uint256 usdcBal1 = usdc.balanceOf(NSTBL_HUB);
@@ -355,7 +355,7 @@ contract TestRedeem is BaseTest {
         assertEq(_exitCycleId, _currCycleId + 2);
         (uint256 exitWindowStart,) = withdrawalManagerUSDT.getWindowAtId(_exitCycleId);
 
-        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdt));
 
         uint256 usdtBal1 = usdt.balanceOf(NSTBL_HUB);
@@ -399,7 +399,7 @@ contract TestRedeem is BaseTest {
         assertEq(_exitCycleId, _currCycleId + 2);
         (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
 
-        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdc));
 
         uint256 usdcBal1 = usdc.balanceOf(NSTBL_HUB);
@@ -441,7 +441,7 @@ contract TestRedeem is BaseTest {
         assertEq(_exitCycleId, _currCycleId + 2);
         (uint256 exitWindowStart,) = withdrawalManagerUSDT.getWindowAtId(_exitCycleId);
 
-        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdt));
 
         uint256 usdtBal1 = usdt.balanceOf(NSTBL_HUB);
@@ -479,14 +479,14 @@ contract TestRedeem is BaseTest {
 
         assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12, "loanmanager");
         assertEq(redeemAmount, loanManager.escrowedMapleShares(address(lusdc))*1e12);
-        // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12, "withdrawal");
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12, "withdrawal");
 
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
         assertEq(_exitCycleId, _currCycleId + 2);
         (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
 
-        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdc));
 
         uint256 usdcBal1 = usdc.balanceOf(NSTBL_HUB);
@@ -535,7 +535,7 @@ contract TestRedeem is BaseTest {
         assertEq(_exitCycleId, _currCycleId + 2);
         (uint256 exitWindowStart,) = withdrawalManagerUSDT.getWindowAtId(_exitCycleId);
 
-        vm.expectRevert("WM:PE:NOT_IN_WINDOW");
+        vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdt));
 
         uint256 usdtBal1 = usdt.balanceOf(NSTBL_HUB);
@@ -557,6 +557,241 @@ contract TestRedeem is BaseTest {
         } else {
             assertTrue(loanManager.awaitingRedemption(address(usdt)));
         }
+        vm.stopPrank();
+    }
+
+    function test_redeem_USDC_missedWindow() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
+
+        // time warp
+        vm.warp(block.timestamp + 2 weeks);
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        console.log("lUSDC minted - ", lmUSDC);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+
+        uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
+        uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (,uint256 exitWindowEnd) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
+
+        vm.expectRevert("LM: Not in Window");
+        loanManager.redeem(address(usdc));
+
+        vm.warp(exitWindowEnd + 100);
+
+        vm.expectRevert("LM: Not in Window");
+        loanManager.redeem(address(usdc));
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+
+
+        //removing shares
+        loanManager.remove(address(usdc));
+        assertEq(usdcPool.balanceOf(address(loanManager)), lmUSDC / 10 ** 12);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), 0);
+        assertEq(loanManager.escrowedMapleShares(address(lusdc)), 0);
+        assertEq(loanManager.awaitingRedemption(address(lusdc)), false);
+
+        
+        //Requesting redemption again
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+
+
+        _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
+        _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
+
+        uint256 usdcBal1 = usdc.balanceOf(NSTBL_HUB);
+        vm.warp(exitWindowStart);
+
+        //Redeeming requested assets
+        uint256 expectedUSDC = loanManager.getAssetsWithUnrealisedLosses(address(usdc), lmUSDC);
+        loanManager.redeem(address(usdc));
+
+        uint256 usdcBal2 = usdc.balanceOf(NSTBL_HUB);
+        console.log(usdcBal2 - usdcBal1, expectedUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12);
+        assertEq(lusdc.totalSupply(), loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12);
+        console.log("lUSDC pending redemption - ", loanManager.getLpTokensPendingRedemption(address(lusdc)));
+        if (loanManager.escrowedMapleShares(address(lusdc)) == 0) {
+            assertFalse(loanManager.awaitingRedemption(address(usdc)));
+        } else {
+            assertTrue(loanManager.awaitingRedemption(address(usdc)));
+        }
+        vm.stopPrank();
+    }
+
+    function test_redeem_USDT_missedWindow() external {
+         uint256 amount = 1e7 * 1e6;
+        _investAssets(USDT, address(usdtPool), amount);
+
+        // time warp
+        vm.warp(block.timestamp + 2 weeks);
+
+        uint256 lmUSDT = lusdt.balanceOf(NSTBL_HUB);
+        console.log("lUSDT minted - ", lmUSDT);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdt), lmUSDT);
+        assertEq(usdtPool.balanceOf(address(loanManager)), 0);
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
+
+        uint256 _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
+        uint256 _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (,uint256 exitWindowEnd) = withdrawalManagerUSDT.getWindowAtId(_exitCycleId);
+
+        vm.expectRevert("LM: Not in Window");
+        loanManager.redeem(address(usdt));
+
+        vm.warp(exitWindowEnd + 100);
+
+        vm.expectRevert("LM: Not in Window");
+        loanManager.redeem(address(usdt));
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
+
+
+        //removing shares
+        loanManager.remove(address(usdt));
+        assertEq(usdtPool.balanceOf(address(loanManager)), lmUSDT / 10 ** 12);
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), 0);
+        assertEq(loanManager.escrowedMapleShares(address(lusdt)), 0);
+        assertEq(loanManager.awaitingRedemption(address(lusdt)), false);
+
+        
+        //Requesting redemption again
+        loanManager.requestRedeem(address(usdt), lmUSDT);
+        assertEq(usdtPool.balanceOf(address(loanManager)), 0);
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
+
+
+        _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
+        _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (uint256 exitWindowStart,) = withdrawalManagerUSDT.getWindowAtId(_exitCycleId);
+
+        uint256 usdtBal1 = usdc.balanceOf(NSTBL_HUB);
+        vm.warp(exitWindowStart);
+
+        //Redeeming requested assets
+        uint256 expectedUSDT = loanManager.getAssetsWithUnrealisedLosses(address(usdt), lmUSDT);
+        loanManager.redeem(address(usdt));
+
+        uint256 usdtBal2 = usdt.balanceOf(NSTBL_HUB);
+        console.log(usdtBal2 - usdtBal1, expectedUSDT);
+        assertEq(lusdt.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12);
+        assertEq(lusdt.totalSupply(), loanManager.escrowedMapleShares(address(lusdt)) * 10 ** 12);
+        console.log("lUSDT pending redemption - ", loanManager.getLpTokensPendingRedemption(address(lusdt)));
+        if (loanManager.escrowedMapleShares(address(lusdt)) == 0) {
+            assertFalse(loanManager.awaitingRedemption(address(usdt)));
+        } else {
+            assertTrue(loanManager.awaitingRedemption(address(usdt)));
+        }
+        vm.stopPrank();
+    }
+
+    function test_redeem_USDC_partialLP_missedWindow_fuzz(uint256 amount, uint256 redeemAmount) external {
+        // Constraint input amount
+        vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        uint256 shares = usdcPool.previewDeposit(amount);
+        vm.assume(shares > 0);
+        _investAssets(USDC, address(usdcPool), amount);
+
+        vm.assume(redeemAmount < IPool(MAPLE_USDC_CASH_POOL).balanceOf(address(loanManager)));
+        redeemAmount *= 1e12;
+        vm.assume(redeemAmount > 0);
+
+        // time warp
+        vm.warp(block.timestamp + 2 weeks);
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        console.log("lUSDC minted - ", lmUSDC);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdc), redeemAmount);
+        assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC-redeemAmount)/1e12);
+        assertEq(redeemAmount, loanManager.escrowedMapleShares(address(lusdc))*1e12);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount/1e12);
+
+        uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
+        uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (,uint256 exitWindowEnd) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
+
+        vm.expectRevert("LM: Not in Window");
+        loanManager.redeem(address(usdc));
+
+        vm.warp(exitWindowEnd + 100);
+
+        vm.expectRevert("LM: Not in Window");
+        loanManager.redeem(address(usdc));
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12);
+
+
+        //removing shares
+        loanManager.remove(address(usdc));
+        assertEq(usdcPool.balanceOf(address(loanManager)), lmUSDC / 10 ** 12);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), 0);
+        assertEq(loanManager.escrowedMapleShares(address(lusdc)), 0);
+        assertEq(loanManager.awaitingRedemption(address(lusdc)), false);
+
+        
+        //Requesting redemption again
+        loanManager.requestRedeem(address(usdc), redeemAmount);
+        assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC-redeemAmount)/ 1e12);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12);
+
+
+        _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
+        _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
+
+        uint256 usdcBal1 = usdc.balanceOf(NSTBL_HUB);
+        vm.warp(exitWindowStart);
+
+        //Redeeming requested assets
+        uint256 expectedUSDC = loanManager.getAssetsWithUnrealisedLosses(address(usdc), redeemAmount);
+        loanManager.redeem(address(usdc));
+
+        uint256 usdcBal2 = usdc.balanceOf(NSTBL_HUB);
+        console.log(usdcBal2 - usdcBal1, expectedUSDC);
+        assertEq(
+            lusdc.balanceOf(NSTBL_HUB),
+            lmUSDC - (redeemAmount - loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12)
+        );
+        assertEq(
+            lusdc.totalSupply(), lmUSDC - (redeemAmount - loanManager.escrowedMapleShares(address(lusdc)) * 10 ** 12)
+        );
+        console.log("lUSDC pending redemption - ", loanManager.getLpTokensPendingRedemption(address(lusdc)));
+
+        if (loanManager.escrowedMapleShares(address(lusdc)) == 0) {
+            assertFalse(loanManager.awaitingRedemption(address(usdc)));
+        } else {
+            assertTrue(loanManager.awaitingRedemption(address(usdc)));
+        }
+        vm.stopPrank();
+    }
+
+    function test_redeem_USDC_withoutRequest() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
+
+        // time warp
+        vm.warp(block.timestamp + 2 weeks);
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        console.log("lUSDC minted - ", lmUSDC);
+        vm.startPrank(NSTBL_HUB);
+
+        vm.expectRevert("LM: No redemption requested");
+        loanManager.redeem(address(usdc));
+        
         vm.stopPrank();
     }
 }

@@ -1,0 +1,37 @@
+Date : 2023-09-12 16:11:53
+Directory : /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts
+Total : 9 files,  396 codes, 611 comments, 170 blanks, all 1177 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Solidity |          9 |        396 |        611 |        170 |      1,177 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                         | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                            |          9 |        396 |        611 |        170 |      1,177 |
+| . (Files)                                                                                                    |          3 |        260 |        198 |         74 |        532 |
+| interfaces                                                                                                   |          6 |        136 |        413 |         96 |        645 |
+| interfaces (Files)                                                                                           |          2 |         18 |         14 |         17 |         49 |
+| interfaces/maple                                                                                             |          4 |        118 |        399 |         79 |        596 |
++--------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                     | language | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LoanManager.sol                                | Solidity |        199 |        159 |         37 |        395 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/LoanManagerStorage.sol                         | Solidity |         31 |         26 |         23 |         80 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/TokenLP.sol                                    | Solidity |         30 |         13 |         14 |         57 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/IERC20Helper.sol                    | Solidity |          6 |          4 |          4 |         14 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/ILoanManager.sol                    | Solidity |         12 |         10 |         13 |         35 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/maple/IPool.sol                     | Solidity |         18 |          1 |          2 |         21 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/maple/IPoolManager.sol              | Solidity |         49 |        251 |         45 |        345 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/maple/IWithdrawalManager.sol        | Solidity |         33 |        111 |         23 |        167 |
+| /Users/harryrpo1/Desktop/nealthy/nstbl-loan-manager/contracts/interfaces/maple/IWithdrawalManagerStorage.sol | Solidity |         18 |         36 |          9 |         63 |
+| Total                                                                                                        |          |        396 |        611 |        170 |      1,177 |
++--------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

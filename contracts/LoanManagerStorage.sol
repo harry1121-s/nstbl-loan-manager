@@ -13,6 +13,8 @@ contract LoanManagerStorage {
 
     event Redeem(address indexed asset, uint256 shares, uint256 tokensReceived);
 
+    event Removed(address indexed asset, uint256 shares);
+
     /*//////////////////////////////////////////////////////////////
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
