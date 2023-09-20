@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.21;
+pragma solidity 0.8.21;
 
 import "./interfaces/maple/IPool.sol";
 import "./interfaces/maple/IWithdrawalManager.sol";
@@ -11,9 +11,13 @@ contract LoanManagerStorage {
 
     event RequestRedeem(address indexed asset, uint256 lTokens, uint256 escrowedShares);
 
-    event Redeem(address indexed asset, uint256 shares, uint256 tokensReceived);
+    event Redeem(address indexed asset, uint256 mapleShares, uint256 tokensReceived);
 
-    event Removed(address indexed asset, uint256 shares);
+    event Removed(address indexed asset, uint256 mapleShares);
+
+    event AdminChanged(address indexed oldAdmin, address indexed newAdmin);
+
+    event NSTBLHUBChanged(address indexed oldHub, address indexed newHub);
 
     /*//////////////////////////////////////////////////////////////
                                IMMUTABLES
@@ -67,10 +71,10 @@ contract LoanManagerStorage {
     /// @notice mapping to store total shares issued to the Loan Manager contract per asset
     mapping(address => uint256) public totalSharesReceived;
 
-    /// @notice mapping to store total amount of LP tokens minted 
+    /// @notice mapping to store total amount of LP tokens minted
     mapping(address => uint256) public totalLPTokensMinted;
 
-    /// @notice mapping to store total amount of LP tokens burned 
+    /// @notice mapping to store total amount of LP tokens burned
     mapping(address => uint256) public totalLPTokensBurned;
 
     /// @notice mapping to store escrowed shares in the Maple protocol pool corresponding to each LP token

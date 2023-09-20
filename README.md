@@ -30,3 +30,12 @@ To make it easier to perform some tasks within the repo, a few commands are avai
 ## About Nealthy
 
 [Nealthy](https://www.nealthy.com) is a VARA regulated crypto asset management company. Nealthy provides on-chain index products for KYC/KYB individuals and institutions to invest in.
+
+## Revision
+
+New functions added:
+| Functions | Description |
+| ------------- | ------------ |
+| remove(.....) | Public function to remove Locked Maple Shares (during request redemption). Only accessed by NSTBL Hub. |
+
+| _removeMapleCash(......) | Internal function to remove Locked Maple Shares. This function transfers locked Maple Shares from Maple Protocol to loanManager, updates relevant accounting data, and emits a `Remove` event. |

@@ -8,6 +8,7 @@ verbosity       = 3                       # The verbosity of tests
 block_timestamp = 1_685_721_539           # Timestamp for tests (non-zero)
 gas_limit       = "18446744073709551615"  # Gas limit for tests
 gas_reports = ["*"]
+auto_detect_solc = true
 
 [profile.production]
 optimizer = true
@@ -26,3 +27,4 @@ number_underscore = "thousands"
 override_spacing = true
 wrap_comments = false
 ignore = []
+

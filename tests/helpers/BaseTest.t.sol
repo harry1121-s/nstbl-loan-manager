@@ -41,7 +41,12 @@ contract BaseTest is Utils {
         mainnetFork = vm.createFork("https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW");
         vm.selectFork(mainnetFork);
         vm.startPrank(owner);
-        // token = new Token(name, symbol);
+        require(
+            NSTBL_HUB != address(0) && owner != address(0) && MAPLE_USDC_CASH_POOL != address(0)
+                && MAPLE_USDT_CASH_POOL != address(0) && MAPLE_POOL_MANAGER_USDC != address(0)
+                && MAPLE_POOL_MANAGER_USDT != address(0) && WITHDRAWAL_MANAGER_USDC != address(0)
+                && WITHDRAWAL_MANAGER_USDT != address(0) && USDC != address(0) && USDT != address(0)
+        );
         loanManager = new LoanManager(
             NSTBL_HUB,
             owner,
