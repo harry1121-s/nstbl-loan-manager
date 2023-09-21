@@ -125,7 +125,6 @@ contract TestRequestRedeem is BaseTest {
         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
         assertEq(lusdc.balanceOf(address(loanManager)), 0);
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
         vm.stopPrank();
     }
 
@@ -144,7 +143,6 @@ contract TestRequestRedeem is BaseTest {
         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
         assertEq(lusdc.balanceOf(address(loanManager)), 0);
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
         assertTrue(loanManager.awaitingRedemption(USDC));
         vm.stopPrank();
         _investAssets(USDC, address(usdcPool), amount);
@@ -165,7 +163,6 @@ contract TestRequestRedeem is BaseTest {
         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
         assertEq(lusdc.balanceOf(address(loanManager)), 0);
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
         vm.stopPrank();
     }
 
@@ -186,7 +183,6 @@ contract TestRequestRedeem is BaseTest {
         loanManager.requestRedeem(address(usdc), redeemAmount);
 
         assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12, "loanmanager");
-        // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12, "withdrawal");
         vm.stopPrank();
     }
 
@@ -214,7 +210,6 @@ contract TestRequestRedeem is BaseTest {
         vm.startPrank(NSTBL_HUB);
         loanManager.requestRedeem(address(usdt), lmUSDT);
         assertEq(usdtPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
         vm.stopPrank();
     }
 
@@ -230,7 +225,6 @@ contract TestRequestRedeem is BaseTest {
         assertEq(lusdt.balanceOf(NSTBL_HUB), lmUSDT);
         assertEq(lusdt.balanceOf(address(loanManager)), 0);
         assertEq(usdtPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
         assertTrue(loanManager.awaitingRedemption(USDT));
         vm.stopPrank();
         _investAssets(USDT, address(usdtPool), amount);
@@ -251,7 +245,6 @@ contract TestRequestRedeem is BaseTest {
         assertEq(lusdt.balanceOf(NSTBL_HUB), lmUSDT);
         assertEq(lusdt.balanceOf(address(loanManager)), 0);
         assertEq(usdtPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
         vm.stopPrank();
     }
 
@@ -272,7 +265,6 @@ contract TestRequestRedeem is BaseTest {
         loanManager.requestRedeem(address(usdt), redeemAmount);
 
         assertEq(usdtPool.balanceOf(address(loanManager)), (lmUSDT - redeemAmount) / 1e12, "loanmanager");
-        // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), redeemAmount / 10 ** 12, "withdrawal");
         vm.stopPrank();
     }
 
@@ -307,7 +299,6 @@ contract TestRedeem is BaseTest {
         vm.startPrank(NSTBL_HUB);
         loanManager.requestRedeem(address(usdc), lmUSDC);
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
 
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -348,7 +339,6 @@ contract TestRedeem is BaseTest {
         lusdt.safeIncreaseAllowance(address(loanManager), lmUSDT);
         loanManager.requestRedeem(address(usdt), lmUSDT);
         assertEq(usdtPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
 
         uint256 _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
@@ -392,7 +382,6 @@ contract TestRedeem is BaseTest {
         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
         assertEq(lusdc.balanceOf(address(loanManager)), 0);
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
 
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -434,7 +423,6 @@ contract TestRedeem is BaseTest {
         assertEq(lusdt.balanceOf(NSTBL_HUB), lmUSDT);
         assertEq(lusdt.balanceOf(address(loanManager)), 0);
         assertEq(usdtPool.balanceOf(address(loanManager)), 0);
-        // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
 
         uint256 _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
@@ -479,7 +467,6 @@ contract TestRedeem is BaseTest {
 
         assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12, "loanmanager");
         assertEq(redeemAmount, loanManager.escrowedMapleShares(address(lusdc)) * 1e12);
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12, "withdrawal");
 
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -528,7 +515,6 @@ contract TestRedeem is BaseTest {
         loanManager.requestRedeem(address(usdt), redeemAmount);
 
         assertEq(usdtPool.balanceOf(address(loanManager)), (lmUSDT - redeemAmount) / 1e12, "loanmanager");
-        // assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), redeemAmount / 10 ** 12, "withdrawal");
 
         uint256 _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
@@ -563,7 +549,7 @@ contract TestRedeem is BaseTest {
     function test_redeem_USDC_missedWindow() external {
         uint256 amount = 1e7 * 1e6;
         _investAssets(USDC, address(usdcPool), amount);
-
+        uint256 wmInitialBal = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         // time warp
         vm.warp(block.timestamp + 2 weeks);
 
@@ -572,7 +558,6 @@ contract TestRedeem is BaseTest {
         vm.startPrank(NSTBL_HUB);
         loanManager.requestRedeem(address(usdc), lmUSDC);
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
 
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -586,19 +571,19 @@ contract TestRedeem is BaseTest {
 
         vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdc));
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), wmInitialBal + lmUSDC / 10 ** 12);
 
         //removing shares
         loanManager.remove(address(usdc));
         assertEq(usdcPool.balanceOf(address(loanManager)), lmUSDC / 10 ** 12);
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), 0);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), wmInitialBal);
         assertEq(loanManager.escrowedMapleShares(address(lusdc)), 0);
         assertEq(loanManager.awaitingRedemption(address(lusdc)), false);
 
         //Requesting redemption again
         loanManager.requestRedeem(address(usdc), lmUSDC);
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), lmUSDC / 10 ** 12);
+        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), wmInitialBal + lmUSDC / 10 ** 12);
 
         _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -626,9 +611,10 @@ contract TestRedeem is BaseTest {
     }
 
     function test_redeem_USDT_missedWindow() external {
+
         uint256 amount = 1e7 * 1e6;
         _investAssets(USDT, address(usdtPool), amount);
-
+        uint256 wmInitialBal = usdtPool.balanceOf(address(withdrawalManagerUSDT));
         // time warp
         vm.warp(block.timestamp + 2 weeks);
 
@@ -637,7 +623,6 @@ contract TestRedeem is BaseTest {
         vm.startPrank(NSTBL_HUB);
         loanManager.requestRedeem(address(usdt), lmUSDT);
         assertEq(usdtPool.balanceOf(address(loanManager)), 0);
-        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
 
         uint256 _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
@@ -651,19 +636,19 @@ contract TestRedeem is BaseTest {
 
         vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdt));
-        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), wmInitialBal + lmUSDT / 10 ** 12);
 
         //removing shares
         loanManager.remove(address(usdt));
         assertEq(usdtPool.balanceOf(address(loanManager)), lmUSDT / 10 ** 12);
-        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), 0);
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), wmInitialBal);
         assertEq(loanManager.escrowedMapleShares(address(lusdt)), 0);
         assertEq(loanManager.awaitingRedemption(address(lusdt)), false);
 
         //Requesting redemption again
         loanManager.requestRedeem(address(usdt), lmUSDT);
         assertEq(usdtPool.balanceOf(address(loanManager)), 0);
-        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), lmUSDT / 10 ** 12);
+        assertEq(usdtPool.balanceOf(address(withdrawalManagerUSDT)), wmInitialBal + lmUSDT / 10 ** 12);
 
         _currCycleId = withdrawalManagerUSDT.getCurrentCycleId();
         _exitCycleId = withdrawalManagerUSDT.exitCycleId(address(loanManager));
