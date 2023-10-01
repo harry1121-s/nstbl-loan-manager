@@ -82,4 +82,13 @@ contract LoanManagerStorage {
 
     /// @notice mapping to store total assets received per asset from Maple protocol pool after redemption
     mapping(address => uint256) public assetsRedeemed;
+
+
+    ////New storage variables
+
+    /// @notice external interest rate for the assets invested in Maple protocol pool, set by the admin
+    uint256 public interestRate;
+
+    uint256 immutable precision = 10**27;
+    uint256 public interestStartTime;
 }

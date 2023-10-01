@@ -453,4 +453,37 @@ contract LoanManager is LoanManagerStorage {
         admin = _admin;
         emit AdminChanged(oldAdmin, admin);
     }
+
+
+
+    /////////////////////////////// v1.1.0 ///////////////////////////////
+    function redeemManual(address _asset, uint256 _shares) external onlyAdmin nonReentrant validAsset(_asset) {
+        if (_asset == usdc) {
+            _redeemMapleCashManual(_shares, usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
+        } else if (_asset == usdt) {
+            _redeemMapleCashManual(_shares, usdt, mapleUSDTPool, address(lUSDT), MAPLE_WITHDRAWAL_MANAGER_USDT);
+        }
+    }
+
+    function _redeemMapleCashManual(uint256 _shares, address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
+
+        // uint256 _shares = escrowedMapleShares[_lpToken];
+
+        uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
+        assetsRedeemed[_asset] += stablesRedeemed;
+        IERC20Helper(_lpToken).burn(nstblHub, (_shares) * 10 ** adjustedDecimals);
+        emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
+    }
+
+    function getUnrealisedMaturityValue(address _asset) external view returns(uint256 _value){
+        _value = (totalAssetsReceived[_asset] - assetsRedeemed[_asset]) * interestRate * (block.timestamp-interestStartTime)/Precision;
+    }
+
+    function setInterestStartTime() external onlyAdmin {
+        interestStartTime = block.timestamp;
+    }
+
+    function getAirdroppedTokens(address _asset) external view returns(uint256 _value){
+        _value = IERC20Helper(_asset).balanceOf(address(this));
+    }
 }
