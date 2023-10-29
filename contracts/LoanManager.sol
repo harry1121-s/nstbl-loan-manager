@@ -485,11 +485,11 @@ contract LoanManager is LoanManagerStorage {
 
     function getInvestedAssets(address _asset) external view returns(uint256 _value){
         require(_asset == usdc, "LM: Invalid Target address");
-        _value = totalAssetsReceived[_asset];
+        _value = totalAssetsReceived[_asset] * 10**adjustedDecimals;
     }
 
     function getMaturedAssets(address _asset) external view returns(uint256 _value){
         require(_asset == usdc, "LM: Invalid Target address");
-        _value = IPool(mapleUSDCPool).convertToAssets(lUSDC.totalSupply() / 10 ** adjustedDecimals);
+        _value = IPool(mapleUSDCPool).convertToAssets(lUSDC.totalSupply() / 10 ** adjustedDecimals) * 10**adjustedDecimals;
     }
 }
