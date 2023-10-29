@@ -475,15 +475,21 @@ contract LoanManager is LoanManagerStorage {
         emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
     }
 
-    function getUnrealisedMaturityValue(address _asset) external view returns(uint256 _value){
-        _value = (totalAssetsReceived[_asset] - assetsRedeemed[_asset]) * interestRate * (block.timestamp-interestStartTime)/Precision;
-    }
-
-    function setInterestStartTime() external onlyAdmin {
-        interestStartTime = block.timestamp;
-    }
-
     function getAirdroppedTokens(address _asset) external view returns(uint256 _value){
         _value = IERC20Helper(_asset).balanceOf(address(this));
+    }
+
+    function withdrawTokens(address _asset, uint256 _amount, address _destination) external authorizedCaller {
+        IERC20Helper(_asset).safeTransfer(_destination, _amount);
+    }
+
+    function getInvestedAssets(address _asset) external view returns(uint256 _value){
+        require(_asset == usdc, "LM: Invalid Target address");
+        _value = totalAssetsReceived[_asset];
+    }
+
+    function getMaturedAssets(address _asset) external view returns(uint256 _value){
+        require(_asset == usdc, "LM: Invalid Target address");
+        _value = IPool(mapleUSDCPool).convertToAssets(lUSDC.totalSupply() / 10 ** adjustedDecimals);
     }
 }
