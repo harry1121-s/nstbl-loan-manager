@@ -19,166 +19,167 @@ contract TestProxy is BaseTest {
         console.log(loanManager.MAPLE_WITHDRAWAL_MANAGER_USDC());
     }
 }
-// contract TestDeposit is BaseTest {
-//     using SafeERC20 for IERC20;
 
-//     function setUp() public virtual override {
-//         super.setUp();
-//     }
+contract TestDeposit is BaseTest {
+    using SafeERC20 for IERC20;
 
-//     function test_deposit_pass_USDC() public {
-//         uint256 amount = 1e7 * 1e6;
-//         _investAssets(USDC, address(usdcPool), amount);
+    function setUp() public virtual override {
+        super.setUp();
+    }
 
-//         uint256 investedAssets = loanManager.getInvestedAssets(USDC);
-//         assertEq(investedAssets, amount*10**loanManager.adjustedDecimals());
-//         uint256 sharesToReceive = usdcPool.previewDeposit(amount);
-//         assertEq(IERC20(USDC).balanceOf(user), 0);
-//         assertEq(usdcPool.balanceOf(address(loanManager)), sharesToReceive);
-//         vm.warp(block.timestamp+ 1);
-//         uint256 maturedAssets = loanManager.getMaturedAssets(USDC);
-//         console.log("Invested Assets", investedAssets);
-//         console.log("Matured Assets", maturedAssets);
-//     }
+    function test_deposit_pass_USDC() public {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
 
-//     function test_deposit_pass_USDC_fuzz(uint256 amount) public {
-//         // Constraint input amount
-//         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
-//         uint256 shares = usdcPool.previewDeposit(amount);
-//         vm.assume(shares > 0);
+        uint256 investedAssets = loanManager.getInvestedAssets(USDC);
+        assertEq(investedAssets, amount*10**loanManager.adjustedDecimals());
+        uint256 sharesToReceive = usdcPool.previewDeposit(amount);
+        assertEq(IERC20(USDC).balanceOf(user), 0);
+        assertEq(usdcPool.balanceOf(address(loanManager)), sharesToReceive);
+        vm.warp(block.timestamp+ 1);
+        uint256 maturedAssets = loanManager.getMaturedAssets(USDC);
+        console.log("Invested Assets", investedAssets);
+        console.log("Matured Assets", maturedAssets);
+    }
 
-//         // Action
-//         _investAssets(USDC, address(usdcPool), amount);
+    function test_deposit_pass_USDC_fuzz(uint256 amount) public {
+        // Constraint input amount
+        vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        uint256 shares = usdcPool.previewDeposit(amount);
+        vm.assume(shares > 0);
 
-//         // Assert
-//         uint256 sharesToReceive = usdcPool.previewDeposit(amount);
-//         assertEq(IERC20(USDC).balanceOf(user), 0, "balance of user changes to 0");
-//         assertEq(
-//             usdcPool.balanceOf(address(loanManager)),
-//             sharesToReceive,
-//             "USDC Cash LP token balance of loanManager increases"
-//         );
-//     }
+        // Action
+        _investAssets(USDC, address(usdcPool), amount);
 
-//     function testFail_deposit_revert_invalid_amount_lowerBound_USDC_fuzz(uint256 amount) public {
-//         // Constraint input amount
-//         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
-//         uint256 shares = usdcPool.previewDeposit(amount);
-//         vm.assume(shares == 0);
+        // Assert
+        uint256 sharesToReceive = usdcPool.previewDeposit(amount);
+        assertEq(IERC20(USDC).balanceOf(user), 0, "balance of user changes to 0");
+        assertEq(
+            usdcPool.balanceOf(address(loanManager)),
+            sharesToReceive,
+            "USDC Cash LP token balance of loanManager increases"
+        );
+    }
 
-//         // Action
-//         _investAssets(USDC, address(usdcPool), amount);
-//     }
+    function testFail_deposit_revert_invalid_amount_lowerBound_USDC_fuzz(uint256 amount) public {
+        // Constraint input amount
+        vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        uint256 shares = usdcPool.previewDeposit(amount);
+        vm.assume(shares == 0);
 
-//     function testFail_deposit_revert_invalid_amount_upperBound_USDC_fuzz(uint256 amount) public {
-//         // Constraint input amount
-//         vm.assume(amount < type(uint256).max - 1);
-//         vm.assume(amount > _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        // Action
+        _investAssets(USDC, address(usdcPool), amount);
+    }
 
-//         // Action
-//         // vm.expectRevert("LM: Invalid amount"); @TODO: fix this
-//         _investAssets(USDC, address(usdcPool), amount);
-//     }
-// }
+    function testFail_deposit_revert_invalid_amount_upperBound_USDC_fuzz(uint256 amount) public {
+        // Constraint input amount
+        vm.assume(amount < type(uint256).max - 1);
+        vm.assume(amount > _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
 
-// contract TestRequestRedeem is BaseTest {
-//     using SafeERC20 for IERC20;
+        // Action
+        // vm.expectRevert("LM: Invalid amount"); @TODO: fix this
+        _investAssets(USDC, address(usdcPool), amount);
+    }
+}
 
-//     function setUp() public override {
-//         super.setUp();
-//     }
+contract TestRequestRedeem is BaseTest {
+    using SafeERC20 for IERC20;
 
-//     function test_requestRedeem_USDC() external {
-//         uint256 amount = 1e7 * 1e6;
-//         _investAssets(USDC, address(usdcPool), amount);
+    function setUp() public override {
+        super.setUp();
+    }
 
-//         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+    function test_requestRedeem_USDC() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
 
-//         vm.startPrank(NSTBL_HUB);
-//         vm.expectRevert("LM: Insufficient Shares");
-//         loanManager.requestRedeem(address(usdc), (lmUSDC * 11) / 10);
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
-//         loanManager.requestRedeem(address(usdc), lmUSDC);
-//         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
-//         assertEq(lusdc.balanceOf(address(loanManager)), 0);
-//         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-//         vm.stopPrank();
-//     }
+        vm.startPrank(NSTBL_HUB);
+        vm.expectRevert("LM: Insufficient Shares");
+        loanManager.requestRedeem(address(usdc), (lmUSDC * 11) / 10);
 
-//     function test_requestRedeem_and_deposit_USDC() external {
-//         uint256 amount = 1e7 * 1e6;
-//         _investAssets(USDC, address(usdcPool), amount);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
+        assertEq(lusdc.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        vm.stopPrank();
+    }
 
-//         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+    function test_requestRedeem_and_deposit_USDC() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
 
-//         vm.startPrank(NSTBL_HUB);
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
-//         vm.expectRevert("LM: No redemption requested");
-//         loanManager.redeem(USDC);
+        vm.startPrank(NSTBL_HUB);
 
-//         loanManager.requestRedeem(address(usdc), lmUSDC);
-//         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
-//         assertEq(lusdc.balanceOf(address(loanManager)), 0);
-//         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-//         assertTrue(loanManager.awaitingRedemption(USDC));
-//         vm.stopPrank();
-//         _investAssets(USDC, address(usdcPool), amount);
-//     }
+        vm.expectRevert("LM: No redemption requested");
+        loanManager.redeem(USDC);
 
-//     function test_requestRedeem_USDC_fullLP_pass_fuzz(uint256 amount) external {
-//         // Constraint input amount
-//         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
-//         uint256 shares = usdcPool.previewDeposit(amount);
-//         vm.assume(shares > 0);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
+        assertEq(lusdc.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        assertTrue(loanManager.awaitingRedemption(USDC));
+        vm.stopPrank();
+        _investAssets(USDC, address(usdcPool), amount);
+    }
 
-//         _investAssets(USDC, address(usdcPool), amount);
+    function test_requestRedeem_USDC_fullLP_pass_fuzz(uint256 amount) external {
+        // Constraint input amount
+        vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        uint256 shares = usdcPool.previewDeposit(amount);
+        vm.assume(shares > 0);
 
-//         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        _investAssets(USDC, address(usdcPool), amount);
 
-//         vm.startPrank(NSTBL_HUB);
-//         loanManager.requestRedeem(address(usdc), lmUSDC);
-//         assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
-//         assertEq(lusdc.balanceOf(address(loanManager)), 0);
-//         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
-//         vm.stopPrank();
-//     }
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
-//     function test_requestRedeem_USDC_partialLP_pass_fuzz(uint256 amount, uint256 redeemAmount) external {
-//         // Constraint input amount
-//         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
-//         uint256 shares = usdcPool.previewDeposit(amount);
-//         vm.assume(shares > 0);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdc), lmUSDC);
+        assertEq(lusdc.balanceOf(NSTBL_HUB), lmUSDC);
+        assertEq(lusdc.balanceOf(address(loanManager)), 0);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+        vm.stopPrank();
+    }
 
-//         _investAssets(USDC, address(usdcPool), amount);
-//         vm.assume(redeemAmount < IPool(MAPLE_USDC_CASH_POOL).balanceOf(address(loanManager)));
-//         redeemAmount *= 1e12;
-//         vm.assume(redeemAmount > 0);
+    function test_requestRedeem_USDC_partialLP_pass_fuzz(uint256 amount, uint256 redeemAmount) external {
+        // Constraint input amount
+        vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        uint256 shares = usdcPool.previewDeposit(amount);
+        vm.assume(shares > 0);
 
-//         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        _investAssets(USDC, address(usdcPool), amount);
+        vm.assume(redeemAmount < IPool(MAPLE_USDC_CASH_POOL).balanceOf(address(loanManager)));
+        redeemAmount *= 1e12;
+        vm.assume(redeemAmount > 0);
 
-//         vm.startPrank(NSTBL_HUB);
-//         loanManager.requestRedeem(address(usdc), redeemAmount);
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
-//         assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12, "loanmanager");
-//         vm.stopPrank();
-//     }
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdc), redeemAmount);
 
-//     function test_requestRedeem_USDC_revert_pendingRedemption() external {
-//         uint256 amount = 1e7 * 1e6;
-//         _investAssets(USDC, address(usdcPool), amount);
+        assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12, "loanmanager");
+        vm.stopPrank();
+    }
 
-//         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+    function test_requestRedeem_USDC_revert_pendingRedemption() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, address(usdcPool), amount);
 
-//         vm.startPrank(NSTBL_HUB);
-//         loanManager.requestRedeem(address(usdc), lmUSDC / 2);
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
-//         vm.expectRevert("LM: Redemption Pending");
-//         loanManager.requestRedeem(address(usdc), lmUSDC / 2);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(address(usdc), lmUSDC / 2);
 
-//         vm.stopPrank();
-//     }
+        vm.expectRevert("LM: Redemption Pending");
+        loanManager.requestRedeem(address(usdc), lmUSDC / 2);
 
-// }
+        vm.stopPrank();
+    }
+
+}
 
 contract TestRedeem is BaseTest {
     using SafeERC20 for IERC20;
@@ -391,12 +392,16 @@ contract TestRedeem is BaseTest {
         vm.warp(block.timestamp + 2 weeks);
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        uint256 wmBalBefore = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         console.log("lUSDC minted - ", lmUSDC);
         vm.startPrank(NSTBL_HUB);
         loanManager.requestRedeem(address(usdc), redeemAmount);
+        uint256 wmBalAfter = usdcPool.balanceOf(address(withdrawalManagerUSDC));
+
         assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12);
         assertEq(redeemAmount, loanManager.escrowedMapleShares(address(lusdc)) * 1e12);
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 1e12);
+        assertEq(wmBalAfter-wmBalBefore, redeemAmount / 1e12);
+        console.log(redeemAmount, redeemAmount / 1e12);
 
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -410,19 +415,23 @@ contract TestRedeem is BaseTest {
 
         vm.expectRevert("LM: Not in Window");
         loanManager.redeem(address(usdc));
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12);
+        assertEq(wmBalAfter-wmBalBefore, redeemAmount / 10 ** 12);
 
         //removing shares
+        wmBalBefore = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         loanManager.remove(address(usdc));
+        wmBalAfter = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         assertEq(usdcPool.balanceOf(address(loanManager)), lmUSDC / 10 ** 12);
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), 0);
+        assertEq(wmBalBefore-wmBalAfter, redeemAmount / 10 ** 12);
         assertEq(loanManager.escrowedMapleShares(address(lusdc)), 0);
         assertEq(loanManager.awaitingRedemption(address(lusdc)), false);
 
         //Requesting redemption again
+        wmBalBefore = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         loanManager.requestRedeem(address(usdc), redeemAmount);
+        wmBalAfter = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         assertEq(usdcPool.balanceOf(address(loanManager)), (lmUSDC - redeemAmount) / 1e12);
-        assertEq(usdcPool.balanceOf(address(withdrawalManagerUSDC)), redeemAmount / 10 ** 12);
+        assertEq(wmBalAfter-wmBalBefore, redeemAmount / 10 ** 12);
 
         _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
@@ -454,7 +463,6 @@ contract TestRedeem is BaseTest {
         }
         vm.stopPrank();
     }
-
     function test_redeem_USDC_withoutRequest() external {
         uint256 amount = 1e7 * 1e6;
         _investAssets(USDC, address(usdcPool), amount);
