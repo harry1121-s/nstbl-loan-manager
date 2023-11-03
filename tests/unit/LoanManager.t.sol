@@ -11,29 +11,29 @@ contract TestDeposit is BaseTest {
         super.setUp();
     }
 
-    function test_deposit_pass_USDC() public {
-        uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
-
-        uint256 investedAssets = loanManager.getInvestedAssets(USDC);
-        assertEq(investedAssets, amount);
-        uint256 sharesToReceive = usdcPool.previewDeposit(amount);
-        assertEq(IERC20(USDC).balanceOf(user), 0);
-        assertEq(usdcPool.balanceOf(address(loanManager)), sharesToReceive);
-        vm.warp(block.timestamp+ 1);
-        uint256 maturedAssets = loanManager.getMaturedAssets(USDC);
-        console.log("Invested Assets", investedAssets);
-        console.log("Matured Assets", maturedAssets);
-    }
-
-    // function test_deposit_pass_USDT() public {
+    // function test_deposit_pass_USDC() public {
     //     uint256 amount = 1e7 * 1e6;
-    //     _investAssets(USDT, address(usdtPool), amount);
+    //     _investAssets(USDC, address(usdcPool), amount);
 
-    //     uint256 sharesToReceive = usdtPool.previewDeposit(amount);
-    //     assertEq(IERC20(USDT).balanceOf(user), 0);
-    //     assertEq(usdtPool.balanceOf(address(loanManager)), sharesToReceive);
+    //     uint256 investedAssets = loanManager.getInvestedAssets(USDC);
+    //     assertEq(investedAssets, amount*10**loanManager.adjustedDecimals());
+    //     uint256 sharesToReceive = usdcPool.previewDeposit(amount);
+    //     assertEq(IERC20(USDC).balanceOf(user), 0);
+    //     assertEq(usdcPool.balanceOf(address(loanManager)), sharesToReceive);
+    //     vm.warp(block.timestamp+ 1);
+    //     uint256 maturedAssets = loanManager.getMaturedAssets(USDC);
+    //     console.log("Invested Assets", investedAssets);
+    //     console.log("Matured Assets", maturedAssets);
     // }
+
+    function test_deposit_pass_USDT() public {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDT, address(usdtPool), amount);
+
+        uint256 sharesToReceive = usdtPool.previewDeposit(amount);
+        assertEq(IERC20(USDT).balanceOf(user), 0);
+        assertEq(usdtPool.balanceOf(address(loanManager)), sharesToReceive);
+    }
 
     // function test_deposit_pass_USDC_fuzz(uint256 amount) public {
     //     // Constraint input amount
