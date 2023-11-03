@@ -24,7 +24,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     using Address for address;
 
     uint256 internal constant REVISION = 1;
-    uint256 private _locked;
+    uint256 public _locked;
 
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS
