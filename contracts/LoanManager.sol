@@ -24,7 +24,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     using Address for address;
 
     uint256 internal constant REVISION = 1;
-    uint256 private _locked = 1;
+    uint256 private _locked;
 
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS
@@ -67,7 +67,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
      * @dev Modifier to prevent reentrancy attacks.
      */
     modifier nonReentrant() {
-        require(_locked == 1, "P:LOCKED");
+        require(_locked == 1, "LM:LOCKED");
 
         _locked = 2;
 
@@ -84,24 +84,18 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
      * @dev Constructor to set immutables the LoanManager contract.
      */
     constructor() {
-        // nstblHub = _nstblHub;
-        // admin = _admin;
        
-        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-        usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
-        
-
+        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;        
         
     }
 
-    function initialize(address _nstblHub, address _admin, address _mapleUSDCPool, address _mapleUSDTPool) external initializer {
+    function initialize(address _nstblHub, address _admin, address _mapleUSDCPool) external initializer {
         nstblHub = _nstblHub;
         admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
-        mapleUSDTPool = _mapleUSDTPool;
         lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", _admin);
-        lUSDT = new TokenLP("Loan Manager USDT", "lUSDT", _admin);
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
+        _locked = 1;
 
         emit NSTBLHUBChanged(address(0), nstblHub);
         emit AdminChanged(address(0), admin);
@@ -112,23 +106,23 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @dev Deposit assets into the Maple Protocol pool and mint LP tokens (lUSDC/lUSDT) to the NSTBL Hub.
+     * @dev Deposit assets into the Maple Protocol pool and mint LP tokens (lUSDC) to the NSTBL Hub.
      * @notice The LP tokens corresponding to the shares issued by the Maple Protocol pool are minted.
-     * @param _asset The address of the asset to deposit. (USDC/USDT)
+     * @param _asset The address of the asset to deposit. (USDC)
      * @param _amount The amount of the asset to deposit.
      */
     function deposit(address _asset, uint256 _amount) external authorizedCaller nonReentrant validAsset(_asset) {
         if (_asset == usdc) {
             _depositMapleCash(_amount, usdc, mapleUSDCPool, address(lUSDC), MAPLE_POOL_MANAGER_USDC);
-        } else if (_asset == usdt) {
-            _depositMapleCash(_amount, usdt, mapleUSDTPool, address(lUSDT), MAPLE_POOL_MANAGER_USDT);
         }
+        else
+            revert InvalidAsset();
     }
 
     /**
-     * @dev Request the redemption of LP tokens issued. (lUSDC/lUSDT)
+     * @dev Request the redemption of LP tokens issued. (lUSDC)
      * @notice The shares corresponding to the LP tokens are requested for redemption from the Maple Protocol pool.
-     * @param _asset The address of the asset to redeem. (USDC/USDT)
+     * @param _asset The address of the asset to redeem. (USDC)
      * @param _lpTokens The amount of LP tokens to redeem.
      */
     function requestRedeem(address _asset, uint256 _lpTokens)
@@ -139,39 +133,36 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     {
         if (_asset == usdc) {
             _requestRedeemMapleCash(_lpTokens, usdc, mapleUSDCPool, address(lUSDC));
-        } else if (_asset == usdt) {
-            _requestRedeemMapleCash(_lpTokens, usdt, mapleUSDTPool, address(lUSDT));
-        }
+        } else 
+            revert InvalidAsset();
     }
 
     /**
-     * @dev Redeem LP tokens issued. (lUSDC/lUSDT)
+     * @dev Redeem LP tokens issued. (lUSDC)
      * @notice The shares corresponding to the LP tokens that were requested for redemption are redeemed from the Maple Protocol pool.
      * @notice The shares are burned in the Maple Protocol pool contract and the LP tokens are burned here.
-     * @param _asset The address of the asset to redeem. (USDC/USDT)
+     * @param _asset The address of the asset to redeem. (USDC)
      */
     function redeem(address _asset) external authorizedCaller nonReentrant validAsset(_asset) {
         require(awaitingRedemption[_asset], "LM: No redemption requested");
         if (_asset == usdc) {
             _redeemMapleCash(usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
-        } else if (_asset == usdt) {
-            _redeemMapleCash(usdt, mapleUSDTPool, address(lUSDT), MAPLE_WITHDRAWAL_MANAGER_USDT);
-        }
+        } else
+            revert InvalidAsset();
     }
 
     /**
      * @dev Remove Locked Maple Shares (during request redemption).
      * @notice The shares corresponding to the LP tokens that were requested for redemption are removed from the Maple Protocol pool.
      * @notice The shares are transferred Maple Protocol's withdrawal manager contract back to Nealthy's loan Manager.
-     * @param _asset The address of the asset. (USDC/USDT)
+     * @param _asset The address of the asset. (USDC)
      */
     function remove(address _asset) external authorizedCaller nonReentrant validAsset(_asset) {
         require(awaitingRedemption[_asset], "LM: No Tokens to remove");
         if (_asset == usdc) {
             _removeMapleCash(usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
-        } else if (_asset == usdt) {
-            _removeMapleCash(usdt, mapleUSDTPool, address(lUSDT), MAPLE_WITHDRAWAL_MANAGER_USDT);
-        }
+        } else 
+            revert InvalidAsset();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -208,7 +199,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     }
 
     /**
-     * @dev Internal function to request the redemption of LP tokens issued. (lUSDC/lUSDT)
+     * @dev Internal function to request the redemption of LP tokens issued. (lUSDC)
      * @param _lpTokens The amount of LP tokens to redeem.
      * @param _asset The address of the asset to redeem.
      * @param _pool The address of the Maple Protocol pool.
@@ -224,7 +215,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     }
 
     /**
-     * @dev Internal function to Redeem LP tokens issued. (lUSDC/lUSDT)
+     * @dev Internal function to Redeem LP tokens issued. (lUSDC)
      * @param _asset The address of the asset to redeem.
      * @param _pool The address of the Maple Protocol pool.
      * @param _lpToken The address of the LP token associated with the pool.
@@ -295,10 +286,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function getAssets(address _asset, uint256 _lpTokens) external view validInput(_asset, _lpTokens) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).convertToAssets(_lpTokens / 10 ** adjustedDecimals);
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToAssets(_lpTokens / 10 ** adjustedDecimals);
-        }
-        return ERR_CODE;
+        } else
+            return ERR_CODE;
     }
 
     /**
@@ -315,10 +304,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).convertToExitAssets(_lpTokens / 10 ** adjustedDecimals);
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToExitAssets(_lpTokens / 10 ** adjustedDecimals);
-        }
-        return ERR_CODE;
+        } else 
+            return ERR_CODE;
     }
 
     /**
@@ -330,10 +317,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function getShares(address _asset, uint256 _amount) external view validInput(_asset, _amount) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).convertToShares(_amount);
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToShares(_amount);
-        }
-        return ERR_CODE;
+        } else
+            return ERR_CODE;
     }
 
     /**
@@ -345,10 +330,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function getExitShares(address _asset, uint256 _amount) external view validInput(_asset, _amount) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).convertToExitShares(_amount);
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).convertToExitShares(_amount);
-        }
-        return ERR_CODE;
+        } else 
+            return ERR_CODE;
     }
 
     /**
@@ -359,10 +342,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function getUnrealizedLossesMaple(address _asset) external view validAsset(_asset) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).unrealizedLosses();
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).unrealizedLosses();
-        }
-        return ERR_CODE;
+        } else 
+            return ERR_CODE;
     }
 
     /**
@@ -373,10 +354,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function getTotalAssetsMaple(address _asset) external view validAsset(_asset) returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).totalAssets();
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).totalAssets();
-        }
-        return ERR_CODE;
+        } else
+            return ERR_CODE;
     }
 
     /**
@@ -389,10 +368,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function previewRedeem(address _asset, uint256 _lpTokens) external view returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).previewRedeem(_lpTokens / 10 ** 12);
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).previewRedeem(_lpTokens / 10 ** 12);
-        }
-        return ERR_CODE;
+        } else 
+            return ERR_CODE;
     }
 
     /**
@@ -404,10 +381,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function previewDepositAssets(address _asset, uint256 _amount) external view returns (uint256) {
         if (_asset == usdc) {
             return IPool(mapleUSDCPool).previewDeposit(_amount);
-        } else if (_asset == usdt) {
-            return IPool(mapleUSDTPool).previewDeposit(_amount);
-        }
-        return ERR_CODE;
+        } else 
+            return ERR_CODE;
     }
 
     /**
@@ -467,9 +442,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     function redeemManual(address _asset, uint256 _shares) external onlyAdmin nonReentrant validAsset(_asset) {
         if (_asset == usdc) {
             _redeemMapleCashManual(_shares, usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
-        } else if (_asset == usdt) {
-            _redeemMapleCashManual(_shares, usdt, mapleUSDTPool, address(lUSDT), MAPLE_WITHDRAWAL_MANAGER_USDT);
-        }
+        } else 
+            revert InvalidAsset();
     }
 
     function _redeemMapleCashManual(uint256 _shares, address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
