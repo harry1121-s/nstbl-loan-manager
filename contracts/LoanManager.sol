@@ -3,6 +3,7 @@ pragma solidity 0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import {VersionedInitializable} from "./upgradeable/VersionedInitializable.sol";
 import {
     IPool,
     IERC20Helper,
@@ -18,10 +19,11 @@ import {
  * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations.
  */
 
-contract LoanManager is LoanManagerStorage {
+contract LoanManager is LoanManagerStorage, VersionedInitializable {
     using SafeERC20 for IERC20Helper;
     using Address for address;
 
+    uint256 internal constant REVISION = 1;
     uint256 private _locked = 1;
 
     /*//////////////////////////////////////////////////////////////
@@ -79,19 +81,24 @@ contract LoanManager is LoanManagerStorage {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @dev Constructor to initialize the LoanManager contract.
-     * @param _nstblHub The address of the Nealthy NSTBL Hub contract.
-     * @param _admin The address of the admin for this contract.
-     * @param _mapleUSDCPool The address of the Maple Protocol USDC pool.
-     * @param _mapleUSDTPool The address of the Maple Protocol USDT pool.
+     * @dev Constructor to set immutables the LoanManager contract.
      */
-    constructor(address _nstblHub, address _admin, address _mapleUSDCPool, address _mapleUSDTPool) {
+    constructor() {
+        // nstblHub = _nstblHub;
+        // admin = _admin;
+       
+        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+        usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+        
+
+        
+    }
+
+    function initialize(address _nstblHub, address _admin, address _mapleUSDCPool, address _mapleUSDTPool) external initializer {
         nstblHub = _nstblHub;
         admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
         mapleUSDTPool = _mapleUSDTPool;
-        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-        usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
         lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", _admin);
         lUSDT = new TokenLP("Loan Manager USDT", "lUSDT", _admin);
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
@@ -492,4 +499,14 @@ contract LoanManager is LoanManagerStorage {
         require(_asset == usdc, "LM: Invalid Target address");
         _value = IPool(mapleUSDCPool).convertToAssets(lUSDC.totalSupply() / 10 ** adjustedDecimals) * 10**adjustedDecimals;
     }
+
+    function getRevision() internal pure virtual override returns (uint256) {
+        return REVISION;
+    }
+
+    function getVersion() public pure returns(uint256 _version) {
+        _version = getRevision();
+    }
+
+    uint256[49] _gap;
 }

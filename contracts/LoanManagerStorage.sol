@@ -31,8 +31,8 @@ contract LoanManagerStorage {
 
     /// @notice addresses of the maple pools for USDC and USDT
     /// @dev is immutable to allow for changes during upgrades (in case of changes on Maple's side)
-    address public immutable mapleUSDCPool;
-    address public immutable mapleUSDTPool;
+    address public mapleUSDCPool;
+    address public mapleUSDTPool;
 
     /// @notice addresses of the maple pool managers for USDC and USDT cash pools
     /// @dev is immutable to allow for changes during upgrades (in case of changes on Maple's side)
@@ -46,11 +46,11 @@ contract LoanManagerStorage {
 
     /// @notice addresses of the LP tokens issued by Nealthy LoanManager for USDC and USDT
     /// @dev is immutable since tokens are deployed in the constructor
-    TokenLP public immutable lUSDC;
-    TokenLP public immutable lUSDT;
+    TokenLP public lUSDC;
+    TokenLP public lUSDT;
 
     /// @notice used to convert between maple LP token and Nealthy LoanManager's LP token
-    uint256 public immutable adjustedDecimals;
+    uint256 public adjustedDecimals;
 
     /// @notice address of the admin
     address public admin;
