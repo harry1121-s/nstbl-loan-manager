@@ -440,6 +440,10 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
         require(_asset == usdc, "LM: Invalid Target address");
         _value = IPool(mapleUSDCPool).convertToAssets(lUSDC.totalSupply() / 10 ** adjustedDecimals) * 10**adjustedDecimals;
     }
+    
+    funtion getLPTotalSupply() external view returns(uint256 _value){
+        _value = lUSDC.totalSupply();
+    }
 
     function getRevision() internal pure virtual override returns (uint256) {
         return REVISION;
