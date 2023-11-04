@@ -4,6 +4,9 @@ pragma solidity ^0.8.13;
 import { Test, console } from "forge-std/Test.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { LoanManager } from "../../contracts/LoanManager.sol";
+import { ACLManager } from "@aclManager/contracts/ACLManager.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IPoolManager } from "../../contracts/interfaces/maple/IPoolManager.sol";
 import { IWithdrawalManager, IWithdrawalManagerStorage } from "../../contracts/interfaces/maple/IWithdrawalManager.sol";
@@ -17,71 +20,71 @@ contract BaseTest is Utils {
     //////////////////////////////////////////////////////////////*/
 
     // Main contracts
+    ProxyAdmin public proxyAdmin;
+    TransparentUpgradeableProxy public loanManagerProxy;
+
+    ACLManager public aclManager;
+    LoanManager public lmImpl1;
     LoanManager public loanManager;
     // Token public token;
     IERC20 public usdc;
-    IERC20 public usdt;
 
     IERC20 public lusdc;
-    IERC20 public lusdt;
 
     IPool public usdcPool;
-    IPool public usdtPool;
     IPoolManager public poolManagerUSDC;
     IWithdrawalManager public withdrawalManagerUSDC;
-    IPoolManager public poolManagerUSDT;
-    IWithdrawalManager public withdrawalManagerUSDT;
     uint256 mainnetFork;
 
     /*//////////////////////////////////////////////////////////////
                                  SETUP
     //////////////////////////////////////////////////////////////*/
 
-    function setUp() public virtual {
+    function setUp() public virtual{
         mainnetFork = vm.createFork("https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW");
         vm.selectFork(mainnetFork);
         vm.startPrank(owner);
+
+        aclManager = new ACLManager();
+        aclManager.setAuthorizedCallerLoanManager(NSTBL_HUB, true);
         require(
             NSTBL_HUB != address(0) && owner != address(0) && MAPLE_USDC_CASH_POOL != address(0)
-                && MAPLE_USDT_CASH_POOL != address(0) && MAPLE_POOL_MANAGER_USDC != address(0)
-                && MAPLE_POOL_MANAGER_USDT != address(0) && WITHDRAWAL_MANAGER_USDC != address(0)
-                && WITHDRAWAL_MANAGER_USDT != address(0) && USDC != address(0) && USDT != address(0)
+                && MAPLE_POOL_MANAGER_USDC != address(0)
+                && WITHDRAWAL_MANAGER_USDC != address(0)
+                && USDC != address(0)
         );
-        loanManager = new LoanManager(
-            NSTBL_HUB,
-            owner,
-            MAPLE_USDC_CASH_POOL,
-            MAPLE_USDT_CASH_POOL
-        );
+        lmImpl1 = new LoanManager();
+        console.log("Implementation Address: ", address(lmImpl1));
+        bytes memory data = abi.encodeCall(lmImpl1.initialize, (NSTBL_HUB, address(aclManager), MAPLE_USDC_CASH_POOL));
+        loanManagerProxy = new TransparentUpgradeableProxy(address(lmImpl1), admin, data);
+        console.log("Proxy Address: ", address(loanManagerProxy));
         vm.stopPrank();
+        loanManager = LoanManager(address(loanManagerProxy));
+        console.log("LoanManager Address: ", address(loanManager));
+        
         lusdc = IERC20(address(loanManager.lUSDC()));
-        lusdt = IERC20(address(loanManager.lUSDT()));
         usdc = IERC20(USDC);
-        usdt = IERC20(USDT);
         usdcPool = IPool(MAPLE_USDC_CASH_POOL);
-        usdtPool = IPool(MAPLE_USDT_CASH_POOL);
         poolManagerUSDC = IPoolManager(MAPLE_POOL_MANAGER_USDC);
-        poolManagerUSDT = IPoolManager(MAPLE_POOL_MANAGER_USDT);
         withdrawalManagerUSDC = IWithdrawalManager(WITHDRAWAL_MANAGER_USDC);
-        withdrawalManagerUSDT = IWithdrawalManager(WITHDRAWAL_MANAGER_USDT);
 
         vm.label(address(loanManager), "LoanManager");
         vm.label(address(usdc), "USDC");
         vm.label(address(usdcPool), "USDC Pool");
         vm.label(poolDelegateUSDC, "poolDelegate USDC");
         vm.label(address(poolManagerUSDC), "poolManager USDC");
+
+        
+
     }
 
     function _setAllowedLender(address _delegate) internal {
         bool out;
         vm.startPrank(_delegate);
-        if (_delegate == poolDelegateUSDC) {
-            poolManagerUSDC.setAllowedLender(address(loanManager), true);
-            (out,) = address(poolManagerUSDC).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
-        } else {
-            poolManagerUSDT.setAllowedLender(address(loanManager), true);
-            (out,) = address(poolManagerUSDT).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
-        }
+        
+        poolManagerUSDC.setAllowedLender(address(loanManager), true);
+        (out,) = address(poolManagerUSDC).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
+        
         assertTrue(out);
         vm.stopPrank();
     }
@@ -91,8 +94,6 @@ contract BaseTest is Utils {
 
         if (_asset == USDC) {
             _setAllowedLender(poolDelegateUSDC);
-        } else {
-            _setAllowedLender(poolDelegateUSDT);
         }
 
         vm.startPrank(NSTBL_HUB);

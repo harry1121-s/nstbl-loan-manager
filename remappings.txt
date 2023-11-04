@@ -1,3 +1,4 @@
 ds-test/=modules/forge-std/lib/ds-test/src/
 forge-std/=modules/forge-std/src/
 @openzeppelin/=modules/openzeppelin-contracts/
+@aclManager/=modules/nstbl-acl-manager
