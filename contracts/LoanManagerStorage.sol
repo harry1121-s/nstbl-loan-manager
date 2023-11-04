@@ -4,6 +4,7 @@ pragma solidity 0.8.21;
 import "./interfaces/maple/IPool.sol";
 import "./interfaces/maple/IWithdrawalManager.sol";
 import "./interfaces/IERC20Helper.sol";
+import "@aclManager/contracts/IACLManager.sol";
 import "./TokenLP.sol";
 
 contract LoanManagerStorage {
@@ -14,8 +15,6 @@ contract LoanManagerStorage {
     event Redeem(address indexed asset, uint256 mapleShares, uint256 tokensReceived);
 
     event Removed(address indexed asset, uint256 mapleShares);
-
-    event AdminChanged(address indexed oldAdmin, address indexed newAdmin);
 
     event NSTBLHUBChanged(address indexed oldHub, address indexed newHub);
 
@@ -47,15 +46,15 @@ contract LoanManagerStorage {
     /// @notice used to convert between maple LP token and Nealthy LoanManager's LP token
     uint256 public adjustedDecimals;
 
-    /// @notice address of the admin
-    address public admin;
-
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
 
     /// @notice address of the NSTBL Hub
     address public nstblHub;
+
+    /// @notice address of the Access Control Manager
+    address public aclManager;
 
     /// @notice mapping to check for pending redemptions for an asset
     mapping(address => bool) public awaitingRedemption;

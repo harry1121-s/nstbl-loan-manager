@@ -11,13 +11,14 @@ contract TestProxy is BaseTest {
     }
 
     function test_proxy() external {
-        assertEq(loanManager.admin(), admin);
+        assertEq(loanManager.aclManager(), address(aclManager));
         assertEq(loanManager.nstblHub(), NSTBL_HUB);
         assertEq(loanManager.mapleUSDCPool(), MAPLE_USDC_CASH_POOL);
         assertEq(loanManager.usdc(), USDC);
         assertEq(loanManager.MAPLE_POOL_MANAGER_USDC(), MAPLE_POOL_MANAGER_USDC);
         assertEq(loanManager.MAPLE_WITHDRAWAL_MANAGER_USDC(), WITHDRAWAL_MANAGER_USDC);
         assertEq(loanManager._locked(), 1);
+        assertEq(loanManager.getVersion(), 1);
     }
 }
 

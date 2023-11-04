@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import { Test, console } from "forge-std/Test.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { LoanManager } from "../../contracts/LoanManager.sol";
+import { ACLManager } from "@aclManager/contracts/ACLManager.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -22,6 +23,7 @@ contract BaseTest is Utils {
     ProxyAdmin public proxyAdmin;
     TransparentUpgradeableProxy public loanManagerProxy;
 
+    ACLManager public aclManager;
     LoanManager public lmImpl1;
     LoanManager public loanManager;
     // Token public token;
@@ -42,6 +44,9 @@ contract BaseTest is Utils {
         mainnetFork = vm.createFork("https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW");
         vm.selectFork(mainnetFork);
         vm.startPrank(owner);
+
+        aclManager = new ACLManager();
+        aclManager.setAuthorizedCallerLoanManager(NSTBL_HUB, true);
         require(
             NSTBL_HUB != address(0) && owner != address(0) && MAPLE_USDC_CASH_POOL != address(0)
                 && MAPLE_POOL_MANAGER_USDC != address(0)
@@ -50,7 +55,7 @@ contract BaseTest is Utils {
         );
         lmImpl1 = new LoanManager();
         console.log("Implementation Address: ", address(lmImpl1));
-        bytes memory data = abi.encodeCall(lmImpl1.initialize, (NSTBL_HUB, admin, MAPLE_USDC_CASH_POOL));
+        bytes memory data = abi.encodeCall(lmImpl1.initialize, (NSTBL_HUB, address(aclManager), MAPLE_USDC_CASH_POOL));
         loanManagerProxy = new TransparentUpgradeableProxy(address(lmImpl1), admin, data);
         console.log("Proxy Address: ", address(loanManagerProxy));
         vm.stopPrank();

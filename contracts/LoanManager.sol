@@ -9,6 +9,7 @@ import {
     IERC20Helper,
     IWithdrawalManagerStorage,
     IWithdrawalManager,
+    IACLManager,
     TokenLP,
     LoanManagerStorage
 } from "./LoanManagerStorage.sol";
@@ -34,7 +35,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
      * @dev Modifier to ensure that only authorized callers can execute a function.
      */
     modifier authorizedCaller() {
-        require(msg.sender == nstblHub, "Loan Manager: unAuth Hub");
+        require(IACLManager(aclManager).authorizedCallersLoanManager(msg.sender), "Loan Manager: unAuth Hub");
         _;
     }
 
@@ -42,7 +43,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
      * @dev Modifier to ensure that only the admin can execute a function.
      */
     modifier onlyAdmin() {
-        require(msg.sender == admin, "LM: unAuth Admin");
+        require(msg.sender == IACLManager(aclManager).admin(), "LM: unAuth Admin");
         _;
     }
 
@@ -89,16 +90,15 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
         
     }
 
-    function initialize(address _nstblHub, address _admin, address _mapleUSDCPool) external initializer {
+    function initialize(address _nstblHub, address _aclManager, address _mapleUSDCPool) external initializer {
         nstblHub = _nstblHub;
-        admin = _admin;
         mapleUSDCPool = _mapleUSDCPool;
-        lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", _admin);
+        aclManager = _aclManager;
+        lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", IACLManager(_aclManager).admin());
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
         _locked = 1;
 
         emit NSTBLHUBChanged(address(0), nstblHub);
-        emit AdminChanged(address(0), admin);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -403,39 +403,6 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     /*//////////////////////////////////////////////////////////////
                            LM Admin Functions
     //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @dev Set an authorized caller address for the Loan Manager contract.
-     * @param _caller The address to be set as an authorized caller.
-     * @notice This function can only be called by the admin of the Loan Manager contract.
-     * @notice This function is used to update the authorized caller address for the Loan Manager contract.
-     * Only the admin has the permission to call this function. The authorized caller is typically a trusted contract or entity
-     * that can interact with the Loan Manager contract on behalf of the Maple Protocol, granting specific permissions.
-     * @notice Use this function with caution, as it can grant or revoke important privileges to the designated caller.
-     */
-    function setAuthorizedCaller(address _caller) external onlyAdmin {
-        require(_caller != address(0));
-        address oldHub = nstblHub;
-        nstblHub = _caller;
-        emit NSTBLHUBChanged(oldHub, nstblHub);
-    }
-
-    /**
-     * @dev updates admin address for the Loan Manager contract.
-     * @param _admin The address to be set as the admin.
-     * @notice This function can only be called by the admin of the Loan Manager contract.
-     * @notice This function is used to update the admin address for the Loan Manager contract.
-     * Only the admin has the permission to call this function. The admin is typically a trusted address or entity
-     * that can update the access of authorized caller to the Loan Manager contract.
-     * @notice Use this function with caution, as it can grant or revoke important privileges to the designated caller.
-     */
-    function changeAdmin(address _admin) external onlyAdmin {
-        require(_admin != address(0));
-        address oldAdmin = admin;
-        admin = _admin;
-        emit AdminChanged(oldAdmin, admin);
-    }
-
 
 
     /////////////////////////////// v1.1.0 ///////////////////////////////
