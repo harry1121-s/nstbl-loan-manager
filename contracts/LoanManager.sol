@@ -25,7 +25,7 @@ contract LoanManager is LoanManagerStorage {
     uint256 private _locked = 1;
 
     /*//////////////////////////////////////////////////////////////
-                               MODIFIERS
+    MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -75,7 +75,7 @@ contract LoanManager is LoanManagerStorage {
     }
 
     /*//////////////////////////////////////////////////////////////
-                              CONSTRUCTOR
+    CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -101,7 +101,7 @@ contract LoanManager is LoanManagerStorage {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            LP Functions
+    LP FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -168,106 +168,7 @@ contract LoanManager is LoanManagerStorage {
     }
 
     /*//////////////////////////////////////////////////////////////
-                           LM Internal Functions
-    //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @dev Internal function to deposit assets into the Maple Protocol pool and mint LP tokens.
-     * @param _amount The amount of the asset to deposit.
-     * @param _asset The address of the asset being deposited.
-     * @param _pool The address of the Maple Protocol pool.
-     * @param _lpToken The address of the LP token associated with the pool.
-     * @param _poolManager The address of the Maple Protocol pool manager contract.
-     * @notice This function checks if the deposit amount is valid, transfers the assets from the sender to this contract, approves the pool to spend the assets, updates relevant accounting data, and emits a `Deposit` event.
-     */
-    function _depositMapleCash(uint256 _amount, address _asset, address _pool, address _lpToken, address _poolManager)
-        internal
-    {
-        require(isValidDepositAmount(_amount, _pool, _poolManager), "LM: Invalid amount");
-        uint256 lpTokens;
-        uint256 sharesReceived;
-        IERC20Helper(_asset).safeTransferFrom(msg.sender, address(this), _amount);
-        IERC20Helper(_asset).safeIncreaseAllowance(_pool, _amount);
-
-        totalAssetsReceived[_asset] += _amount;
-        uint256 balBefore = IPool(_pool).balanceOf(address(this));
-        IPool(_pool).deposit(_amount, address(this));
-        sharesReceived = IPool(_pool).balanceOf(address(this)) - balBefore;
-        totalSharesReceived[_asset] += sharesReceived;
-        lpTokens = sharesReceived * 10 ** adjustedDecimals;
-        totalLPTokensMinted[_lpToken] += lpTokens;
-        IERC20Helper(_lpToken).mint(nstblHub, lpTokens);
-        emit Deposit(_asset, _amount, lpTokens, sharesReceived);
-    }
-
-    /**
-     * @dev Internal function to request the redemption of LP tokens issued. (lUSDC/lUSDT)
-     * @param _lpTokens The amount of LP tokens to redeem.
-     * @param _asset The address of the asset to redeem.
-     * @param _pool The address of the Maple Protocol pool.
-     * @param _lpToken The address of the LP token associated with the pool.
-     * @notice This function checks if redemption is pending and if there are sufficient shares to redeem, records the escrowed shares, and emits a `RequestRedeem` event.
-     */
-    function _requestRedeemMapleCash(uint256 _lpTokens, address _asset, address _pool, address _lpToken) internal {
-        require(!awaitingRedemption[_asset], "LM: Redemption Pending");
-        require(IPool(_pool).balanceOf(address(this)) >= _lpTokens / 10 ** adjustedDecimals, "LM: Insufficient Shares");
-        escrowedMapleShares[_lpToken] = IPool(_pool).requestRedeem(_lpTokens / 10 ** adjustedDecimals, address(this));
-        awaitingRedemption[_asset] = true;
-        emit RequestRedeem(_asset, _lpTokens, escrowedMapleShares[_lpToken]);
-    }
-
-    /**
-     * @dev Internal function to Redeem LP tokens issued. (lUSDC/lUSDT)
-     * @param _asset The address of the asset to redeem.
-     * @param _pool The address of the Maple Protocol pool.
-     * @param _lpToken The address of the LP token associated with the pool.
-     * @param _withdrawManager The address of the withdrawal manager contract.
-     * @notice This function redeems Maple Protocol tokens, burns the associated LP tokens, updates relevant accounting data, and emits a `Redeem` event.
-     */
-    function _redeemMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
-        uint256 exitCycleId = IWithdrawalManagerStorage(_withdrawManager).exitCycleId(address(this));
-        (uint256 windowStart, uint256 windowEnd) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
-        uint256 _shares = escrowedMapleShares[_lpToken];
-
-        require(block.timestamp >= windowStart && block.timestamp < windowEnd, "LM: Not in Window");
-
-        uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
-        assetsRedeemed[_asset] += stablesRedeemed;
-        escrowedMapleShares[_lpToken] = IWithdrawalManagerStorage(_withdrawManager).lockedShares(address(this));
-        IERC20Helper(_lpToken).burn(nstblHub, (_shares - escrowedMapleShares[_lpToken]) * 10 ** adjustedDecimals);
-        if (escrowedMapleShares[_lpToken] == 0) {
-            awaitingRedemption[_asset] = false;
-        }
-        emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
-    }
-
-    /**
-     * @dev Internal function to remove locked Maple Shares.
-     * @param _asset The address of the asset to redeem.
-     * @param _pool The address of the Maple Protocol pool.
-     * @param _lpToken The address of the LP token associated with the pool.
-     * @param _withdrawManager The address of the withdrawal manager contract.
-     * @notice This function transfers locked Maple Shares from Maple Protocol to loanManager, updates relevant accounting data, and emits a `Remove` event.
-     */
-    function _removeMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
-        uint256 exitCycleId = IWithdrawalManagerStorage(_withdrawManager).exitCycleId(address(this));
-        (uint256 windowStart,) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
-        uint256 _shares = escrowedMapleShares[_lpToken];
-
-        require(block.timestamp > windowStart, "LM: Redemption Pending");
-
-        uint256 sharesRemoved = IPool(_pool).removeShares(_shares, address(this));
-        escrowedMapleShares[_lpToken] -= sharesRemoved;
-
-        if (escrowedMapleShares[_lpToken] == 0) {
-            awaitingRedemption[_asset] = false;
-        }
-
-        emit Removed(_asset, _shares);
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                           LM Getter Functions
+    GETTERS
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -419,7 +320,7 @@ contract LoanManager is LoanManagerStorage {
     }
 
     /*//////////////////////////////////////////////////////////////
-                           LM Admin Functions
+    ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -454,9 +355,6 @@ contract LoanManager is LoanManagerStorage {
         emit AdminChanged(oldAdmin, admin);
     }
 
-
-
-    /////////////////////////////// v1.1.0 ///////////////////////////////
     function redeemManual(address _asset, uint256 _shares) external onlyAdmin nonReentrant validAsset(_asset) {
         if (_asset == usdc) {
             _redeemMapleCashManual(_shares, usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
@@ -491,5 +389,104 @@ contract LoanManager is LoanManagerStorage {
     function getMaturedAssets(address _asset) external view returns(uint256 _value){
         require(_asset == usdc, "LM: Invalid Target address");
         _value = IPool(mapleUSDCPool).convertToAssets(lUSDC.totalSupply() / 10 ** adjustedDecimals) * 10**adjustedDecimals;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+    INTERNALS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev Internal function to deposit assets into the Maple Protocol pool and mint LP tokens.
+     * @param _amount The amount of the asset to deposit.
+     * @param _asset The address of the asset being deposited.
+     * @param _pool The address of the Maple Protocol pool.
+     * @param _lpToken The address of the LP token associated with the pool.
+     * @param _poolManager The address of the Maple Protocol pool manager contract.
+     * @notice This function checks if the deposit amount is valid, transfers the assets from the sender to this contract, approves the pool to spend the assets, updates relevant accounting data, and emits a `Deposit` event.
+     */
+    function _depositMapleCash(uint256 _amount, address _asset, address _pool, address _lpToken, address _poolManager)
+        internal
+    {
+        require(isValidDepositAmount(_amount, _pool, _poolManager), "LM: Invalid amount");
+        uint256 lpTokens;
+        uint256 sharesReceived;
+        IERC20Helper(_asset).safeTransferFrom(msg.sender, address(this), _amount);
+        IERC20Helper(_asset).safeIncreaseAllowance(_pool, _amount);
+
+        totalAssetsReceived[_asset] += _amount;
+        uint256 balBefore = IPool(_pool).balanceOf(address(this));
+        IPool(_pool).deposit(_amount, address(this));
+        sharesReceived = IPool(_pool).balanceOf(address(this)) - balBefore;
+        totalSharesReceived[_asset] += sharesReceived;
+        lpTokens = sharesReceived * 10 ** adjustedDecimals;
+        totalLPTokensMinted[_lpToken] += lpTokens;
+        IERC20Helper(_lpToken).mint(nstblHub, lpTokens);
+        emit Deposit(_asset, _amount, lpTokens, sharesReceived);
+    }
+
+    /**
+     * @dev Internal function to request the redemption of LP tokens issued. (lUSDC/lUSDT)
+     * @param _lpTokens The amount of LP tokens to redeem.
+     * @param _asset The address of the asset to redeem.
+     * @param _pool The address of the Maple Protocol pool.
+     * @param _lpToken The address of the LP token associated with the pool.
+     * @notice This function checks if redemption is pending and if there are sufficient shares to redeem, records the escrowed shares, and emits a `RequestRedeem` event.
+     */
+    function _requestRedeemMapleCash(uint256 _lpTokens, address _asset, address _pool, address _lpToken) internal {
+        require(!awaitingRedemption[_asset], "LM: Redemption Pending");
+        require(IPool(_pool).balanceOf(address(this)) >= _lpTokens / 10 ** adjustedDecimals, "LM: Insufficient Shares");
+        escrowedMapleShares[_lpToken] = IPool(_pool).requestRedeem(_lpTokens / 10 ** adjustedDecimals, address(this));
+        awaitingRedemption[_asset] = true;
+        emit RequestRedeem(_asset, _lpTokens, escrowedMapleShares[_lpToken]);
+    }
+
+    /**
+     * @dev Internal function to Redeem LP tokens issued. (lUSDC/lUSDT)
+     * @param _asset The address of the asset to redeem.
+     * @param _pool The address of the Maple Protocol pool.
+     * @param _lpToken The address of the LP token associated with the pool.
+     * @param _withdrawManager The address of the withdrawal manager contract.
+     * @notice This function redeems Maple Protocol tokens, burns the associated LP tokens, updates relevant accounting data, and emits a `Redeem` event.
+     */
+    function _redeemMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
+        uint256 exitCycleId = IWithdrawalManagerStorage(_withdrawManager).exitCycleId(address(this));
+        (uint256 windowStart, uint256 windowEnd) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
+        uint256 _shares = escrowedMapleShares[_lpToken];
+
+        require(block.timestamp >= windowStart && block.timestamp < windowEnd, "LM: Not in Window");
+
+        uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
+        assetsRedeemed[_asset] += stablesRedeemed;
+        escrowedMapleShares[_lpToken] = IWithdrawalManagerStorage(_withdrawManager).lockedShares(address(this));
+        IERC20Helper(_lpToken).burn(nstblHub, (_shares - escrowedMapleShares[_lpToken]) * 10 ** adjustedDecimals);
+        if (escrowedMapleShares[_lpToken] == 0) {
+            awaitingRedemption[_asset] = false;
+        }
+        emit Redeem(_asset, _shares, assetsRedeemed[_asset]);
+    }
+
+    /**
+     * @dev Internal function to remove locked Maple Shares.
+     * @param _asset The address of the asset to redeem.
+     * @param _pool The address of the Maple Protocol pool.
+     * @param _lpToken The address of the LP token associated with the pool.
+     * @param _withdrawManager The address of the withdrawal manager contract.
+     * @notice This function transfers locked Maple Shares from Maple Protocol to loanManager, updates relevant accounting data, and emits a `Remove` event.
+     */
+    function _removeMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
+        uint256 exitCycleId = IWithdrawalManagerStorage(_withdrawManager).exitCycleId(address(this));
+        (uint256 windowStart,) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
+        uint256 _shares = escrowedMapleShares[_lpToken];
+
+        require(block.timestamp > windowStart, "LM: Redemption Pending");
+
+        uint256 sharesRemoved = IPool(_pool).removeShares(_shares, address(this));
+        escrowedMapleShares[_lpToken] -= sharesRemoved;
+
+        if (escrowedMapleShares[_lpToken] == 0) {
+            awaitingRedemption[_asset] = false;
+        }
+
+        emit Removed(_asset, _shares);
     }
 }
