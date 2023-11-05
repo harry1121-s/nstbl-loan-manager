@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import "./interfaces/maple/IPool.sol";
 import "./interfaces/maple/IWithdrawalManager.sol";
 import "./interfaces/IERC20Helper.sol";
-import "@aclManager/contracts/IACLManager.sol";
+import "@nstbl-acl-manager/contracts/IACLManager.sol";
 import "./TokenLP.sol";
 
 contract LoanManagerStorage {
