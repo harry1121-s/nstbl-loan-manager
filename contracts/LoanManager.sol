@@ -223,10 +223,10 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
      */
     function _removeMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
         uint256 exitCycleId = IWithdrawalManagerStorage(_withdrawManager).exitCycleId(address(this));
-        (uint256 windowStart,) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
+        (,uint256 windowEnd) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
         uint256 _shares = escrowedMapleShares;
 
-        require(block.timestamp > windowStart, "LM: Redemption Pending");
+        require(block.timestamp > windowEnd, "LM: Redemption Pending");
 
         uint256 sharesRemoved = IPool(_pool).removeShares(_shares, address(this));
         escrowedMapleShares -= sharesRemoved;
