@@ -18,7 +18,7 @@ pragma solidity 0.8.21;
 abstract contract VersionedInitializable {
 
     address private immutable originalImpl;
-    uint256 constant LAST_INITIALIZED_REVISION_SLOT = 13;
+    uint256 constant LAST_INITIALIZED_REVISION_SLOT = 12;
 
     error CannotInitImplementation();
     error Initialized();

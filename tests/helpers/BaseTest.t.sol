@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import { Test, console } from "forge-std/Test.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { LoanManager } from "../../contracts/LoanManager.sol";
-import { ACLManager } from "@aclManager/contracts/ACLManager.sol";
+import { ACLManager } from "@nstbl-acl-manager/contracts/ACLManager.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -99,7 +99,7 @@ contract BaseTest is Utils {
         vm.startPrank(NSTBL_HUB);
         IERC20(_asset).safeIncreaseAllowance(address(loanManager), amount);
 
-        loanManager.deposit(_asset, amount);
+        loanManager.deposit(amount);
         vm.stopPrank();
     }
 

@@ -56,29 +56,25 @@ contract LoanManagerStorage {
     /// @notice address of the Access Control Manager
     address public aclManager;
 
-    /// @notice mapping to check for pending redemptions for an asset
-    mapping(address => bool) public awaitingRedemption;
+    /// @notice boolena flag to check for pending redemptions for an asset
+    bool public awaitingRedemption;
 
-    /// @notice mapping to store total amount of an asset received for deposit
-    mapping(address => uint256) public totalAssetsReceived;
+    /// @notice to store total amount of an asset received for deposit
+    uint256 public totalAssetsReceived;
 
-    /// @notice mapping to store total shares issued to the Loan Manager contract per asset
-    mapping(address => uint256) public totalSharesReceived;
+    /// @notice to store total shares issued to the Loan Manager contract per asset
+    uint256 public totalSharesReceived;
 
-    /// @notice mapping to store total amount of LP tokens minted
-    mapping(address => uint256) public totalLPTokensMinted;
+    /// @notice to store total amount of LP tokens minted
+    uint256 public totalLPTokensMinted;
 
-    /// @notice mapping to store total amount of LP tokens burned
-    mapping(address => uint256) public totalLPTokensBurned;
+    /// @notice to store total amount of LP tokens burned
+    uint256 public totalLPTokensBurned;
 
-    /// @notice mapping to store escrowed shares in the Maple protocol pool corresponding to each LP token
-    mapping(address => uint256) public escrowedMapleShares;
+    /// @notice to store escrowed shares in the Maple protocol pool corresponding to each LP token
+    uint256 public escrowedMapleShares;
 
-    /// @notice mapping to store total assets received per asset from Maple protocol pool after redemption
-    mapping(address => uint256) public assetsRedeemed;
+    /// @notice mapping to store total assets received from Maple protocol pool after redemption
+    uint256 public assetsRedeemed;
 
-
-    ////New storage variables
-
-    uint256 immutable precision = 10**27;
 }
