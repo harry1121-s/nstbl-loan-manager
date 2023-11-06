@@ -6,8 +6,8 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { LoanManager } from "../../contracts/LoanManager.sol";
 import { LoanManagerV2 } from "../../contracts/upgradeable/test/LoanManagerV2.sol";
 import { ACLManager } from "@nstbl-acl-manager/contracts/ACLManager.sol";
-import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "../../contracts/upgradeable/ProxyAdmin.sol";
+import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "../../contracts/upgradeable/TransparentUpgradeableProxy.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IPoolManager } from "../../contracts/interfaces/maple/IPoolManager.sol";
@@ -57,6 +57,7 @@ contract BaseTest is Utils {
                 && WITHDRAWAL_MANAGER_USDC != address(0)
                 && USDC != address(0)
         );
+        proxyAdmin = new ProxyAdmin(owner);
         lmImpl1 = new LoanManager();
         console.log("Implementation Address: V1", address(lmImpl1));
         lmImpl2 = new LoanManagerV2();

@@ -79,9 +79,9 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
         usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;        
     }
 
-    function initialize(uint256 _newVar) external initializer {
-        newVar = _newVar;
-    }
+    // function initialize(uint256 _newVar) external initializer {
+    //     newVar = _newVar;
+    // }
 
     /*//////////////////////////////////////////////////////////////
     LP FUNCTIONS
