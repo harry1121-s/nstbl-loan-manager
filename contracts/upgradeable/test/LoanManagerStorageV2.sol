@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.21;
 
-import "./interfaces/maple/IPool.sol";
-import "./interfaces/maple/IWithdrawalManager.sol";
-import "./interfaces/IERC20Helper.sol";
+import "../../interfaces/maple/IPool.sol";
+import "../../interfaces/maple/IWithdrawalManager.sol";
+import "../../interfaces/IERC20Helper.sol";
 import "@nstbl-acl-manager/contracts/IACLManager.sol";
-import "./TokenLP.sol";
+import "../../TokenLP.sol";
 
-contract LoanManagerStorage {
+contract LoanManagerStorageV2 {
     event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
 
     event RequestRedeem(address indexed asset, uint256 lTokens, uint256 escrowedShares);
@@ -80,6 +80,8 @@ contract LoanManagerStorage {
     /// @notice mapping to store total assets received from Maple protocol pool after redemption
     uint256 public assetsRedeemed;
 
+    uint256 public newVar;
+    /// @notice intentionally not reducing gap size to check for storage collisions
     uint256[49] _gap;
 
 }

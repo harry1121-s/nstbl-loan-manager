@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import {VersionedInitializable} from "./upgradeable/VersionedInitializable.sol";
+import {VersionedInitializable} from "../VersionedInitializable.sol";
 import {
     IPool,
     IERC20Helper,
@@ -11,8 +11,8 @@ import {
     IWithdrawalManager,
     IACLManager,
     TokenLP,
-    LoanManagerStorage
-} from "./LoanManagerStorage.sol";
+    LoanManagerStorageV2
+} from "./LoanManagerStorageV2.sol";
 /**
  * @title LoanManager contract for managing Maple Protocol loans
  * @author Angad Singh Agarwal, Harshit Singhal
@@ -20,11 +20,11 @@ import {
  * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations.
  */
 
-contract LoanManager is LoanManagerStorage, VersionedInitializable {
+contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
     using SafeERC20 for IERC20Helper;
     using Address for address;
 
-    uint256 internal constant REVISION = 111;
+    uint256 internal constant REVISION = 222;
     uint256 private _locked;
 
     /*//////////////////////////////////////////////////////////////
@@ -79,14 +79,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
         usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;        
     }
 
-    function initialize(address _nstblHub, address _aclManager, address _mapleUSDCPool) external initializer {
-        nstblHub = _nstblHub;
-        mapleUSDCPool = _mapleUSDCPool;
-        aclManager = _aclManager;
-        lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", IACLManager(_aclManager).admin());
-        adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
-        _locked = 1;
-        emit NSTBLHUBChanged(address(0), nstblHub);
+    function initialize(uint256 _newVar) external initializer {
+        newVar = _newVar;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -394,6 +388,10 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
 
     function getVersion() public pure returns(uint256 _version) {
         _version = getRevision();
+    }
+
+    function getLocked() public view returns(uint256){
+        return _locked;
     }
 
 }

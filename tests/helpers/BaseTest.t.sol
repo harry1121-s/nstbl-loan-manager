@@ -4,10 +4,12 @@ pragma solidity ^0.8.13;
 import { Test, console } from "forge-std/Test.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { LoanManager } from "../../contracts/LoanManager.sol";
+import { LoanManagerV2 } from "../../contracts/upgradeable/test/LoanManagerV2.sol";
 import { ACLManager } from "@nstbl-acl-manager/contracts/ACLManager.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IPoolManager } from "../../contracts/interfaces/maple/IPoolManager.sol";
 import { IWithdrawalManager, IWithdrawalManagerStorage } from "../../contracts/interfaces/maple/IWithdrawalManager.sol";
 import { IPool } from "../../contracts/interfaces/maple/IPool.sol";
@@ -25,6 +27,8 @@ contract BaseTest is Utils {
 
     ACLManager public aclManager;
     LoanManager public lmImpl1;
+    LoanManagerV2 public lmImpl2;
+
     LoanManager public loanManager;
     // Token public token;
     IERC20 public usdc;
@@ -54,7 +58,9 @@ contract BaseTest is Utils {
                 && USDC != address(0)
         );
         lmImpl1 = new LoanManager();
-        console.log("Implementation Address: ", address(lmImpl1));
+        console.log("Implementation Address: V1", address(lmImpl1));
+        lmImpl2 = new LoanManagerV2();
+        console.log("Implementation Address: V2", address(lmImpl2));
         bytes memory data = abi.encodeCall(lmImpl1.initialize, (NSTBL_HUB, address(aclManager), MAPLE_USDC_CASH_POOL));
         loanManagerProxy = new TransparentUpgradeableProxy(address(lmImpl1), admin, data);
         console.log("Proxy Address: ", address(loanManagerProxy));
