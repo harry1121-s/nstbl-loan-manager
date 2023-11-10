@@ -79,14 +79,18 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
         usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;        
     }
 
-    function initialize(address _nstblHub, address _aclManager, address _mapleUSDCPool) external initializer {
-        nstblHub = _nstblHub;
+    function initialize(address _aclManager, address _mapleUSDCPool) external initializer {
         mapleUSDCPool = _mapleUSDCPool;
         aclManager = _aclManager;
         lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", IACLManager(_aclManager).admin());
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
         _locked = 1;
+    }
+
+    function updateNSTBLHUB(address _nstblHub) external onlyAdmin {
+        nstblHub = _nstblHub;
         emit NSTBLHUBChanged(address(0), nstblHub);
+
     }
 
     /*//////////////////////////////////////////////////////////////
