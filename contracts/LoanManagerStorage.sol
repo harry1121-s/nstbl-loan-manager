@@ -80,6 +80,6 @@ contract LoanManagerStorage {
     /// @notice mapping to store total assets received from Maple protocol pool after redemption
     uint256 public assetsRedeemed;
 
-    uint256[49] _gap;
+    uint256[38] _gap;
 
 }
