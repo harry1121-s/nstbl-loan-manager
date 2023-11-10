@@ -82,6 +82,6 @@ contract LoanManagerStorageV2 {
 
     uint256 public newVar;
     /// @notice intentionally not reducing gap size to check for storage collisions
-    uint256[48] _gap;
+    uint256[49] _gap;
 
 }

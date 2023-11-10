@@ -63,7 +63,7 @@ contract BaseTest is Utils {
         lmImpl2 = new LoanManagerV2();
         console.log("Implementation Address: V2", address(lmImpl2));
         bytes memory data = abi.encodeCall(lmImpl1.initialize, (NSTBL_HUB, address(aclManager), MAPLE_USDC_CASH_POOL));
-        loanManagerProxy = new TransparentUpgradeableProxy(address(lmImpl1), admin, data);
+        loanManagerProxy = new TransparentUpgradeableProxy(address(lmImpl1), address(proxyAdmin), data);
         console.log("Proxy Address: ", address(loanManagerProxy));
         vm.stopPrank();
         loanManager = LoanManager(address(loanManagerProxy));
