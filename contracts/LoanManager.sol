@@ -358,6 +358,13 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
         return (shares > 0) && (_amount < (upperBound - totalAssets)) ? true : false;
     }
 
+    function getDepositUpperBound() external view returns (uint256 upperBound) {
+        bytes memory val = MAPLE_POOL_MANAGER_USDC.functionStaticCall(abi.encodeWithSignature("liquidityCap()"));
+        uint256 ub = uint256(bytes32(val));
+        uint256 totalAssets = IPool(mapleUSDCPool).totalAssets();
+        upperBound = ub-totalAssets;
+    }
+
     /*//////////////////////////////////////////////////////////////
     ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
