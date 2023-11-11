@@ -12,7 +12,7 @@ testToken:
 	forge test --match-path ./tests/unit/Token.t.sol
 
 testLoanManager:
-	forge test --match-path ./tests/unit/LoanManager.t.sol -vvvvv --gas-report
+	forge test --match-path ./tests/unit/LoanManager.t.sol -vvv --gas-report
 
 debug: 
 	forge test -vvvvv

@@ -125,9 +125,9 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
      * @notice The shares corresponding to the LP tokens that were requested for redemption are redeemed from the Maple Protocol pool.
      * @notice The shares are burned in the Maple Protocol pool contract and the LP tokens are burned here.
      */
-    function redeem() external authorizedCaller nonReentrant {
+    function redeem() external authorizedCaller nonReentrant returns(uint256 stablesRedeemed){
         require(awaitingRedemption, "LM: No redemption requested");
-        _redeemMapleCash(usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
+        stablesRedeemed = _redeemMapleCash(usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
     }
 
     /**
@@ -197,7 +197,7 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
      * @param _withdrawManager The address of the withdrawal manager contract.
      * @notice This function redeems Maple Protocol tokens, burns the associated LP tokens, updates relevant accounting data, and emits a `Redeem` event.
      */
-    function _redeemMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
+    function _redeemMapleCash(address _asset, address _pool, address _lpToken, address _withdrawManager) internal returns(uint256){
         uint256 exitCycleId = IWithdrawalManagerStorage(_withdrawManager).exitCycleId(address(this));
         (uint256 windowStart, uint256 windowEnd) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
         uint256 _shares = escrowedMapleShares;
@@ -212,7 +212,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
         if (escrowedMapleShares == 0) {
             awaitingRedemption = false;
         }
-        emit Redeem(_asset, _shares, assetsRedeemed);
+        emit Redeem(_asset, _shares, stablesRedeemed);
+        return stablesRedeemed;
     }
 
     /**
@@ -362,18 +363,19 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     //////////////////////////////////////////////////////////////*/
 
 
-    function redeemManual(uint256 _shares) external onlyAdmin nonReentrant {
-            _redeemMapleCashManual(_shares, usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
+    function redeemManual(uint256 _shares) external onlyAdmin nonReentrant returns(uint256 stablesRedeemed){
+            stablesRedeemed = _redeemMapleCashManual(_shares, usdc, mapleUSDCPool, address(lUSDC), MAPLE_WITHDRAWAL_MANAGER_USDC);
     }
 
-    function _redeemMapleCashManual(uint256 _shares, address _asset, address _pool, address _lpToken, address _withdrawManager) internal {
+    function _redeemMapleCashManual(uint256 _shares, address _asset, address _pool, address _lpToken, address _withdrawManager) internal returns(uint256){
 
         // uint256 _shares = escrowedMapleShares;
 
         uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
         assetsRedeemed += stablesRedeemed;
         IERC20Helper(_lpToken).burn(nstblHub, (_shares) * 10 ** adjustedDecimals);
-        emit Redeem(_asset, _shares, assetsRedeemed);
+        emit Redeem(_asset, _shares, stablesRedeemed);
+        return stablesRedeemed;
     }
 
     function getAirdroppedTokens(address _asset) external view returns(uint256 _value){
@@ -385,7 +387,8 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
     }
 
     function getMaturedAssets() external view returns(uint256 _value){
-        _value = IPool(mapleUSDCPool).convertToAssets(IPool(mapleUSDCPool).balanceOf(address(this))) * 10**adjustedDecimals;
+        // _value = IPool(mapleUSDCPool).convertToAssets(IPool(mapleUSDCPool).balanceOf(address(this)) + escrowedMapleShares) * 10**adjustedDecimals;
+        _value = IPool(mapleUSDCPool).convertToAssets(lUSDC.totalSupply()/10**adjustedDecimals) * 10**adjustedDecimals;
     }
     
     function getLPTotalSupply() external view returns(uint256 _value){

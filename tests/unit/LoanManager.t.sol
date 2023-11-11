@@ -23,29 +23,29 @@ contract TestProxy is BaseTest {
         assertEq(ERC20(address(loanManager.lUSDC())).name(), "Loan Manager USDC");
     }
     
-    // function test_wrongProxyUpgrade() external {
+    function test_wrongProxyUpgrade() external {
          
-    //     vm.startPrank(proxyAdmin.owner());
-    //     bytes memory data = abi.encodeCall(lmImpl2.initialize, (1e3));
-    //     proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(loanManagerProxy)), address(lmImpl2), data);
-    //     vm.stopPrank();
+        vm.startPrank(proxyAdmin.owner());
+        bytes memory data = abi.encodeCall(lmImpl2.initialize, (1e3));
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(loanManagerProxy)), address(lmImpl2), data);
+        vm.stopPrank();
 
-    //     LoanManagerV2 loanManager2 = LoanManagerV2(address(loanManagerProxy));
-    //     assertEq(loanManager2.aclManager(), address(aclManager));
-    //     assertEq(loanManager2.nstblHub(), NSTBL_HUB);
-    //     assertEq(loanManager2.mapleUSDCPool(), MAPLE_USDC_CASH_POOL);
-    //     assertEq(loanManager2.usdc(), USDC);
-    //     assertEq(loanManager2.MAPLE_POOL_MANAGER_USDC(), MAPLE_POOL_MANAGER_USDC);
-    //     assertEq(loanManager2.MAPLE_WITHDRAWAL_MANAGER_USDC(), WITHDRAWAL_MANAGER_USDC);
-    //     assertEq(uint256(vm.load(address(loanManager2), bytes32(uint256(0)))), 222);
-    //     assertEq(loanManager2.getVersion(), 222);
-    //     assertEq(loanManager2.versionSlot(), 222);
-    //     assertEq(ERC20(address(loanManager2.lUSDC())).name(), "Loan Manager USDC");
-    //     assertEq(loanManager2.newVar(), 1e3);
-    //     assertEq(loanManager2.getLocked(), 0, "LOCKED VAR");
-    //     assertEq(uint256(vm.load(address(loanManager2), bytes32(uint256(62)))), 0, "T2");
+        LoanManagerV2 loanManager2 = LoanManagerV2(address(loanManagerProxy));
+        assertEq(loanManager2.aclManager(), address(aclManager));
+        assertEq(loanManager2.nstblHub(), NSTBL_HUB);
+        assertEq(loanManager2.mapleUSDCPool(), MAPLE_USDC_CASH_POOL);
+        assertEq(loanManager2.usdc(), USDC);
+        assertEq(loanManager2.MAPLE_POOL_MANAGER_USDC(), MAPLE_POOL_MANAGER_USDC);
+        assertEq(loanManager2.MAPLE_WITHDRAWAL_MANAGER_USDC(), WITHDRAWAL_MANAGER_USDC);
+        assertEq(uint256(vm.load(address(loanManager2), bytes32(uint256(0)))), 222);
+        assertEq(loanManager2.getVersion(), 222);
+        assertEq(loanManager2.versionSlot(), 222);
+        assertEq(ERC20(address(loanManager2.lUSDC())).name(), "Loan Manager USDC");
+        assertEq(loanManager2.newVar(), 1e3);
+        assertEq(loanManager2.getLocked(), 0, "LOCKED VAR");
+        assertEq(uint256(vm.load(address(loanManager2), bytes32(uint256(62)))), 0, "T2");
  
-    // }
+    }
 }
 
 contract TestDeposit is BaseTest {
@@ -234,7 +234,8 @@ contract TestRedeem is BaseTest {
         vm.warp(exitWindowStart);
 
         uint256 expectedUSDC = loanManager.getAssetsWithUnrealisedLosses(lmUSDC);
-        loanManager.redeem();
+        uint256 stablesRedeemed = loanManager.redeem();
+        assertEq(stablesRedeemed, expectedUSDC);
         uint256 usdcBal2 = usdc.balanceOf(NSTBL_HUB);
         console.log(usdcBal2 - usdcBal1, expectedUSDC);
         assertEq(lusdc.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares() * 10 ** 12);
