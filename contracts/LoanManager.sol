@@ -403,4 +403,10 @@ contract LoanManager is LoanManagerStorage, VersionedInitializable {
         _version = getRevision();
     }
 
+    function getRedemptionWindow() external view returns(uint256 windowStart, uint256 windowEnd){
+        require(awaitingRedemption, "LM: No redemption requested");
+         uint256 exitCycleId = IWithdrawalManagerStorage(MAPLE_WITHDRAWAL_MANAGER_USDC).exitCycleId(address(this));
+        (windowStart, windowEnd) = IWithdrawalManager(MAPLE_WITHDRAWAL_MANAGER_USDC).getWindowAtId(exitCycleId);
+    }
+
 }
