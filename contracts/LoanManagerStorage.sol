@@ -8,15 +8,6 @@ import "@nstbl-acl-manager/contracts/IACLManager.sol";
 import "./TokenLP.sol";
 
 contract LoanManagerStorage {
-    event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
-
-    event RequestRedeem(address indexed asset, uint256 lTokens, uint256 escrowedShares);
-
-    event Redeem(address indexed asset, uint256 mapleShares, uint256 tokensReceived);
-
-    event Removed(address indexed asset, uint256 mapleShares);
-
-    event NSTBLHUBChanged(address indexed oldHub, address indexed newHub);
 
     /*//////////////////////////////////////////////////////////////
                                IMMUTABLES

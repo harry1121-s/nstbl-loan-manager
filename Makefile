@@ -18,7 +18,9 @@ debug:
 	forge test -vvvvv
 
 clean:
-	@forge clean
+	@forge clean && \
+	rm -rf coverage && \
+	rm lcov.info
 
 git:
 	@git add .
