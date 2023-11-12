@@ -32,4 +32,26 @@ interface ILoanManager {
                                  VIEWS
     //////////////////////////////////////////////////////////////*/
 
+    function getLpTokensPendingRedemption() external view returns (uint256);
+
+    function getAssets(uint256 lpTokens_) external view returns (uint256);
+
+    function getAssetsWithUnrealisedLosses(uint256 lpTokens_) external view returns (uint256);
+    
+    function getShares(uint256 amount_) external view returns (uint256);
+
+    function getExitShares(uint256 amount_) external view returns (uint256);
+
+    function getUnrealizedLossesMaple() external view returns (uint256);
+
+    function getTotalAssetsMaple() external view returns (uint256);
+
+    function previewRedeem(uint256 lpTokens_) external view returns (uint256);
+
+    function previewDepositAssets(uint256 amount_) external view returns (uint256);
+
+    function isValidDepositAmount(uint256 amount_, address pool_, address poolManager_) public view returns (bool);
+
+    function getDepositUpperBound() external view returns (uint256 upperBound);
+
 }
