@@ -13,7 +13,8 @@ interface ILoanManager {
      * @param lTokens The amount of tokens minted
      * @param mapleShares The total shares after deposit is performed
      */
-    event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
+    event Deposit(a
+    ddress indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
 
     /**
      * @dev Emitted if there is a request to redeem the shares issued
@@ -104,50 +105,50 @@ interface ILoanManager {
     function getShares(uint256 amount_) external view returns (uint256);
 
     /**
-     * @dev Get the number of exit shares represented by a given amount of an asset.
-     * @param amount_ The amount of the asset to convert.
-     * @return The number of exit shares represented by the amount of the asset, or an error code if the asset is not supported.
+     * @dev Get the number of exit shares represented by a given amount of an asset
+     * @param amount_ The amount of the asset to convert
+     * @return The number of exit shares represented by the amount of the asset, or an error code if the asset is not supported
      */
     function getExitShares(uint256 amount_) external view returns (uint256);
 
     /**
-     * @dev Get the total unrealized losses (from Maple Protocol's loans) for a specific asset within the Maple Protocol pool.
-     * @return The total unrealized losses for the asset, or an error code if the asset is not supported.
+     * @dev Get the total unrealized losses (from Maple Protocol's loans) for a specific asset within the Maple Protocol pool
+     * @return The total unrealized losses for the asset, or an error code if the asset is not supported
      */
     function getUnrealizedLossesMaple() external view returns (uint256);
 
     /**
-     * @dev Get the total amount for a specific asset within the Maple Protocol pool.
-     * @return The total amount for the asset, or an error code if the asset is not supported.
+     * @dev Get the total amount for a specific asset within the Maple Protocol pool
+     * @return The total amount for the asset, or an error code if the asset is not supported
      */
     function getTotalAssetsMaple() external view returns (uint256);
 
     /**
-     * @dev Preview the redemption of assets based on the given asset and number of LP tokens.
-     * @param lpTokens_ The number of LP tokens to be redeemed.
-     * @return The previewed amount of redeemed assets, or an error code if the asset is not supported.
+     * @dev Preview the redemption of assets based on the given asset and number of LP tokens
+     * @param lpTokens_ The number of LP tokens to be redeemed
+     * @return The previewed amount of redeemed assets, or an error code if the asset is not supported
      */
     function previewRedeem(uint256 lpTokens_) external view returns (uint256);
 
     /**
-     * @dev Preview the deposit of assets based on the given asset and amount.
-     * @param amount_ The amount of assets to be deposited.
-     * @return The previewed amount of shares that would be minted to the Loan Manager, or an error code if the asset is not supported.
+     * @dev Preview the deposit of assets based on the given asset and amount
+     * @param amount_ The amount of assets to be deposited
+     * @return The previewed amount of shares that would be minted to the Loan Manager, or an error code if the asset is not supported
      */
     function previewDepositAssets(uint256 amount_) external view returns (uint256);
 
     /**
-     * @dev Check if a deposit amount is valid based on the liquidity cap and total assets in the Maple Protocol pool.
-     * @param amount_ The amount to deposit.
-     * @param pool_ The address of the Maple Protocol pool contract.
-     * @param poolManager_ The address of the Maple Protocol pool manager contract.
-     * @return true if the deposit amount is valid; otherwise, false.
+     * @dev Check if a deposit amount is valid based on the liquidity cap and total assets in the Maple Protocol pool
+     * @param amount_ The amount to deposit
+     * @param pool_ The address of the Maple Protocol pool contract
+     * @param poolManager_ The address of the Maple Protocol pool manager contract
+     * @return true if the deposit amount is valid; otherwise, false
      */
     function isValidDepositAmount(uint256 amount_, address pool_, address poolManager_) external view returns (bool);
 
     /**
-     * @dev Get the maximum amount that can be deposited based on the liquidity cap and total assets in the Maple Protocol pool.
-     * @return upperBound The maximum amount that can be deposited.
+     * @dev Get the maximum amount that can be deposited based on the liquidity cap and total assets in the Maple Protocol pool
+     * @return upperBound The maximum amount that can be deposited
      */
     function getDepositUpperBound() external view returns (uint256 upperBound);
 }
