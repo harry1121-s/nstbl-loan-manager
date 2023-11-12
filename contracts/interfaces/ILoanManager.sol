@@ -8,8 +8,8 @@ interface ILoanManager {
 
     /**
      * @dev Emitted when an amount is deposited from sender to this contract
-     * @param asset The address of the assets being deposited
-     * @param amount The amount of assets being deposited
+     * @param asset The address of the asset being deposited
+     * @param amount The amount of the asset being deposited
      * @param lTokens The amount of tokens minted
      * @param mapleShares The total shares after deposit is performed
      */
@@ -19,7 +19,7 @@ interface ILoanManager {
      * @dev Emitted if there is a request to redeem the shares issued
      * @param asset The address of the asset to redeem
      * @param lTokens The amount of LP tokens to redeem
-     * @param escrowedShares The total escrowed shares redeemed from maple
+     * @param escrowedShares The total escrowed shares to be redeemed from maple
      */
     event RequestRedeem(address indexed asset, uint256 lTokens, uint256 escrowedShares);
 
@@ -50,25 +50,25 @@ interface ILoanManager {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @dev Deposit assets into the Maple Protocol pool and mint LP tokens (lUSDC) to the nSTBL Hub.
-     * @param amount_ The amount of the asset to deposit.
+     * @dev Deposit assets into the Maple Protocol pool and mint LP tokens (lUSDC) to the nSTBL Hub
+     * @param amount_ The amount of the asset to deposit
      */
     function deposit(uint256 amount_) external;
 
     /**
-     * @dev Request the redemption of LP tokens issued. (lUSDC)
-     * @param lpTokens_ The amount of LP tokens to redeem.
+     * @dev Request the redemption of LP tokens issued (lUSDC)
+     * @param lpTokens_ The amount of LP tokens to redeem
      */
     function requestRedeem(uint256 lpTokens_) external;
 
     /**
-     * @dev Redeem LP tokens issued. (lUSDC)
-     * @return stablesRedeemed The amount of shares redeemed.
+     * @dev Redeem LP tokens issued (lUSDC)
+     * @return stablesRedeemed The amount of shares redeemed
      */
     function redeem() external returns(uint256 stablesRedeemed);
 
     /**
-     * @dev Remove Locked Maple Shares (during request redemption).
+     * @dev Remove Locked Maple Shares (during request redemption)
      */
     function remove() external;
 
@@ -77,29 +77,29 @@ interface ILoanManager {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @dev Get the number of LP tokens pending redemption for a specific LP token.
-     * @return The number of LP tokens pending redemption.
+     * @dev Get the number of LP tokens pending redemption for a specific LP token
+     * @return The number of LP tokens pending redemption
      */
     function getLpTokensPendingRedemption() external view returns (uint256);
 
     /**
-     * @dev Get the total assets represented by a given amount of LP tokens for a specific asset.
-     * @param lpTokens_ The amount of LP tokens to convert.
-     * @return The total assets represented by the LP tokens.
+     * @dev Get the total assets represented by a given amount of LP tokens for a specific asset
+     * @param lpTokens_ The amount of LP tokens to convert
+     * @return The total assets represented by the LP tokens
      */
     function getAssets(uint256 lpTokens_) external view returns (uint256);
 
     /**
-     * @dev Get the total assets with unrealized losses(from Maple Protocol's loans) represented by a given amount of LP tokens for a specific asset.
-     * @param lpTokens_ The amount of LP tokens to convert.
-     * @return The total assets with unrealized losses represented by the LP tokens.
+     * @dev Get the total assets with unrealized losses(from Maple Protocol's loans) represented by a given amount of LP tokens for a specific asset
+     * @param lpTokens_ The amount of LP tokens to convert
+     * @return The total assets with unrealized losses represented by the LP tokens
      */
     function getAssetsWithUnrealisedLosses(uint256 lpTokens_) external view returns (uint256);
     
     /**
-     * @dev Get the number of shares (issued by Maple protocol pool to the Loan Manager) represented by a given amount of an asset.
-     * @param amount_ The amount of the asset to convert.
-     * @return The number of shares represented by the amount of the asset, or an error code if the asset is not supported.
+     * @dev Get the number of shares (issued by Maple protocol pool to the Loan Manager) represented by a given amount of an asset
+     * @param amount_ The amount of the asset to convert
+     * @return The number of shares represented by the amount of the asset, or an error code if the asset is not supported
      */
     function getShares(uint256 amount_) external view returns (uint256);
 
