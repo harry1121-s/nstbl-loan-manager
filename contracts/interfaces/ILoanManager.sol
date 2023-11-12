@@ -50,7 +50,7 @@ interface ILoanManager {
 
     function previewDepositAssets(uint256 amount_) external view returns (uint256);
 
-    function isValidDepositAmount(uint256 amount_, address pool_, address poolManager_) public view returns (bool);
+    function isValidDepositAmount(uint256 amount_, address pool_, address poolManager_) external view returns (bool);
 
     function getDepositUpperBound() external view returns (uint256 upperBound);
 
