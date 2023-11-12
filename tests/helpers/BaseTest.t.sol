@@ -97,8 +97,8 @@ contract BaseTest is Utils {
         vm.stopPrank();
     }
 
-    function _investAssets(address _asset, address _pool, uint256 amount) internal {
-        erc20_deal(_asset, NSTBL_HUB, amount);
+    function _investAssets(address _asset, uint256 amount) internal {
+        erc20_deal( NSTBL_HUB, amount);
 
         if (_asset == USDC) {
             _setAllowedLender(poolDelegateUSDC);

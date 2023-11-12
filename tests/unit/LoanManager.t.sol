@@ -57,7 +57,7 @@ contract TestDeposit is BaseTest {
 
     function test_deposit_pass_USDC() public {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         uint256 sharesToReceive = usdcPool.previewDeposit(amount);
         assertEq(IERC20(USDC).balanceOf(user), 0);
@@ -74,7 +74,7 @@ contract TestDeposit is BaseTest {
         vm.assume(shares > 0);
 
         // Action
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         // Assert
         uint256 sharesToReceive = usdcPool.previewDeposit(amount);
@@ -93,7 +93,7 @@ contract TestDeposit is BaseTest {
         vm.assume(shares == 0);
 
         // Action
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
     }
 
     function testFail_deposit_revert_invalid_amount_upperBound_USDC_fuzz(uint256 amount) public {
@@ -103,7 +103,7 @@ contract TestDeposit is BaseTest {
 
         // Action
         // vm.expectRevert("LM: Invalid amount"); @TODO: fix this
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
     }
 }
 
@@ -116,7 +116,7 @@ contract TestRequestRedeem is BaseTest {
 
     function test_requestRedeem_USDC() external {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
@@ -133,7 +133,7 @@ contract TestRequestRedeem is BaseTest {
 
     function test_requestRedeem_and_deposit_USDC() external {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
@@ -148,7 +148,7 @@ contract TestRequestRedeem is BaseTest {
         assertEq(usdcPool.balanceOf(address(loanManager)), 0);
         assertTrue(loanManager.awaitingRedemption());
         vm.stopPrank();
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
     }
 
     function test_requestRedeem_USDC_fullLP_pass_fuzz(uint256 amount) external {
@@ -157,7 +157,7 @@ contract TestRequestRedeem is BaseTest {
         uint256 shares = usdcPool.previewDeposit(amount);
         vm.assume(shares > 0);
 
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
@@ -175,7 +175,7 @@ contract TestRequestRedeem is BaseTest {
         uint256 shares = usdcPool.previewDeposit(amount);
         vm.assume(shares > 0);
 
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
         vm.assume(redeemAmount < IPool(MAPLE_USDC_CASH_POOL).balanceOf(address(loanManager)));
         redeemAmount *= 1e12;
         vm.assume(redeemAmount > 0);
@@ -191,7 +191,7 @@ contract TestRequestRedeem is BaseTest {
 
     function test_requestRedeem_USDC_revert_pendingRedemption() external {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
@@ -211,7 +211,7 @@ contract TestRedeem is BaseTest {
 
     function test_redeem_USDC() external {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         // time warp
         vm.warp(block.timestamp + 2 weeks);
@@ -255,7 +255,7 @@ contract TestRedeem is BaseTest {
         uint256 shares = usdcPool.previewDeposit(amount);
         vm.assume(shares > 0);
 
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
 
@@ -296,7 +296,7 @@ contract TestRedeem is BaseTest {
         uint256 shares = usdcPool.previewDeposit(amount);
         vm.assume(shares > 0);
 
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
         vm.assume(redeemAmount < IPool(MAPLE_USDC_CASH_POOL).balanceOf(address(loanManager)));
         redeemAmount *= 1e12;
         vm.assume(redeemAmount > 0);
@@ -341,7 +341,7 @@ contract TestRedeem is BaseTest {
 
     function test_redeem_USDC_missedWindow() external {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
         uint256 wmInitialBal = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         // time warp
         vm.warp(block.timestamp + 2 weeks);
@@ -408,7 +408,7 @@ contract TestRedeem is BaseTest {
         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
         uint256 shares = usdcPool.previewDeposit(amount);
         vm.assume(shares > 0);
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         vm.assume(redeemAmount < IPool(MAPLE_USDC_CASH_POOL).balanceOf(address(loanManager)));
         redeemAmount *= 1e12;
@@ -491,7 +491,7 @@ contract TestRedeem is BaseTest {
     }
     function test_redeem_USDC_withoutRequest() external {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         // time warp
         vm.warp(block.timestamp + 2 weeks);
@@ -568,7 +568,7 @@ contract TestGetter is BaseTest {
 
     function test_previewRedeem_USDC() external {
         uint256 amount = 1e7 * 1e6;
-        _investAssets(USDC, address(usdcPool), amount);
+        _investAssets(USDC, amount);
 
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
         vm.startPrank(NSTBL_HUB);

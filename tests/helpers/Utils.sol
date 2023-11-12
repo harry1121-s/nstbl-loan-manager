@@ -34,7 +34,7 @@ contract Utils is Test {
         vm.stopPrank();
     }
 
-    function erc20_deal(address asset_, address account_, uint256 amount_) internal {
+    function erc20_deal(address account_, uint256 amount_) internal {
         deal(USDC, account_, amount_, true);
     }
 }
