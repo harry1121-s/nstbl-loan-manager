@@ -1,3 +1,6 @@
+build:
+	@forge build --sizes
+	
 test:
 	@forge test
 
