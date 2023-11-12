@@ -150,5 +150,4 @@ interface ILoanManager {
      * @return upperBound The maximum amount that can be deposited.
      */
     function getDepositUpperBound() external view returns (uint256 upperBound);
-
 }
