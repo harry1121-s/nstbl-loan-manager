@@ -102,7 +102,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @dev Deposit assets into the Maple Protocol pool and mint LP tokens (lUSDC) to the NSTBL Hub.
+     * @dev Deposit assets into the Maple Protocol pool and mint LP tokens (lUSDC) to the nSTBL Hub.
      * @notice The LP tokens corresponding to the shares issued by the Maple Protocol pool are minted.
      * @param amount_ The amount of the asset to deposit.
      */
@@ -221,7 +221,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
 
     /**
      * @dev Internal function to remove locked Maple Shares.
-     * @param asset_ The address of the asset to redeem.
+     * @param asset_ The address of the asset to remove.
      * @param pool_ The address of the Maple Protocol pool.
      * @param withdrawManager_ The address of the withdrawal manager contract.
      * @notice This function transfers locked Maple Shares from Maple Protocol to loanManager, updates relevant accounting data, and emits a `Remove` event.
