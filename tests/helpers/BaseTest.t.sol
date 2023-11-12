@@ -81,9 +81,6 @@ contract BaseTest is Utils {
         vm.label(address(usdcPool), "USDC Pool");
         vm.label(poolDelegateUSDC, "poolDelegate USDC");
         vm.label(address(poolManagerUSDC), "poolManager USDC");
-
-        
-
     }
 
     function _setAllowedLender(address _delegate) internal {

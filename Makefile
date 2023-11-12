@@ -1,21 +1,14 @@
-# Build and test
-
-profile ?=default
-
-build:
-	@FOUNDRY_PROFILE=production forge build
-
 test:
-	forge test
-
-testToken:
-	forge test --match-path ./tests/unit/Token.t.sol
-
-testLoanManager:
-	forge test --match-path ./tests/unit/LoanManager.t.sol -vvv --gas-report
+	@forge test
 
 debug: 
-	forge test -vvvvv
+	@forge test -vvvvv
+
+testToken:
+	@forge test --match-path ./tests/unit/Token.t.sol
+
+testLoanManager:
+	@forge test --match-path ./tests/unit/LoanManager.t.sol -vvv --gas-report
 
 clean:
 	@forge clean && \

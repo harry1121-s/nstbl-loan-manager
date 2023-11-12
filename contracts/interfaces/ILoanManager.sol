@@ -13,8 +13,7 @@ interface ILoanManager {
      * @param lTokens The amount of tokens minted
      * @param mapleShares The total shares after deposit is performed
      */
-    event Deposit(a
-    ddress indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
+    event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
 
     /**
      * @dev Emitted if there is a request to redeem the shares issued
