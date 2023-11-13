@@ -17,6 +17,7 @@ contract Utils is Test {
     address owner = address(123);
     address user = address(456);
     address admin = address(789);
+    address user1 = vm.addr(101);
 
     /*//////////////////////////////////////////////////////////////
                                HELPERS

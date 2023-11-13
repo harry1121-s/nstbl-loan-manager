@@ -69,7 +69,7 @@ contract TestDeposit is BaseTest {
 
     function test_deposit_pass_USDC_fuzz(uint256 amount) public {
         // Constraint input amount
-        vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
+        vm.assume(amount < loanManager.getDepositUpperBound());
         uint256 shares = usdcPool.previewDeposit(amount);
         vm.assume(shares > 0);
 
@@ -225,7 +225,7 @@ contract TestRedeem is BaseTest {
         uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
         uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
         assertEq(_exitCycleId, _currCycleId + 2);
-        (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
+        (uint256 exitWindowStart,) = loanManager.getRedemptionWindow();
 
         vm.expectRevert("LM: Not in Window");
         loanManager.redeem();
@@ -511,7 +511,27 @@ contract TestGetter is BaseTest {
     function setUp() public override {
         super.setUp();
     }
-   
+    
+     function test_airdroppedTokens() external {
+
+        deal(USDC, address(loanManager), 1e7*1e6, true);
+        assertEq(loanManager.getAirdroppedTokens(USDC), 1e7*1e6);
+        vm.prank(NSTBL_HUB);
+        loanManager.withdrawTokens(USDC, 1e7*1e6, user1);
+        assertEq(IERC20(USDC).balanceOf(user1), 1e7*1e6);
+    }
+
+    function test_LPTotalSupply() external {
+        _investAssets(USDC, 1e12);
+        assertEq(loanManager.getLPTotalSupply(), usdcPool.balanceOf(address(loanManager))*1e12);
+    }
+    
+    function test_getAssets(uint256 lpTokens) external {
+        vm.assume(lpTokens < 1e30);
+        vm.assume(lpTokens > 0);
+        assertEq(loanManager.getAssets(lpTokens), usdcPool.convertToAssets(lpTokens/1e12));
+    }
+
     function test_getAssets_with_unrealisedLosses_fuzz(uint256 lpTokens) external {
         vm.assume(lpTokens < 1e30);
         vm.assume(lpTokens > 0);
@@ -584,6 +604,7 @@ contract TestGetter is BaseTest {
         vm.warp(exitWindowStart);
         console.log("Assets available for Redemption: ", loanManager.previewRedeem(lmUSDC));
     }
+
     function test_IsValidDepositAmount_USDC_fuzz() external {
         assertTrue(loanManager.isValidDepositAmount(1e12, MAPLE_USDC_CASH_POOL, MAPLE_POOL_MANAGER_USDC));
     }
