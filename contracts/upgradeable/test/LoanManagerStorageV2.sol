@@ -7,6 +7,7 @@ import "../../interfaces/IERC20Helper.sol";
 import "@nstbl-acl-manager/contracts/IACLManager.sol";
 import "../../TokenLP.sol";
 
+// This contract is just to test upgrade functionality and will not be used in production
 contract LoanManagerStorageV2 {
     event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
 
