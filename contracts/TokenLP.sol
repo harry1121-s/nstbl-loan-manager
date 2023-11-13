@@ -29,7 +29,7 @@ contract TokenLP is ERC20 {
     //////////////////////////////////////////////////////////////*/
 
     constructor(string memory _name, string memory _symbol, address admin_) ERC20(_name, _symbol) {
-        require(admin_ != address(0), "LP: invalid Address");
+        require(admin_ != address(0), "Token: invalid Address");
         admin = admin_;
         loanManager = msg.sender;
         emit AdminChanged(address(0), admin);
@@ -53,14 +53,14 @@ contract TokenLP is ERC20 {
     //////////////////////////////////////////////////////////////*/
 
     function setLoanManager(address loanManager_) external onlyAdmin {
-        require(loanManager_ != address(0), "LP: invalid Address");
+        require(loanManager_ != address(0), "Token: invalid Address");
         address oldLoanManager = loanManager;
         loanManager = loanManager_;
         emit LoanManagerChanged(oldLoanManager, loanManager);
     }
 
     function setAdmin(address admin_) external onlyAdmin {
-        require(admin_ != address(0), "LP: invalid Address");
+        require(admin_ != address(0), "Token: invalid Address");
         address oldAdmin = admin;
         admin = admin_;
         emit AdminChanged(oldAdmin, admin);

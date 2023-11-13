@@ -50,6 +50,11 @@ contract TestToken is Test {
         vm.expectRevert("Token: Admin unAuth");
         token.setLoanManager(newLoanManager);
 
+        // Test new address cannot be zero
+        vm.expectRevert("Token: invalid Address");
+        vm.prank(admin);
+        token.setLoanManager(address(0));
+        
         // Test that admin can set the new LoanManager
         vm.prank(admin);
         token.setLoanManager(newLoanManager);
@@ -60,6 +65,11 @@ contract TestToken is Test {
         // Test that only admin can set the new admin
         vm.expectRevert("Token: Admin unAuth");
         token.setAdmin(newAdmin);
+
+        // Test new address cannot be zero
+        vm.expectRevert("Token: invalid Address");
+        vm.prank(admin);
+        token.setAdmin(address(0));
 
         // Test that admin can set the new admin
         vm.prank(admin);
