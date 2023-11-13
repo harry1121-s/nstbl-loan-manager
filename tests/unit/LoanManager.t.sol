@@ -429,7 +429,6 @@ contract TestRedeem is BaseTest {
         vm.expectRevert("LM: Redemption Pending");
         loanManager.remove();
 
-        vm.warp(exitWindowEnd - 100);
         vm.warp(exitWindowEnd + 100);
 
         vm.expectRevert("LM: Not in Window");
