@@ -231,6 +231,8 @@ contract TestRedeem is BaseTest {
         // time warp
         vm.warp(block.timestamp + 2 weeks);
 
+        vm.expectRevert("LM: No redemption requested");
+        loanManager.getRedemptionWindow();
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
         console.log("lUSDC minted - ", lmUSDC);
         vm.startPrank(NSTBL_HUB);
@@ -424,6 +426,10 @@ contract TestRedeem is BaseTest {
         vm.expectRevert("LM: Not in Window");
         loanManager.redeem();
 
+        vm.expectRevert("LM: Redemption Pending");
+        loanManager.remove();
+
+        vm.warp(exitWindowEnd - 100);
         vm.warp(exitWindowEnd + 100);
 
         vm.expectRevert("LM: Not in Window");
