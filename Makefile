@@ -1,6 +1,20 @@
+install:
+	@mkdir modules && \
+	cd modules && \
+	git submodule add https://github.com/foundry-rs/forge-std.git && \
+	git submodule add https://github.com/OpenZeppelin/openzeppelin-contracts.git && \
+	git submodule add https://github.com/nealthy-labs/nSTBL_V1_ACLManager.git && \
+	cd ..
+
+update:
+	cd modules && \
+	git submodule update --remote nstbl-acl-manager && \
+	cd ..
+
+
 build:
 	@forge build --sizes
-	
+
 test:
 	@forge test
 
