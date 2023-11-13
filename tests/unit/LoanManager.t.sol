@@ -46,6 +46,21 @@ contract TestProxy is BaseTest {
         assertEq(uint256(vm.load(address(loanManager2), bytes32(uint256(62)))), 0, "T2");
  
     }
+
+    function test_wrongSetup() external {
+
+        vm.startPrank(aclManager.admin());
+        vm.expectRevert("LM:INVALID_ADDRESS");
+        loanManager.updateNSTBLHUB(address(0));
+        vm.stopPrank();
+
+        LoanManager imp1 = new LoanManager();
+
+        bytes memory data = abi.encodeCall(imp1.initialize, (address(0), address(0)));
+
+        vm.expectRevert("LM:INVALID_ADDRESS");
+        TransparentUpgradeableProxy lmProxy = new TransparentUpgradeableProxy(address(imp1), address(proxyAdmin), data);    
+    }
 }
 
 contract TestDeposit is BaseTest {
@@ -249,6 +264,48 @@ contract TestRedeem is BaseTest {
         vm.stopPrank();
     }
 
+     function test_redeem_USDC_manual() external {
+        uint256 amount = 1e7 * 1e6;
+        _investAssets(USDC, amount);
+
+        // time warp
+        vm.warp(block.timestamp + 2 weeks);
+
+        uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
+        console.log("lUSDC minted - ", lmUSDC);
+        vm.startPrank(NSTBL_HUB);
+        loanManager.requestRedeem(lmUSDC);
+        assertEq(usdcPool.balanceOf(address(loanManager)), 0);
+
+        uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
+        uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
+        assertEq(_exitCycleId, _currCycleId + 2);
+        (uint256 exitWindowStart,) = loanManager.getRedemptionWindow();
+
+        vm.expectRevert("LM: Not in Window");
+        loanManager.redeem();
+
+        uint256 usdcBal1 = usdc.balanceOf(NSTBL_HUB);
+        vm.warp(exitWindowStart);
+
+        uint256 expectedUSDC = loanManager.getAssetsWithUnrealisedLosses(lmUSDC);
+        vm.stopPrank();
+        vm.prank(aclManager.admin());
+        uint256 stablesRedeemed = loanManager.redeemManual(lmUSDC/1e12);
+        // uint256 stablesRedeemed = loanManager.redeem();
+        assertEq(stablesRedeemed, expectedUSDC);
+        // uint256 usdcBal2 = usdc.balanceOf(NSTBL_HUB);
+        // console.log(usdcBal2 - usdcBal1, expectedUSDC);
+        // assertEq(lusdc.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares() * 10 ** 12);
+        // assertEq(lusdc.totalSupply(), loanManager.escrowedMapleShares() * 10 ** 12);
+        // console.log("lUSDC pending redemption - ", loanManager.getLpTokensPendingRedemption());
+        // if (loanManager.escrowedMapleShares() == 0) {
+        //     assertFalse(loanManager.awaitingRedemption());
+        // } else {
+        //     assertTrue(loanManager.awaitingRedemption());
+        // }
+    }
+
     function test_redeem_USDC_fullLP_pass_fuzz(uint256 amount) external {
         // Constraint input amount
         vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
@@ -342,6 +399,13 @@ contract TestRedeem is BaseTest {
     function test_redeem_USDC_missedWindow() external {
         uint256 amount = 1e7 * 1e6;
         _investAssets(USDC, amount);
+
+        //no tokens to remove from pool
+        vm.startPrank(NSTBL_HUB);
+        vm.expectRevert("LM: No Tokens to remove");
+        loanManager.remove();
+        vm.stopPrank();
+
         uint256 wmInitialBal = usdcPool.balanceOf(address(withdrawalManagerUSDC));
         // time warp
         vm.warp(block.timestamp + 2 weeks);
@@ -525,7 +589,7 @@ contract TestGetter is BaseTest {
         _investAssets(USDC, 1e12);
         assertEq(loanManager.getLPTotalSupply(), usdcPool.balanceOf(address(loanManager))*1e12);
     }
-    
+
     function test_getAssets(uint256 lpTokens) external {
         vm.assume(lpTokens < 1e30);
         vm.assume(lpTokens > 0);
