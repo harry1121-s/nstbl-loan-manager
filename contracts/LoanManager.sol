@@ -77,7 +77,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      * @dev Constructor to set immutables for the LoanManager contract
      */
     constructor() {
-        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;        
+        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;  
     }
     //function to initialize the storage in the proxy contract
     function initialize(address aclManager_, address mapleUSDCPool_) external initializer {
@@ -93,8 +93,9 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
     //function to set the address of NSTBL hub
     function updateNSTBLHUB(address nstblHub_) external onlyAdmin {
         _zeroAddressCheck(nstblHub_);
+        address oldNstblHub = nstblHub;
         nstblHub = nstblHub_;
-        emit NSTBLHUBChanged(address(0), nstblHub);
+        emit NSTBLHUBChanged(oldNstblHub, nstblHub);
 
     }
 
@@ -347,7 +348,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      */
     function previewRedeem(uint256 lpTokens_) external view returns (uint256) {
         
-            return IPool(mapleUSDCPool).previewRedeem(lpTokens_ / 10 ** 12);
+            return IPool(mapleUSDCPool).previewRedeem(lpTokens_ / 10 ** adjustedDecimals);
 
     }
 

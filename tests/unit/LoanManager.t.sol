@@ -110,6 +110,7 @@ contract TestDeposit is BaseTest {
         // Action
         _investAssets(USDC, amount);
     }
+    
 }
 
 contract TestRequestRedeem is BaseTest {
