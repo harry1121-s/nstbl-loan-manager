@@ -11,7 +11,6 @@ update:
 	git submodule update --remote nstbl-acl-manager && \
 	cd ..
 
-
 build:
 	@forge build --sizes
 

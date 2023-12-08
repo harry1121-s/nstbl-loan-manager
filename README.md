@@ -6,6 +6,7 @@ This repository contains the core contracts of the nSTBL V1 protocol that are re
 | Contract | Description |
 | -------- | ------- |
 | [`LoanManager`](https://github.com/nealthy-labs/nSTBL_V1_LoanManager/blob/main/contracts/LoanManager.sol) | Contains the logic for the Loan Manager |
+| [`LoanManagerStorage`](https://github.com/nealthy-labs/nSTBL_V1_LoanManager/blob/main/contracts/LoanManager.sol) | Contains the storage for the Loan Manager, decoupled to keep track of upgrades |
 | [`ILoanManager`](https://github.com/nealthy-labs/nSTBL_V1_LoanManager/blob/main/contracts/ILoanManager.sol) | The interface for the Loan Manager contract |
 
 ## Dependencies/Inheritance

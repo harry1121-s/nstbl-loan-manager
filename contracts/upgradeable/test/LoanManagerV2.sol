@@ -13,13 +13,8 @@ import {
     TokenLP,
     LoanManagerStorageV2
 } from "./LoanManagerStorageV2.sol";
-/**
- * @title LoanManager contract for managing Maple Protocol loans
- * @author Angad Singh Agarwal, Harshit Singhal
- * @notice This contract is intended to be used by NSTBL hub and future nealthy products
- * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations.
- */
 
+// This contract is just to test upgrade functionality and will not be used in production
 contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
     using SafeERC20 for IERC20Helper;
     using Address for address;
