@@ -139,11 +139,9 @@ interface ILoanManager {
     /**
      * @dev Check if a deposit amount is valid based on the liquidity cap and total assets in the Maple Protocol pool
      * @param amount_ The amount to deposit
-     * @param pool_ The address of the Maple Protocol pool contract
-     * @param poolManager_ The address of the Maple Protocol pool manager contract
      * @return true if the deposit amount is valid; otherwise, false
      */
-    function isValidDepositAmount(uint256 amount_, address pool_, address poolManager_) external view returns (bool);
+    function isValidDepositAmount(uint256 amount_) external view returns (bool);
 
     /**
      * @dev Get the maximum amount that can be deposited based on the liquidity cap and total assets in the Maple Protocol pool

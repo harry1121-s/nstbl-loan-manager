@@ -109,7 +109,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      * @param amount_ The amount of the asset to deposit
      */
     function deposit(uint256 amount_) external authorizedCaller nonReentrant {
-        _depositMapleCash(amount_, usdc, mapleUSDCPool, address(lUSDC), MAPLE_POOL_MANAGER_USDC);
+        _depositMapleCash(amount_, usdc, mapleUSDCPool, address(lUSDC));
     }
 
     /**
@@ -159,13 +159,11 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      * @param asset_ The address of the asset being deposited
      * @param pool_ The address of the Maple Protocol pool
      * @param lpToken_ The address of the LP token associated with the pool
-     * @param poolManager_ The address of the Maple Protocol pool manager contract
      * @notice This function checks if the deposit amount is valid, transfers the assets from the sender to this contract, approves the pool to spend the assets, updates relevant accounting data, and emits a `Deposit` event
      */
-    function _depositMapleCash(uint256 amount_, address asset_, address pool_, address lpToken_, address poolManager_)
+    function _depositMapleCash(uint256 amount_, address asset_, address pool_, address lpToken_)
         internal
     {
-        require(isValidDepositAmount(amount_, pool_, poolManager_), "LM: Invalid amount");
         uint256 lpTokens;
         uint256 sharesReceived;
         IERC20Helper(asset_).safeTransferFrom(msg.sender, address(this), amount_);
@@ -367,15 +365,13 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      * @inheritdoc ILoanManager
      * @dev Check if a deposit amount is valid based on the liquidity cap and total assets in the Maple Protocol pool
      * @param amount_ The amount to deposit
-     * @param pool_ The address of the Maple Protocol pool contract
-     * @param poolManager_ The address of the Maple Protocol pool manager contract
      * @return true if the deposit amount is valid; otherwise, false
      */
-    function isValidDepositAmount(uint256 amount_, address pool_, address poolManager_) public view returns (bool) {
-        bytes memory val = poolManager_.functionStaticCall(abi.encodeWithSignature("liquidityCap()"));
+    function isValidDepositAmount(uint256 amount_) public view returns (bool) {
+        bytes memory val = MAPLE_POOL_MANAGER_USDC.functionStaticCall(abi.encodeWithSignature("liquidityCap()"));
         uint256 upperBound = uint256(bytes32(val));
-        uint256 totalAssets = IPool(pool_).totalAssets();
-        uint256 shares = IPool(pool_).previewDeposit(amount_);
+        uint256 totalAssets = IPool(mapleUSDCPool).totalAssets();
+        uint256 shares = IPool(mapleUSDCPool).previewDeposit(amount_);
         return (shares > 0) && (amount_ < (upperBound - totalAssets)) ? true : false;
     }
 
@@ -394,31 +390,6 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
     /*//////////////////////////////////////////////////////////////
     ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @dev Redeem the shares from Maple manually
-     * @param shares_ The total escrowed shares to redeem from maple
-     * @return stablesRedeemed The total nSTBL redeemed from maple
-     */
-    function redeemManual(uint256 shares_) external onlyAdmin nonReentrant returns(uint256 stablesRedeemed) {
-            stablesRedeemed = _redeemMapleCashManual(shares_, usdc, mapleUSDCPool, address(lUSDC));
-    }
-
-    /**
-     * @dev Redeem the shares from Maple manually
-     * @param shares_ The total shares to be redeemed
-     * @param asset_ The address of the asset to redeem
-     * @param pool_ The address of the pool from which shares are redeemed
-     * @param lpToken_ The address of lp Token which are burned
-     * @return  The total nSTBL redeemed from maple
-     */
-    function _redeemMapleCashManual(uint256 shares_, address asset_, address pool_, address lpToken_) internal returns(uint256) {
-        uint256 stablesRedeemed = IPool(pool_).redeem(shares_, nstblHub, address(this));
-        assetsRedeemed += stablesRedeemed;
-        IERC20Helper(lpToken_).burn(nstblHub, (shares_) * 10 ** adjustedDecimals);
-        emit Redeem(asset_, shares_, stablesRedeemed);
-        return stablesRedeemed;
-    }
 
     /**
      * @dev Get the balance of tokens in the pool
