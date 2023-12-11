@@ -61,22 +61,6 @@ contract TestToken is Test {
         assertEq(token.loanManager(), newLoanManager, "LoanManager set successfully");
     }
 
-    function test_setAdmin_fuzz(address newAdmin) public {
-        // Test that only admin can set the new admin
-        vm.expectRevert("Token: Admin unAuth");
-        token.setAdmin(newAdmin);
-
-        // Test new address cannot be zero
-        vm.expectRevert("Token: invalid Address");
-        vm.prank(admin);
-        token.setAdmin(address(0));
-
-        // Test that admin can set the new admin
-        vm.prank(admin);
-        token.setAdmin(newAdmin);
-        assertEq(token.admin(), newAdmin, "Admin set successfully");
-    }
-
     function test_mint_fuzz(uint256 amount) public {
         // Test that only admin can set the new LoanManager
         vm.expectRevert("Token: LoanManager unAuth");

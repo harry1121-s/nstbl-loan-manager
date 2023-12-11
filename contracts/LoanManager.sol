@@ -85,7 +85,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
         _zeroAddressCheck(mapleUSDCPool_);
         mapleUSDCPool = mapleUSDCPool_;
         aclManager = aclManager_;
-        lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", IACLManager(aclManager_).admin());
+        lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", aclManager_);
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
         _locked = 1;
     }

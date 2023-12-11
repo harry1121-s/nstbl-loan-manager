@@ -110,7 +110,7 @@ contract TestDeposit is BaseTest {
         // Action
         _investAssets(USDC, amount);
     }
-    
+
 }
 
 contract TestRequestRedeem is BaseTest {
@@ -216,7 +216,7 @@ contract TestRedeem is BaseTest {
     using SafeERC20 for IERC20;
 
     function test_redeem_USDC() external {
-        uint256 amount = 1e7 * 1e6;
+        uint256 amount = 1e4 * 1e6;
         _investAssets(USDC, amount);
 
         // time warp
@@ -241,9 +241,9 @@ contract TestRedeem is BaseTest {
 
         uint256 expectedUSDC = loanManager.getAssetsWithUnrealisedLosses(lmUSDC);
         uint256 stablesRedeemed = loanManager.redeem();
-        assertEq(stablesRedeemed, expectedUSDC);
-        assertEq(lusdc.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares() * 10 ** 12);
-        assertEq(lusdc.totalSupply(), loanManager.escrowedMapleShares() * 10 ** 12);
+        assertEq(stablesRedeemed, expectedUSDC, "check stables received");
+        assertEq(lusdc.balanceOf(NSTBL_HUB), loanManager.escrowedMapleShares() * 10 ** 12, "check lUSDC balance");
+        assertEq(lusdc.totalSupply(), loanManager.escrowedMapleShares() * 10 ** 12, "check lUSDC total supply");
         console.log("lUSDC pending redemption - ", loanManager.getLpTokensPendingRedemption());
         if (loanManager.escrowedMapleShares() == 0) {
             assertFalse(loanManager.awaitingRedemption());

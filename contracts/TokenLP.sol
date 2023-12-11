@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.21;
 
+import "@nstbl-acl-manager/contracts/IACLManager.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract TokenLP is ERC20 {
     address public loanManager;
-    address public admin;
+    address public aclManager;
 
-    event AdminChanged(address indexed oldAdmin, address indexed newAdmin);
     event LoanManagerChanged(address indexed oldLoanManager, address indexed newLoanManager);
 
     /*//////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ contract TokenLP is ERC20 {
     }
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "Token: Admin unAuth");
+        require(msg.sender == IACLManager(aclManager).admin(), "Token: Admin unAuth");
         _;
     }
 
@@ -28,11 +28,10 @@ contract TokenLP is ERC20 {
     CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(string memory _name, string memory _symbol, address admin_) ERC20(_name, _symbol) {
-        require(admin_ != address(0), "Token: invalid Address");
-        admin = admin_;
+    constructor(string memory _name, string memory _symbol, address aclManager_) ERC20(_name, _symbol) {
+        require(aclManager_ != address(0), "Token: invalid Address");
+        aclManager = aclManager_;
         loanManager = msg.sender;
-        emit AdminChanged(address(0), admin);
         emit LoanManagerChanged(address(0), loanManager);
     }
 
@@ -59,10 +58,4 @@ contract TokenLP is ERC20 {
         emit LoanManagerChanged(oldLoanManager, loanManager);
     }
 
-    function setAdmin(address admin_) external onlyAdmin {
-        require(admin_ != address(0), "Token: invalid Address");
-        address oldAdmin = admin;
-        admin = admin_;
-        emit AdminChanged(oldAdmin, admin);
-    }
 }
