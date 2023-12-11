@@ -54,7 +54,7 @@ contract TestToken is Test {
         vm.expectRevert("Token: invalid Address");
         vm.prank(admin);
         token.setLoanManager(address(0));
-        
+
         // Test that admin can set the new LoanManager
         vm.prank(admin);
         token.setLoanManager(newLoanManager);

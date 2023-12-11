@@ -57,5 +57,4 @@ contract TokenLP is ERC20 {
         loanManager = loanManager_;
         emit LoanManagerChanged(oldLoanManager, loanManager);
     }
-
 }

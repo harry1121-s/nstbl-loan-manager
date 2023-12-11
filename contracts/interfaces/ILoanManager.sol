@@ -65,7 +65,7 @@ interface ILoanManager {
      * @dev Redeem LP tokens issued (lUSDC)
      * @return stablesRedeemed The amount of shares redeemed
      */
-    function redeem() external returns(uint256 stablesRedeemed);
+    function redeem() external returns (uint256 stablesRedeemed);
 
     /**
      * @dev Remove Locked Maple Shares (during request redemption)
@@ -95,7 +95,7 @@ interface ILoanManager {
      * @return The total assets with unrealized losses represented by the LP tokens
      */
     function getAssetsWithUnrealisedLosses(uint256 lpTokens_) external view returns (uint256);
-    
+
     /**
      * @dev Get the number of shares (issued by Maple protocol pool to the Loan Manager) represented by a given amount of an asset
      * @param amount_ The amount of the asset to convert

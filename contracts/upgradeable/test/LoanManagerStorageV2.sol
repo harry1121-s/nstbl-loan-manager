@@ -23,6 +23,7 @@ contract LoanManagerStorageV2 {
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
     error InvalidAsset();
+
     uint256 public immutable ERR_CODE = type(uint256).max - 1;
 
     /// @notice addresses of the maple pool managers for USDC and USDT cash pools
@@ -36,7 +37,7 @@ contract LoanManagerStorageV2 {
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice slot 0 is utilized for the version of the contract
     uint256 public versionSlot;
 
@@ -84,5 +85,4 @@ contract LoanManagerStorageV2 {
     uint256 public newVar;
     /// @notice intentionally not reducing gap size to check for storage collisions
     uint256[49] _gap;
-
 }

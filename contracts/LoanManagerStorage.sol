@@ -8,7 +8,6 @@ import "@nstbl-acl-manager/contracts/IACLManager.sol";
 import "./TokenLP.sol";
 
 contract LoanManagerStorage {
-
     /*//////////////////////////////////////////////////////////////
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
@@ -22,7 +21,7 @@ contract LoanManagerStorage {
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice slot 0 is utilized for the version of the contract
     uint256 public versionSlot;
 
@@ -67,5 +66,4 @@ contract LoanManagerStorage {
 
     /// @notice gap for adding future storage variables in the LoanManagerStorage contract
     uint256[38] _gap;
-
 }

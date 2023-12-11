@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import {VersionedInitializable} from "../VersionedInitializable.sol";
+import { VersionedInitializable } from "../VersionedInitializable.sol";
 import {
     IPool,
     IERC20Helper,
@@ -71,7 +71,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @dev Constructor to set immutables the LoanManager contract.
      */
     constructor() {
-        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;        
+        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     }
 
     function initialize(uint256 _newVar) external initializer {
@@ -96,12 +96,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @notice The shares corresponding to the LP tokens are requested for redemption from the Maple Protocol pool.
      * @param _lpTokens The amount of LP tokens to redeem.
      */
-    function requestRedeem(uint256 _lpTokens)
-        external
-        authorizedCaller
-        nonReentrant
-        validInput(_lpTokens)
-    { 
+    function requestRedeem(uint256 _lpTokens) external authorizedCaller nonReentrant validInput(_lpTokens) {
         _requestRedeemMapleCash(_lpTokens, usdc, mapleUSDCPool);
     }
 
@@ -208,7 +203,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      */
     function _removeMapleCash(address _asset, address _pool, address _withdrawManager) internal {
         uint256 exitCycleId = IWithdrawalManagerStorage(_withdrawManager).exitCycleId(address(this));
-        (,uint256 windowEnd) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
+        (, uint256 windowEnd) = IWithdrawalManager(_withdrawManager).getWindowAtId(exitCycleId);
         uint256 _shares = escrowedMapleShares;
 
         require(block.timestamp > windowEnd, "LM: Redemption Pending");
@@ -241,9 +236,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @return The total assets represented by the LP tokens, adjusted to the contract's decimals, or an error code if the asset is not supported.
      */
     function getAssets(uint256 _lpTokens) external view validInput(_lpTokens) returns (uint256) {
-
         return IPool(mapleUSDCPool).convertToAssets(_lpTokens / 10 ** adjustedDecimals);
-
     }
 
     /**
@@ -251,15 +244,8 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @param _lpTokens The amount of LP tokens to convert.
      * @return The total assets with unrealized losses represented by the LP tokens, adjusted to the contract's decimals, or an error code if the asset is not supported.
      */
-    function getAssetsWithUnrealisedLosses(uint256 _lpTokens)
-        external
-        view
-        validInput(_lpTokens)
-        returns (uint256)
-    {
-        
+    function getAssetsWithUnrealisedLosses(uint256 _lpTokens) external view validInput(_lpTokens) returns (uint256) {
         return IPool(mapleUSDCPool).convertToExitAssets(_lpTokens / 10 ** adjustedDecimals);
-        
     }
 
     /**
@@ -268,9 +254,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @return The number of shares represented by the amount of the asset, or an error code if the asset is not supported.
      */
     function getShares(uint256 _amount) external view validInput(_amount) returns (uint256) {
-        
         return IPool(mapleUSDCPool).convertToShares(_amount);
-        
     }
 
     /**
@@ -279,9 +263,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @return The number of exit shares represented by the amount of the asset, or an error code if the asset is not supported.
      */
     function getExitShares(uint256 _amount) external view validInput(_amount) returns (uint256) {
-        
         return IPool(mapleUSDCPool).convertToExitShares(_amount);
-
     }
 
     /**
@@ -289,9 +271,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @return The total unrealized losses for the asset, or an error code if the asset is not supported.
      */
     function getUnrealizedLossesMaple() external view returns (uint256) {
-
-            return IPool(mapleUSDCPool).unrealizedLosses();
-
+        return IPool(mapleUSDCPool).unrealizedLosses();
     }
 
     /**
@@ -299,9 +279,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @return The total amount for the asset, or an error code if the asset is not supported.
      */
     function getTotalAssetsMaple() external view returns (uint256) {
-
         return IPool(mapleUSDCPool).totalAssets();
-
     }
 
     /**
@@ -311,9 +289,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @return The previewed amount of redeemed assets, or an error code if the asset is not supported.
      */
     function previewRedeem(uint256 _lpTokens) external view returns (uint256) {
-        
-            return IPool(mapleUSDCPool).previewRedeem(_lpTokens / 10 ** 12);
-
+        return IPool(mapleUSDCPool).previewRedeem(_lpTokens / 10 ** 12);
     }
 
     /**
@@ -322,7 +298,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
      * @return The previewed amount of shares that would be minted to the Loan Manager, or an error code if the asset is not supported.
      */
     function previewDepositAssets(uint256 _amount) external view returns (uint256) {
-            return IPool(mapleUSDCPool).previewDeposit(_amount);
+        return IPool(mapleUSDCPool).previewDeposit(_amount);
     }
 
     /**
@@ -344,13 +320,11 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
     ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-
     function redeemManual(uint256 _shares) external onlyAdmin nonReentrant {
-            _redeemMapleCashManual(_shares, usdc, mapleUSDCPool, address(lUSDC));
+        _redeemMapleCashManual(_shares, usdc, mapleUSDCPool, address(lUSDC));
     }
 
     function _redeemMapleCashManual(uint256 _shares, address _asset, address _pool, address _lpToken) internal {
-
         // uint256 _shares = escrowedMapleShares;
 
         uint256 stablesRedeemed = IPool(_pool).redeem(_shares, nstblHub, address(this));
@@ -359,7 +333,7 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
         emit Redeem(_asset, _shares, assetsRedeemed);
     }
 
-    function getAirdroppedTokens(address _asset) external view returns(uint256 _value){
+    function getAirdroppedTokens(address _asset) external view returns (uint256 _value) {
         _value = IERC20Helper(_asset).balanceOf(address(this));
     }
 
@@ -367,11 +341,12 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
         IERC20Helper(_asset).safeTransfer(_destination, _amount);
     }
 
-    function getMaturedAssets() external view returns(uint256 _value){
-        _value = IPool(mapleUSDCPool).convertToAssets(IPool(mapleUSDCPool).balanceOf(address(this))) * 10**adjustedDecimals;
+    function getMaturedAssets() external view returns (uint256 _value) {
+        _value =
+            IPool(mapleUSDCPool).convertToAssets(IPool(mapleUSDCPool).balanceOf(address(this))) * 10 ** adjustedDecimals;
     }
-    
-    function getLPTotalSupply() external view returns(uint256 _value){
+
+    function getLPTotalSupply() external view returns (uint256 _value) {
         _value = lUSDC.totalSupply();
     }
 
@@ -379,12 +354,11 @@ contract LoanManagerV2 is LoanManagerStorageV2, VersionedInitializable {
         return REVISION;
     }
 
-    function getVersion() public pure returns(uint256 _version) {
+    function getVersion() public pure returns (uint256 _version) {
         _version = getRevision();
     }
 
-    function getLocked() public view returns(uint256){
+    function getLocked() public view returns (uint256) {
         return _locked;
     }
-
 }
