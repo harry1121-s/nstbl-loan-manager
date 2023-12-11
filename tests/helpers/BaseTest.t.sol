@@ -48,7 +48,7 @@ contract BaseTest is Utils {
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual {
-        mainnetFork = vm.createFork("https://eth-mainnet.g.alchemy.com/v2/CFhLkcCEs1dFGgg0n7wu3idxcdcJEgbW");
+        mainnetFork = vm.createFork(vm.envString("DEV_RPC_URL"));
         vm.selectFork(mainnetFork);
         vm.startPrank(owner);
 

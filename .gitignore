@@ -6,6 +6,7 @@ out/
 docs/
 coverage/
 lcov.info
+.env
 
 # Ignores development broadcast logs
 !/broadcast
