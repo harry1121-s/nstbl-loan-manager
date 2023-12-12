@@ -5,7 +5,6 @@ import "@nstbl-acl-manager/contracts/IACLManager.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract TokenLP is ERC20 {
-
     /*//////////////////////////////////////////////////////////////
     Storage
     //////////////////////////////////////////////////////////////*/
