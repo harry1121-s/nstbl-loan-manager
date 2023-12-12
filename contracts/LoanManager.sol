@@ -26,7 +26,6 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
     using SafeERC20 for IERC20Helper;
     using Address for address;
 
-    uint256 internal constant REVISION = 111;
     uint256 private _locked;
 
     /*//////////////////////////////////////////////////////////////
@@ -90,6 +89,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
         lUSDC = new TokenLP("Loan Manager USDC", "lUSDC", aclManager_);
         adjustedDecimals = lUSDC.decimals() - IPool(mapleUSDCPool).decimals();
         _locked = 1;
+        emit LoanManagerInitialized(aclManager_, mapleUSDCPool_, address(lUSDC));
     }
 
     /*//////////////////////////////////////////////////////////////

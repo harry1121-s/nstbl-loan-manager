@@ -9,8 +9,9 @@ import "./TokenLP.sol";
 
 contract LoanManagerStorage {
     /*//////////////////////////////////////////////////////////////
-    Immutables
+    Constant & Immutables
     //////////////////////////////////////////////////////////////*/
+    uint256 internal constant REVISION = 1;
 
     /// @notice addresses of the maple pool managers for USDC cash pools
     address public immutable MAPLE_POOL_MANAGER_USDC = 0x219654A61a0BC394055652986BE403fa14405Bb8;

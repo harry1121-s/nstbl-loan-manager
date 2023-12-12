@@ -16,9 +16,9 @@ contract TestProxy is BaseTest {
         assertEq(loanManager.usdc(), USDC);
         assertEq(loanManager.MAPLE_POOL_MANAGER_USDC(), MAPLE_POOL_MANAGER_USDC);
         assertEq(loanManager.MAPLE_WITHDRAWAL_MANAGER_USDC(), WITHDRAWAL_MANAGER_USDC);
-        assertEq(uint256(vm.load(address(loanManager), bytes32(uint256(0)))), 111);
-        assertEq(loanManager.getVersion(), 111);
-        assertEq(loanManager.versionSlot(), 111);
+        assertEq(uint256(vm.load(address(loanManager), bytes32(uint256(0)))), 1);
+        assertEq(loanManager.getVersion(), 1);
+        assertEq(loanManager.versionSlot(), 1);
         assertEq(ERC20(address(loanManager.lUSDC())).name(), "Loan Manager USDC");
     }
 

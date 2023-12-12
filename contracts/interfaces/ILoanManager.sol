@@ -7,6 +7,14 @@ interface ILoanManager {
     //////////////////////////////////////////////////////////////*/
 
     /**
+     * @dev Emitted when Loan Manager is initialized
+     * @param aclManager_ The address of ACL Manager
+     * @param mapleUSDCPool_ The address of MAPLE USDC Pool
+     * @param lUSDC_ The address of LP Token lUSDC
+     */
+    event LoanManagerInitialized(address aclManager_, address mapleUSDCPool_, address lUSDC_);
+
+    /**
      * @dev Emitted when an amount is deposited from sender to this contract
      * @param asset_ The address of the asset being deposited
      * @param amount_ The amount of the asset being deposited
