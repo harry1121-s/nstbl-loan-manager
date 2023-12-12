@@ -26,7 +26,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
     using SafeERC20 for IERC20Helper;
     using Address for address;
 
-    uint256 internal constant REVISION = 111;
+    uint256 internal constant REVISION = 1;
     uint256 private _locked;
 
     /*//////////////////////////////////////////////////////////////
@@ -252,7 +252,7 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      * @param amount_ The amount to deposit
      * @return isValid_ true if the deposit amount is valid; otherwise, false
      */
-    function isValidDepositAmount(uint256 amount_) public view returns (bool isValid_) {
+    function isValidDepositAmount(uint256 amount_) external view returns (bool isValid_) {
         bytes memory val = MAPLE_POOL_MANAGER_USDC.functionStaticCall(abi.encodeWithSignature("liquidityCap()"));
         uint256 upperBound = uint256(bytes32(val));
         uint256 totalAssets = IPool(mapleUSDCPool).totalAssets();
