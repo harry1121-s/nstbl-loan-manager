@@ -3,50 +3,50 @@ pragma solidity 0.8.21;
 
 interface ILoanManager {
     /*//////////////////////////////////////////////////////////////
-                                 EVENTS
+    Events
     //////////////////////////////////////////////////////////////*/
 
     /**
      * @dev Emitted when an amount is deposited from sender to this contract
-     * @param asset The address of the asset being deposited
-     * @param amount The amount of the asset being deposited
-     * @param lTokens The amount of tokens minted
-     * @param mapleShares The total shares after deposit is performed
+     * @param asset_ The address of the asset being deposited
+     * @param amount_ The amount of the asset being deposited
+     * @param lTokens_ The amount of tokens minted
+     * @param mapleShares_ The total shares after deposit is performed
      */
-    event Deposit(address indexed asset, uint256 amount, uint256 lTokens, uint256 mapleShares);
+    event Deposit(address indexed asset_, uint256 amount_, uint256 lTokens_, uint256 mapleShares_);
 
     /**
      * @dev Emitted if there is a request to redeem the shares issued
-     * @param asset The address of the asset to redeem
-     * @param lTokens The amount of LP tokens to redeem
-     * @param escrowedShares The total escrowed shares to be redeemed from maple
+     * @param asset_ The address of the asset to redeem
+     * @param lTokens_ The amount of LP tokens to redeem
+     * @param escrowedShares_ The total escrowed shares to be redeemed from maple
      */
-    event RequestRedeem(address indexed asset, uint256 lTokens, uint256 escrowedShares);
+    event RequestRedeem(address indexed asset_, uint256 lTokens_, uint256 escrowedShares_);
 
     /**
      * @dev Emitted when the issued shares are redeemed
-     * @param asset The address of the asset to redeem
-     * @param mapleShares The total escrowed shares redeemed from maple
-     * @param tokensReceived The total tokens redeemed
+     * @param asset_ The address of the asset to redeem
+     * @param mapleShares_ The total escrowed shares redeemed from maple
+     * @param tokensReceived_ The total tokens redeemed
      */
-    event Redeem(address indexed asset, uint256 mapleShares, uint256 tokensReceived);
+    event Redeem(address indexed asset_, uint256 mapleShares_, uint256 tokensReceived_);
 
     /**
      * @dev Emitted when the locked Maple Shares are removed
-     * @param asset The address of the asset to remove
-     * @param mapleShares The total escrowed shares redeemed from maple
+     * @param asset_ The address of the asset to remove
+     * @param mapleShares_ The total escrowed shares redeemed from maple
      */
-    event Removed(address indexed asset, uint256 mapleShares);
+    event Removed(address indexed asset_, uint256 mapleShares_);
 
     /**
      * @dev Emitted when the address of nSTBL Hub is updated
-     * @param oldHub The old address of the nSTBL Hub
-     * @param newHub The updated address of the nSTBL Hub
+     * @param oldHub_ The old address of the nSTBL Hub
+     * @param newHub_ The updated address of the nSTBL Hub
      */
-    event NSTBLHUBChanged(address indexed oldHub, address indexed newHub);
+    event NSTBLHUBChanged(address indexed oldHub_, address indexed newHub_);
 
     /*//////////////////////////////////////////////////////////////
-                                 LP Functions
+    Accounting
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -73,12 +73,12 @@ interface ILoanManager {
     function remove() external;
 
     /*//////////////////////////////////////////////////////////////
-                                 VIEWS
+    Views
     //////////////////////////////////////////////////////////////*/
 
     /**
      * @dev Get the number of LP tokens pending redemption for a specific LP token
-     * @return The number of LP tokens pending redemption
+     * @return lpTokensPendingRedemption_ The number of LP tokens pending redemption
      */
     function getLpTokensPendingRedemption() external view returns (uint256);
 

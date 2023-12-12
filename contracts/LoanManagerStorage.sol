@@ -9,7 +9,7 @@ import "./TokenLP.sol";
 
 contract LoanManagerStorage {
     /*//////////////////////////////////////////////////////////////
-                               IMMUTABLES
+    Immutables
     //////////////////////////////////////////////////////////////*/
 
     /// @notice addresses of the maple pool managers for USDC cash pools
@@ -19,7 +19,7 @@ contract LoanManagerStorage {
     address public immutable MAPLE_WITHDRAWAL_MANAGER_USDC = 0x1146691782c089bCF0B19aCb8620943a35eebD12;
 
     /*//////////////////////////////////////////////////////////////
-                                STORAGE
+    Storage
     //////////////////////////////////////////////////////////////*/
 
     /// @notice slot 0 is utilized for the version of the contract
