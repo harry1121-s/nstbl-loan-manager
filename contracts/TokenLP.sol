@@ -11,7 +11,7 @@ contract TokenLP is ERC20 {
     event LoanManagerChanged(address indexed oldLoanManager, address indexed newLoanManager);
 
     /*//////////////////////////////////////////////////////////////
-    MODIFIERS
+    Modifiers
     //////////////////////////////////////////////////////////////*/
 
     modifier authorizedCaller() {
@@ -25,7 +25,7 @@ contract TokenLP is ERC20 {
     }
 
     /*//////////////////////////////////////////////////////////////
-    CONSTRUCTOR
+    Constructor
     //////////////////////////////////////////////////////////////*/
 
     constructor(string memory _name, string memory _symbol, address aclManager_) ERC20(_name, _symbol) {
@@ -36,7 +36,7 @@ contract TokenLP is ERC20 {
     }
 
     /*//////////////////////////////////////////////////////////////
-    ACCOUNT MINT/BURN
+    Externals - accounting
     //////////////////////////////////////////////////////////////*/
 
     function mint(address user_, uint256 amount_) external authorizedCaller {
@@ -48,7 +48,7 @@ contract TokenLP is ERC20 {
     }
 
     /*//////////////////////////////////////////////////////////////
-    OWNERSHIP
+    Externals - setters
     //////////////////////////////////////////////////////////////*/
 
     function setLoanManager(address loanManager_) external onlyAdmin {

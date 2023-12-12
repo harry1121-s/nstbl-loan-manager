@@ -34,7 +34,6 @@ To make it easier to perform some tasks within the repo, a few commands are avai
 ## Testing
 1. [`BaseTest.t.sol`](https://github.com/nealthy-labs/nSTBL_V1_nSTBLToken/blob/main/tests/BaseTest.t.sol) contains the deployment setup for the Token and ACLManager.
 2. [`Token.t.sol`](https://github.com/nealthy-labs/nSTBL_V1_nSTBLToken/blob/main/tests/BaseTest.t.sol) contains the unit tests for the Token contract.
-3. [`Invariant`](https://github.com/nealthy-labs/nSTBL_V1_nSTBLToken/blob/main/tests/Invariant) contains the stateful fuzz tests 
 
 ## About Nealthy
 [Nealthy](https://www.nealthy.com) is a VARA regulated crypto asset management company. Nealthy provides on-chain index products for KYC/KYB individuals and institutions to invest in.

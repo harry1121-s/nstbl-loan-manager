@@ -3,13 +3,15 @@ pragma solidity ^0.8.13;
 
 import { Test, console } from "forge-std/Test.sol";
 import { TokenLP } from "../../contracts/TokenLP.sol";
+import { ACLManager } from "@nstbl-acl-manager/contracts/ACLManager.sol";
 
 contract TestToken is Test {
     /*//////////////////////////////////////////////////////////////
-                                 STATE
+    State
     //////////////////////////////////////////////////////////////*/
 
     // Main contract
+    ACLManager public aclManager;
     TokenLP public token;
 
     // EOA addresses
@@ -21,16 +23,18 @@ contract TestToken is Test {
     string public symbol = "lUSDC";
 
     /*//////////////////////////////////////////////////////////////
-                                 SETUP
+    Setup
     //////////////////////////////////////////////////////////////*/
     function setUp() public {
-        vm.prank(admin);
-        token = new TokenLP(name, symbol, admin);
-        vm.label(address(token), "Token");
-        vm.label(LoanManager, "LoanManager");
-
+        vm.startPrank(admin);
+        aclManager = new ACLManager();
+        token = new TokenLP(name, symbol, address(aclManager));
+        vm.stopPrank();
         vm.prank(admin);
         token.setLoanManager(LoanManager);
+
+        vm.label(address(token), "Token");
+        vm.label(LoanManager, "LoanManager");
     }
 
     function test_name() public {
@@ -46,6 +50,7 @@ contract TestToken is Test {
     }
 
     function test_setLoanManager_fuzz(address newLoanManager) public {
+        vm.assume(newLoanManager != address(0));
         // Test that only admin can set the new LoanManager
         vm.expectRevert("Token: Admin unAuth");
         token.setLoanManager(newLoanManager);

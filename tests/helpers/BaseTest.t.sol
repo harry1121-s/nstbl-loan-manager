@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.13;
 
 import { Test, console } from "forge-std/Test.sol";
@@ -21,7 +21,7 @@ import { Utils } from "./Utils.sol";
 contract BaseTest is Utils {
     using SafeERC20 for IERC20;
     /*//////////////////////////////////////////////////////////////
-                                 STATE
+    State
     //////////////////////////////////////////////////////////////*/
 
     // Main contracts
@@ -44,7 +44,7 @@ contract BaseTest is Utils {
     uint256 mainnetFork;
 
     /*//////////////////////////////////////////////////////////////
-                                 SETUP
+    Setup
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual {
