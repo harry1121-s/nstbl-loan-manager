@@ -7,3 +7,6 @@
 [submodule "modules/maple-mocks"]
 	path = modules/maple-mocks
 	url = https://github.com/harry1121-s/maple-mocks.git
+[submodule "modules/openzeppelin-contracts"]
+	path = modules/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts.git
