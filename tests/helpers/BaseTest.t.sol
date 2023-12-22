@@ -39,14 +39,17 @@ contract BaseTest is Utils {
 
     IERC20 public lusdc;
 
-    // IPool public usdcPool;
+
     Pool public usdcPool;
     Pool public poolManagerUSDC;
     Pool public withdrawalManagerUSDC;
     uint256 mainnetFork;
 
     //Maple mock contracts
+    Pool public poolImplementation;
     Pool public pool;
+    TransparentUpgradeableProxy public poolProxy;
+
     // myToken public token;
 
     /*//////////////////////////////////////////////////////////////
@@ -58,7 +61,7 @@ contract BaseTest is Utils {
         vm.selectFork(mainnetFork);
         vm.startPrank(owner);
                         //test usdc goerli address
-        pool = new Pool(USDC, "TUSDC CASH POOL", "TSUDC_CP");
+        
 
         aclManager = new ACLManager();
         aclManager.setAuthorizedCallerLoanManager(NSTBL_HUB, true);
@@ -67,10 +70,15 @@ contract BaseTest is Utils {
                 && MAPLE_POOL_MANAGER_USDC != address(0) && WITHDRAWAL_MANAGER_USDC != address(0) && USDC != address(0)
         );
         proxyAdmin = new ProxyAdmin(owner);
+        poolImplementation = new Pool();
+        bytes memory data = abi.encodeCall(poolImplementation.initialize, (USDC, "TUSDC CASH POOL", "TSUDC_CP"));
+        poolProxy = new TransparentUpgradeableProxy(address(poolImplementation), address(proxyAdmin), data);
+        pool = Pool(address(poolProxy));
+
         lmImpl1 = new LoanManager(address(pool), USDC);
         lmImpl2 = new LoanManagerV2();
         // bytes memory data = abi.encodeCall(lmImpl1.initialize, (address(aclManager), MAPLE_USDC_CASH_POOL));
-        bytes memory data = abi.encodeCall(lmImpl1.initialize, (address(aclManager), address(pool)));
+         data = abi.encodeCall(lmImpl1.initialize, (address(aclManager), address(pool)));
         loanManagerProxy = new TransparentUpgradeableProxy(address(lmImpl1), address(proxyAdmin), data);
         loanManager = LoanManager(address(loanManagerProxy));
         loanManager.updateNSTBLHUB(NSTBL_HUB);
