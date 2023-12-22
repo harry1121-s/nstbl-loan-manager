@@ -76,8 +76,10 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
     /**
      * @dev Constructor to set immutables for the LoanManager contract
      */
-    constructor() {
-        usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    constructor(address pool_, address usdc_) {
+        usdc = usdc_;
+        MAPLE_POOL_MANAGER_USDC = pool_;
+        MAPLE_WITHDRAWAL_MANAGER_USDC = pool_;
     }
 
     //function to initialize the storage in the proxy contract

@@ -5,7 +5,8 @@ import { Test, console } from "forge-std/Test.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Utils is Test {
-    address USDC = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    // address USDC = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    address USDC = address(0x94A4DC7C451Db157cd64E017CDF726501432b7e7); //test usdc goerli address
 
     address public poolDelegateUSDC = 0x8c8C2431658608F5649B8432764a930c952d8A98;
     address public NSTBL_HUB = 0x749f88e87EaEb030E478164cFd3681E27d0bcB42;

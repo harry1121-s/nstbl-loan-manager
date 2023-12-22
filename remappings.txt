@@ -2,3 +2,4 @@ ds-test/=modules/forge-std/lib/ds-test/src/
 forge-std/=modules/forge-std/src/
 @openzeppelin/=modules/openzeppelin-contracts/
 @nstbl-acl-manager/=modules/nstbl-acl-manager
+@maple-mocks/=modules/maple-mocks

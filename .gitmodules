@@ -7,3 +7,6 @@
 [submodule "modules/nstbl-acl-manager"]
 	path = modules/nstbl-acl-manager
 	url = https://github.com/harry1121-s/nstbl-acl-manager.git
+[submodule "modules/maple-mocks"]
+	path = modules/maple-mocks
+	url = https://github.com/harry1121-s/maple-mocks.git
