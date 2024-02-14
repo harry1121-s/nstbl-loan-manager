@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import { Test, console } from "forge-std/Test.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { LoanManager } from "../../contracts/LoanManager.sol";
-import { LoanManagerV2 } from "../../contracts/upgradeable/test/LoanManagerV2.sol";
+// import { LoanManagerV2 } from "../../contracts/upgradeable/test/LoanManagerV2.sol";
 import { ACLManager } from "@nstbl-acl-manager/contracts/ACLManager.sol";
 import { ProxyAdmin } from "../../contracts/upgradeable/ProxyAdmin.sol";
 import {
@@ -14,6 +14,7 @@ import {
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IPoolManager } from "../../contracts/interfaces/maple/IPoolManager.sol";
+import { IPoolPermissionManager } from "../../contracts/interfaces/maple/IPoolPermissionManager.sol";
 import { IWithdrawalManager, IWithdrawalManagerStorage } from "../../contracts/interfaces/maple/IWithdrawalManager.sol";
 import { IPool } from "../../contracts/interfaces/maple/IPool.sol";
 import { Utils } from "./Utils.sol";
@@ -30,7 +31,7 @@ contract BaseTest is Utils {
 
     ACLManager public aclManager;
     LoanManager public lmImpl1;
-    LoanManagerV2 public lmImpl2;
+    // LoanManagerV2 public lmImpl2;
 
     LoanManager public loanManager;
     // Token public token;
@@ -40,6 +41,7 @@ contract BaseTest is Utils {
 
     IPool public usdcPool;
     IPoolManager public poolManagerUSDC;
+    IPoolPermissionManager public poolPermissionManagerUSDC;
     IWithdrawalManager public withdrawalManagerUSDC;
     uint256 mainnetFork;
 
@@ -60,7 +62,7 @@ contract BaseTest is Utils {
         );
         proxyAdmin = new ProxyAdmin(owner);
         lmImpl1 = new LoanManager();
-        lmImpl2 = new LoanManagerV2();
+        // lmImpl2 = new LoanManagerV2();
         bytes memory data = abi.encodeCall(lmImpl1.initialize, (address(aclManager), MAPLE_USDC_CASH_POOL));
         loanManagerProxy = new TransparentUpgradeableProxy(address(lmImpl1), address(proxyAdmin), data);
         loanManager = LoanManager(address(loanManagerProxy));
@@ -71,6 +73,7 @@ contract BaseTest is Utils {
         usdc = IERC20(USDC);
         usdcPool = IPool(MAPLE_USDC_CASH_POOL);
         poolManagerUSDC = IPoolManager(MAPLE_POOL_MANAGER_USDC);
+        poolPermissionManagerUSDC = IPoolPermissionManager(MAPLE_POOL_PERMISSION_MANAGER);
         withdrawalManagerUSDC = IWithdrawalManager(WITHDRAWAL_MANAGER_USDC);
 
         vm.label(address(loanManager), "LoanManager");
@@ -78,16 +81,23 @@ contract BaseTest is Utils {
         vm.label(address(usdcPool), "USDC Pool");
         vm.label(poolDelegateUSDC, "poolDelegate USDC");
         vm.label(address(poolManagerUSDC), "poolManager USDC");
+
+        vm.prank(poolDelegateUSDC);
+        withdrawalManagerUSDC.setManualWithdrawal(address(loanManager), true);
     }
 
     function _setAllowedLender(address _delegate) internal {
         bool out;
         vm.startPrank(_delegate);
 
-        poolManagerUSDC.setAllowedLender(address(loanManager), true);
-        (out,) = address(poolManagerUSDC).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
+        address[] memory lenders = new address[](1);
+        bool[] memory val = new bool[](1);
+        lenders[0] = address(loanManager);
+        val[0] = true;
+        poolPermissionManagerUSDC.setLenderAllowlist(MAPLE_POOL_MANAGER_USDC, lenders, val);
+        // (out,) = address(poolManagerUSDC).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
 
-        assertTrue(out);
+        // assertTrue(out);
         vm.stopPrank();
     }
 

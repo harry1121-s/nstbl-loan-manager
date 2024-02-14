@@ -21,7 +21,6 @@ import {
  * @notice This contract is intended to be used by NSTBL hub and future nealthy products
  * @dev This contract allows NSTBL hub to deposit assets into Maple Protocol pools, request and redeem Maple Protocol tokens, and perform various other loan management operations
  */
-
 contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable {
     using SafeERC20 for IERC20Helper;
     using Address for address;
@@ -314,16 +313,16 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
         version_ = getRevision();
     }
 
-    /**
-     * @dev Get the total time period for redemption
-     * @return windowStart_ The starting time of the window
-     * @return windowEnd_ The ending time of the window
-     */
-    function getRedemptionWindow() external view returns (uint256 windowStart_, uint256 windowEnd_) {
-        require(awaitingRedemption, "LM: No redemption requested");
-        uint256 exitCycleId = IWithdrawalManagerStorage(MAPLE_WITHDRAWAL_MANAGER_USDC).exitCycleId(address(this));
-        (windowStart_, windowEnd_) = IWithdrawalManager(MAPLE_WITHDRAWAL_MANAGER_USDC).getWindowAtId(exitCycleId);
-    }
+    // /**
+    //  * @dev Get the total time period for redemption
+    //  * @return windowStart_ The starting time of the window
+    //  * @return windowEnd_ The ending time of the window
+    //  */
+    // function getRedemptionWindow() external view returns (uint256 windowStart_, uint256 windowEnd_) {
+    //     require(awaitingRedemption, "LM: No redemption requested");
+    //     uint256 exitCycleId = IWithdrawalManagerStorage(MAPLE_WITHDRAWAL_MANAGER_USDC).exitCycleId(address(this));
+    //     (windowStart_, windowEnd_) = IWithdrawalManager(MAPLE_WITHDRAWAL_MANAGER_USDC).getWindowAtId(exitCycleId);
+    // }
 
     /*//////////////////////////////////////////////////////////////
     Externals - setters
@@ -393,11 +392,8 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
         internal
         returns (uint256)
     {
-        uint256 exitCycleId = IWithdrawalManagerStorage(withdrawManager_).exitCycleId(address(this));
-        (uint256 windowStart, uint256 windowEnd) = IWithdrawalManager(withdrawManager_).getWindowAtId(exitCycleId);
+        require(IWithdrawalManagerStorage(withdrawManager_).lockedShares(address(this)) > 0, "LM: No shares to redeem");
         uint256 _shares = escrowedMapleShares;
-
-        require(block.timestamp >= windowStart && block.timestamp < windowEnd, "LM: Not in Window");
 
         uint256 stablesRedeemed = IPool(pool_).redeem(_shares, nstblHub, address(this));
         assetsRedeemed += stablesRedeemed;
@@ -419,12 +415,8 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      * @notice This function transfers locked Maple Shares from Maple Protocol to loanManager, updates relevant accounting data, and emits a `Remove` event
      */
     function _removeMapleCash(address asset_, address pool_, address withdrawManager_) internal {
-        uint256 exitCycleId = IWithdrawalManagerStorage(withdrawManager_).exitCycleId(address(this));
-        (, uint256 windowEnd) = IWithdrawalManager(withdrawManager_).getWindowAtId(exitCycleId);
+        require(IWithdrawalManagerStorage(withdrawManager_).requestIds(address(this)) > 0, "LM: Not in Queue");
         uint256 _shares = escrowedMapleShares;
-
-        require(block.timestamp > windowEnd, "LM: Redemption Pending");
-
         uint256 sharesRemoved = IPool(pool_).removeShares(_shares, address(this));
         escrowedMapleShares -= sharesRemoved;
 

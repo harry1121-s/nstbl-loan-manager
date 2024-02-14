@@ -1,62 +1,53 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.21;
+pragma solidity ^0.8.7;
 
 interface IWithdrawalManagerStorage {
-    struct CycleConfig {
-        uint64 initialCycleId; // Identifier of the first withdrawal cycle using this configuration.
-        uint64 initialCycleTime; // Timestamp of the first withdrawal cycle using this configuration.
-        uint64 cycleDuration; // Duration of the withdrawal cycle.
-        uint64 windowDuration; // Duration of the withdrawal window.
-    }
+    /**
+     *  @dev    Returns the address of the pool contract.
+     *  @return pool Address of the pool contract.
+     */
+    function pool() external view returns (address pool);
 
     /**
-     *  @dev    Gets the configuration for a given config id.
-     *  @param  configId_        The id of the configuration to use.
-     *  @return initialCycleId   Identifier of the first withdrawal cycle using this configuration.
-     *  @return initialCycleTime Timestamp of the first withdrawal cycle using this configuration.
-     *  @return cycleDuration    Duration of the withdrawal cycle.
-     *  @return windowDuration   Duration of the withdrawal window.
+     *  @dev    Returns the address of the pool manager contract.
+     *  @return poolManager Address of the pool manager contract.
      */
-    function cycleConfigs(uint256 configId_)
-        external
-        returns (uint64 initialCycleId, uint64 initialCycleTime, uint64 cycleDuration, uint64 windowDuration);
+    function poolManager() external view returns (address poolManager);
 
     /**
-     *  @dev    Gets the id of the cycle that account can exit on.
-     *  @param  account_ The address to check the exit for.
-     *  @return cycleId_ The id of the cycle that account can exit on.
+     *  @dev    Returns the total amount of shares pending redemption.
+     *  @return totalShares Total amount of shares pending redemption.
      */
-    function exitCycleId(address account_) external view returns (uint256 cycleId_);
+    function totalShares() external view returns (uint256 totalShares);
 
     /**
-     *  @dev    Gets the most recent configuration id.
-     *  @return configId_ The id of the most recent configuration.
+     *  @dev    Checks if an account is set to perform withdrawals manually.
+     *  @param  account  Address of the account.
+     *  @return isManual `true` if the account withdraws manually, `false` if not.
      */
-    function latestConfigId() external view returns (uint256 configId_);
+    function isManualWithdrawal(address account) external view returns (bool isManual);
 
     /**
-     *  @dev    Gets the amount of locked shares for an account.
-     *  @param  account_      The address to check the exit for.
-     *  @return lockedShares_ The amount of shares locked.
+     *  @dev    Returns the amount of shares available for manual withdrawal.
+     *  @param  owner           The address of the owner of shares.
+     *  @return sharesAvailable Amount of shares available for manual withdrawal.
      */
-    function lockedShares(address account_) external view returns (uint256 lockedShares_);
+    function manualSharesAvailable(address owner) external view returns (uint256 sharesAvailable);
 
     /**
-     *  @dev    Gets the address of the pool associated with this withdrawal manager.
-     *  @return pool_ The address of the pool.
+     *  @dev    Returns the request identifier of an account.
+     *          Returns zero if the account does not have a withdrawal request.
+     *  @param  account   Address of the account.
+     *  @return requestId Identifier of the withdrawal request.
      */
-    function pool() external view returns (address pool_);
+    function requestIds(address account) external view returns (uint128 requestId);
 
     /**
-     *  @dev    Gets the address of the pool manager associated with this withdrawal manager.
-     *  @return poolManager_ The address of the pool manager.
+     *  @dev    Returns the first and last withdrawal requests pending redemption.
+     *  @return nextRequestId Identifier of the next withdrawal request that will be processed.
+     *  @return lastRequestId Identifier of the last created withdrawal request.
      */
-    function poolManager() external view returns (address poolManager_);
+    function queue() external view returns (uint128 nextRequestId, uint128 lastRequestId);
 
-    /**
-     *  @dev    Gets the amount of shares for a cycle.
-     *  @param  cycleId_          The id to cycle to check.
-     *  @return totalCycleShares_ The amount of shares in the cycle.
-     */
-    function totalCycleShares(uint256 cycleId_) external view returns (uint256 totalCycleShares_);
+    function lockedShares(address user) external returns (uint256 lockedShares);
 }
