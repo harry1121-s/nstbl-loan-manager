@@ -313,17 +313,6 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
         version_ = getRevision();
     }
 
-    // /**
-    //  * @dev Get the total time period for redemption
-    //  * @return windowStart_ The starting time of the window
-    //  * @return windowEnd_ The ending time of the window
-    //  */
-    // function getRedemptionWindow() external view returns (uint256 windowStart_, uint256 windowEnd_) {
-    //     require(awaitingRedemption, "LM: No redemption requested");
-    //     uint256 exitCycleId = IWithdrawalManagerStorage(MAPLE_WITHDRAWAL_MANAGER_USDC).exitCycleId(address(this));
-    //     (windowStart_, windowEnd_) = IWithdrawalManager(MAPLE_WITHDRAWAL_MANAGER_USDC).getWindowAtId(exitCycleId);
-    // }
-
     /*//////////////////////////////////////////////////////////////
     Externals - setters
     //////////////////////////////////////////////////////////////*/
@@ -392,12 +381,12 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
         internal
         returns (uint256)
     {
-        require(IWithdrawalManagerStorage(withdrawManager_).lockedShares(address(this)) > 0, "LM: No shares to redeem");
+        uint256 lockedShares = IWithdrawalManagerStorage(withdrawManager_).lockedShares(address(this));
+        require(lockedShares > 0, "LM: No shares to redeem");
         uint256 _shares = escrowedMapleShares;
-
-        uint256 stablesRedeemed = IPool(pool_).redeem(_shares, nstblHub, address(this));
+        uint256 stablesRedeemed = IPool(pool_).redeem(lockedShares, nstblHub, address(this));
         assetsRedeemed += stablesRedeemed;
-        escrowedMapleShares = IWithdrawalManagerStorage(withdrawManager_).lockedShares(address(this));
+        (, escrowedMapleShares) = IWithdrawalManager(withdrawManager_).requests(IWithdrawalManagerStorage(withdrawManager_).requestIds(address(this)));
         totalLPTokensBurned += (_shares - escrowedMapleShares) * 10 ** adjustedDecimals;
         IERC20Helper(lpToken_).burn(nstblHub, (_shares - escrowedMapleShares) * 10 ** adjustedDecimals);
         if (escrowedMapleShares == 0) {
@@ -415,9 +404,10 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
      * @notice This function transfers locked Maple Shares from Maple Protocol to loanManager, updates relevant accounting data, and emits a `Remove` event
      */
     function _removeMapleCash(address asset_, address pool_, address withdrawManager_) internal {
-        require(IWithdrawalManagerStorage(withdrawManager_).requestIds(address(this)) > 0, "LM: Not in Queue");
+        (, uint256 removableShares) = IWithdrawalManager(withdrawManager_).requests(IWithdrawalManagerStorage(withdrawManager_).requestIds(address(this)));
+        require(removableShares > 0, "LM: Not in Queue");
         uint256 _shares = escrowedMapleShares;
-        uint256 sharesRemoved = IPool(pool_).removeShares(_shares, address(this));
+        uint256 sharesRemoved = IPool(pool_).removeShares(removableShares, address(this));
         escrowedMapleShares -= sharesRemoved;
 
         if (escrowedMapleShares == 0) {
