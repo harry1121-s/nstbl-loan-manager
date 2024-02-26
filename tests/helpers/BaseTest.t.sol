@@ -95,14 +95,11 @@ contract BaseTest is Utils {
         lenders[0] = address(loanManager);
         val[0] = true;
         poolPermissionManagerUSDC.setLenderAllowlist(MAPLE_POOL_MANAGER_USDC, lenders, val);
-        // (out,) = address(poolManagerUSDC).staticcall(abi.encodeWithSignature("isValidLender(address)", user));
-
-        // assertTrue(out);
         vm.stopPrank();
     }
 
     function _investAssets(address _asset, uint256 amount) internal {
-        erc20_deal(NSTBL_HUB, amount);
+        _dealUSDC(NSTBL_HUB, amount);
 
         if (_asset == USDC) {
             _setAllowedLender(poolDelegateUSDC);
@@ -124,5 +121,12 @@ contract BaseTest is Utils {
         uint256 upperBound = _getLiquidityCap(_poolManager);
         uint256 totalAssets = IPool(_pool).totalAssets();
         return upperBound - totalAssets;
+    }
+
+    function _dealUSDC(address to_, uint256 amount_) internal {
+        bytes32 location = keccak256(abi.encode(to_,uint256(9)));
+        vm.store(USDC, location, bytes32(uint256(amount_)));
+        uint256 supplyBefore = IERC20(USDC).totalSupply();
+        vm.store(USDC, bytes32(uint256(11)), bytes32(uint256(supplyBefore+amount_)));
     }
 }

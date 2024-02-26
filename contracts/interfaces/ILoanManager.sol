@@ -156,4 +156,10 @@ interface ILoanManager {
      * @return upperBound The maximum amount that can be deposited
      */
     function getDepositUpperBound() external view returns (uint256 upperBound);
+
+    /**
+     * @dev Get the number of shares available for redemption from Maple Pool
+     * @return shares_ no of redeemable Shares
+     */
+    function getSharesAvailableForRedemption() external view returns(uint256 shares_);
 }

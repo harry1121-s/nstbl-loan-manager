@@ -154,6 +154,12 @@ contract LoanManager is ILoanManager, LoanManagerStorage, VersionedInitializable
 
     /**
      * @inheritdoc ILoanManager
+     */
+    function getSharesAvailableForRedemption() external view returns(uint256 shares_){
+        shares_ = uint256(bytes32(MAPLE_WITHDRAWAL_MANAGER_USDC.functionStaticCall(abi.encodeWithSignature("manualSharesAvailable(address)", address(this)))));
+    }
+    /**
+     * @inheritdoc ILoanManager
      * @dev Get the number of LP tokens pending redemption for a specific LP token
      * @return lpTokensPendingRedemption_ The number of LP tokens pending redemption, adjusted to the contract's decimals
      */

@@ -194,8 +194,7 @@ contract TestRedeem is BaseTest {
         // time warp
         vm.warp(block.timestamp + 2 weeks);
 
-        // vm.expectRevert("LM: No redemption requested");
-        // loanManager.getRedemptionWindow();
+
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
         vm.startPrank(NSTBL_HUB);
         loanManager.requestRedeem(lmUSDC);
@@ -221,7 +220,7 @@ contract TestRedeem is BaseTest {
         console.log("USDC balances: ", balBefore, balAfter);
         console.log("Manual Shares: ", withdrawalManagerUSDC.manualSharesAvailable(address(loanManager)));
         console.log("Locked Shares: ", withdrawalManagerUSDC.lockedShares(address(loanManager)));
-        console.log("Request Id: ", withdrawalManagerUSDC.requestIds(address(loanManager)));
+        console.log("Shares for Red:", loanManager.getSharesAvailableForRedemption());
         (, lockedShares) =
             withdrawalManagerUSDC.requests(withdrawalManagerUSDC.requestIds(address(loanManager)));
 
@@ -252,8 +251,7 @@ contract TestRedeem is BaseTest {
 
     function test_redeem_USDC_fullLP_pass_fuzz(uint256 amount) external {
         // Constraint input amount
-        // vm.assume(amount < _getUpperBoundDeposit(MAPLE_USDC_CASH_POOL, address(poolManagerUSDC)));
-        vm.assume(amount < 1e5 * 1e6);
+        vm.assume(amount < 1e11);
         vm.assume(amount > 1e2 * 1e6);
 
         _investAssets(USDC, amount);
@@ -385,8 +383,6 @@ contract TestRedeem is BaseTest {
         // time warp
         vm.warp(block.timestamp + 2 weeks);
 
-        // vm.expectRevert("LM: No redemption requested");
-        // loanManager.getRedemptionWindow();
         uint256 lmUSDC = lusdc.balanceOf(NSTBL_HUB);
         vm.startPrank(NSTBL_HUB);
         loanManager.requestRedeem(lmUSDC);
@@ -437,7 +433,7 @@ contract TestGetter is BaseTest {
     }
 
     function test_airdroppedTokens() external {
-        deal(USDC, address(loanManager), 1e7 * 1e6, true);
+        _dealUSDC(address(loanManager), 1e7 * 1e6);
         assertEq(loanManager.getAirdroppedTokens(USDC), 1e7 * 1e6);
         vm.prank(NSTBL_HUB);
         loanManager.withdrawTokens(USDC, 1e7 * 1e6, user1);
@@ -517,12 +513,7 @@ contract TestGetter is BaseTest {
         vm.stopPrank();
         vm.warp(block.timestamp + 100 days);
         assertEq(loanManager.previewRedeem(lmUSDC), 0);
-        // uint256 _currCycleId = withdrawalManagerUSDC.getCurrentCycleId();
-        // uint256 _exitCycleId = withdrawalManagerUSDC.exitCycleId(address(loanManager));
-        // assertEq(_exitCycleId, _currCycleId + 2);
-        // (uint256 exitWindowStart,) = withdrawalManagerUSDC.getWindowAtId(_exitCycleId);
 
-        // vm.warp(exitWindowStart);
         vm.prank(poolDelegateUSDC);
         withdrawalManagerUSDC.processRedemptions(lmUSDC / 10 ** 12);
         console.log("Assets available for Redemption: ", loanManager.previewRedeem(lmUSDC));
@@ -532,4 +523,5 @@ contract TestGetter is BaseTest {
         assertTrue(loanManager.isValidDepositAmount(1e12));
         assertFalse(loanManager.isValidDepositAmount(1e15));
     }
+
 }
