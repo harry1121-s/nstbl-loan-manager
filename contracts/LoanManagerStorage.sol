@@ -14,10 +14,12 @@ contract LoanManagerStorage {
     uint256 internal constant REVISION = 1;
 
     /// @notice addresses of the maple pool managers for USDC cash pools
-    address public immutable MAPLE_POOL_MANAGER_USDC = 0x219654A61a0BC394055652986BE403fa14405Bb8;
+    // address public immutable MAPLE_POOL_MANAGER_USDC = 0x219654A61a0BC394055652986BE403fa14405Bb8;
+    address public immutable MAPLE_POOL_MANAGER_USDC;
 
     /// @notice addresses of the maple withdrawal managers for USDC cash pools
-    address public immutable MAPLE_WITHDRAWAL_MANAGER_USDC = 0x447dcEa1d616f792645ed6E71bC32955A0dBcbAa;
+    // address public immutable MAPLE_WITHDRAWAL_MANAGER_USDC = 0x447dcEa1d616f792645ed6E71bC32955A0dBcbAa;
+    address public immutable MAPLE_WITHDRAWAL_MANAGER_USDC;
 
     /*//////////////////////////////////////////////////////////////
     Storage
